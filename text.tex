@@ -1,0 +1,516 @@
+\documentclass[a4paper, twoside, 11pt]{article}
+% It is needed to use this command for automatic compilation in VSCode
+% !TEX program = lualatexmk
+
+%DOCUMENT, PREAMBLE AND MACROS DESIGNED FOR LuaLaTeX%
+\newcommand{\fbar}{\FloatBarrier}
+
+\usepackage{amsmath} %matematic package%
+\usepackage{amssymb} %for miscellaneous mathematical symbols, first usage was for tick symbol in math mode \checkmark%
+\usepackage{textcomp} %for miscellaneous symbols%
+%\usepackage{times} %times font%
+\usepackage{graphicx} %enhanced support for craphics%
+%\usepackage{mathptmx} %use Times as default text font, and provide maths support%
+\usepackage{cmap} %mapování znaků - vyhledávání v pdf%
+\usepackage[czech]{babel}%CZ%
+\usepackage[utf8]{inputenc}%kódování%
+\usepackage[T1]{fontenc}%kódování%
+\usepackage{multirow}%Multirow table support
+\usepackage{float}%Improves the interface for defining floating objects such as figures and tables%
+\usepackage{wasysym} %for various glyphs, symbols%
+
+\usepackage{setspace}%spacing% 
+\onehalfspacing
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true, %pokud nechci definovat citecolor=black aby byly odkazy citací černé, tak dám colorlinks=false,%
+    bookmarks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=black,
+}
+
+%when using LuaLaTex, defining Times Fonts from your system - it has to be named like this and inserted ttf file in the folder of your tex file%
+\usepackage{fontspec}
+\selectlanguage{czech}
+\setmainfont[Ligatures=TeX,BoldFont={* Bold}] {Times New Roman}
+                                
+\setsansfont[Ligatures=TeX,BoldFont={* Bold}]{Times New Roman}
+                                      
+\setmonofont{Courier}
+ 
+%\usepackage[italic]{mathastext} %for text in math environment, better looking times then
+
+
+
+%for CITATIONS URL to work, it is not needed when you are not using URL label%
+\usepackage{url}
+\usepackage{csquotes}
+\usepackage[style=iso-numeric, backend=biber, isbn=true, urldate=iso,seconds=true, date=terse, datezeros=true, language=czech]{biblatex}
+\addbibresource{src/bib/zdroje.bib} % BIB resources to import
+%\DeclareUrlCommand\url{\def\UrlLeft{<}\def\UrlRight{>} \urlstyle{tt}}
+
+
+
+%\usepackage{biblatex}
+%END for citations%
+
+%changing bibliography font%
+\renewcommand*{\bibfont}{\fontspec{Times New Roman}}
+
+\usepackage{comment} %For comments%
+\usepackage{pdfpages}%for pdf pages%
+\usepackage{enumerate}%For lists%
+\usepackage{enumitem}%For Custom Numbering Nested Lists%
+\setlist[enumerate]{label*=\arabic*.} %setting Number. numbering in lists%
+\usepackage{tikz} %For vector graphics%
+\usepackage{circuitikz}%For schemes%
+\usepackage{pgf} %Post script graphics for tikz%
+
+%pouze funguje v PDFLaTeX%
+%\usepackage{tgtermes}%na times font, jiný nefunguje s vyhledáváním a copy%
+
+%
+\usepackage{placeins}%% for \FloatBarrier command that blocks floating with htbp! go over \FloatBarrier
+\usepackage{mathrsfs}%packagee for math symbols for Laplace, Z transform etc., usage \mathscr{Z}
+\usepackage{upgreek}%for upgreek symbols, specified tau \uptau
+\usepackage{physics}% for derivations \dd
+%this works only when using PDFLaTeX%
+\usepackage[list=true,listformat=simple]{subcaption}
+\usepackage[figurename=Obr.,font=small,labelfont=it,textfont=it]{caption} %for renaming figures instead of renewcommand, small for 11pt default is 10pt as needed in word template
+\usepackage[tablename=Tab.,font=small,labelfont=it,
+            textfont=it]{caption} %for renaming tables instead of renewcommand
+            
+
+% List of abbreviations and symbols
+% Original code author: Jakub Kučera
+
+\usepackage[nonumberlist,nopostdot,section=subsection,numberedsection]{glossaries}
+% section = subsection is for glossaries title to appear as a subsection, numberedsection adds the subsec number
+
+\newglossary[slg]{symbolslist}{symbol}{ntn1}{Seznam symbolů}
+\newglossary[slg]{abbreviationslist}{abbreviation}{ntn2}{Seznam zkratek}
+
+\makeglossaries
+
+% include files with definitions
+\include{src/glossaries/abbreviations}
+\include{src/glossaries/symbols}
+
+\newglossarystyle{myStyleAbbreviations}{
+ \renewenvironment{theglossary}%
+     {\begin{longtable}[l]{llp{\glsdescwidth}p{\glspagelistwidth}}}%
+     {\end{longtable}}%
+  \renewcommand*{\glossaryheader}{}%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand*{\glossaryentryfield}[5]{%
+   \bfseries \glstarget{##1}{##2} & ##3\glspostdescription\space ##5\\}%
+  \renewcommand*{\glossarysubentryfield}[6]{%
+     & \glstarget{##2}{\strut}##4\glspostdescription\space ##6\\}%
+  \renewcommand*{\glsgroupskip}{}%  Pokud chci seskupovat podle abeced: \renewcommand*{\glsgroupskip}{ & \\}
+}
+
+
+\newglossarystyle{myStyleSymbols}{
+  \renewenvironment{theglossary}%
+    {\begin{longtable}[l]{llp{\glsdescwidth}p{\glspagelistwidth}}}%
+    {\end{longtable}}%
+  \renewcommand*{\glossaryheader}{}%
+  \renewcommand*{\glsgroupheading}[1]{}%
+  \renewcommand{\glossentry}[2]{%
+    \glsentryitem{##1} \glstarget{##1}{\glossentryname{##1}} &
+    \glossentrysymbol{##1} &
+    \glossentrydesc{##1} &
+    ##2\tabularnewline
+  }%
+  \renewcommand{\subglossentry}[3]{%
+     &
+     \glssubentryitem{##2}%
+     \glossentrysymbol{##2} &
+     \glstarget{##2}{\strut}\glossentrydesc{##2} & ##3\tabularnewline
+  }%
+  \renewcommand*{\glsgroupskip}{%
+   }% Pokud chci seskupovat podel abecedy  \ifglsnogroupskip\else & & &\tabularnewline\fi
+}
+\renewcommand{\glossarypreamble}{\vspace*{-\baselineskip}} % deleting line after glossaries title
+
+            %this works with LuaLaTex and fontspec package%
+ \DeclareCaptionFont{times}{\fontspec{Times New Roman Italic}}
+
+%labelfont and textfont defined here only works with previous declarecaptionfont times and fontspec%
+\captionsetup{labelfont=times, textfont=times, labelsep=space}%no separator in captions
+%
+
+%\bibliographystyle{czechiso} %czechiso.bst in folder is needed for this style to work, available at http://www.fit.vutbr.cz/~martinek/latex/czechiso.html%
+
+%\hyperref[label]{text}% Help for targeting labels
+
+\usepackage{chngcntr} %for numbered figures with sections
+\usepackage{tocloft}%better TOC
+
+%\usepackage{a4wide}%širší a4%
+\usepackage[inner=3cm,outer=2cm,top=2.5cm,bottom=2.5cm,footskip=1cm]{geometry}%for propper margins
+\usepackage{textcase}%for making text uppercase without caps \MakeTextUppercase
+ 
+ 
+\usepackage{titlesec}%for spacing text after sections
+\usepackage{parskip}[]%for working \parskip
+\newcommand{\sectionbreak}{\clearpage}%maybe for SECTIONS on a new page
+
+\usepackage[titletoc]{appendix}%For appendix - přílohy, titletoc is crucial
+%\renewcommand{\appendixname}{Příloha}
+
+\setlength{\parindent}{0.5cm}%setting indent of paragraph to 0.5cm
+\setlength{\parskip}{0em}%setting parskip to 0 for \titleformat to work properly with parskip package
+
+\usepackage{colortbl}%for colored cells
+\usepackage{xcolor}%for colors
+\definecolor{ctublue}{HTML}{0065BD}%defining ctu color
+\definecolor{ctugreen}{HTML}{A2AD00}
+\definecolor{ctured}{HTML}{C60C30}
+\definecolor{ctuyellow}{HTML}{F0AB00}
+\definecolor{ctugreenyblue}{HTML}{00B2A9}
+\definecolor{ctulightblue}{HTML}{6AADE4}
+\definecolor{ctuorange}{HTML}{E05206}
+\definecolor{lightgray}{HTML}{D1D5DB}
+\definecolor{codeblue}{HTML}{D9E2F3}
+
+
+\titlespacing*{\section}{0em}{1em}{-\parskip}%spacing text after sections from titlesec package
+\titlespacing*{\subsection}{0em}{1em}{-\parskip}%spacing text after sections from titlesec package
+\titlespacing*{\subsubsection}{0em}{1em}{-\parskip}%spacing text after sections from titlesec package
+
+%when you want sectin/sub/subsub to be black, delete \color{ctublue}
+\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{\thesection}{2.1em}{}%defining title sizes by word template
+\titleformat{\subsection}{\color{ctublue}\fontspec{Times New Roman}\fontsize{14}{14}\bfseries}{\thesubsection}{1.53em}{}%defining title sizes by word template
+\titleformat{\subsubsection}{\color{ctublue}\fontspec{Times New Roman}\fontsize{13}{13}\bfseries}{\thesubsubsection}{1em}{}%defining title sizes by word template
+
+
+\usepackage{ctable}%imports xtable with booktabs
+\usepackage{multicol}
+
+\usepackage{listings}%for code environments - \begin{lstlisting}
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
+% solving problems with ) literal to be coded in lstlisting as it should be
+\makeatletter
+\patchcmd{\lsthk@SelectCharTable}{)}{`}{}{} 
+\makeatother 
+
+\lstdefinestyle{zakopal}{
+    backgroundcolor=\color{codeblue},   
+    commentstyle=\color{codegray},
+    keywordstyle=\color{ctured},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{ctuorange},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=zakopal}
+\renewcommand{\lstlistingname}{Kód}% renaming Listing -> Kód 
+\renewcommand{\lstlistlistingname}{Seznam kódů}% renaming List of Listings -> Seznam kódů
+
+\lstdefinelanguage{SCL}
+{morekeywords={FUNCTION_BLOCK,BEGIN,NOT,END_FUNCTION_BLOCK,FUNCTION,VOID,VAR_INPUT,END_VAR,VAR_IN_OUT,IF,
+THEN,END_IF,END_FUNCTION,BOOL,FALSE,TRUE},
+sensitive=false,
+morecomment=[l]{//},
+morestring=[b]",
+literate={;}{{\textcolor{ctuorange}{;}}}{1}
+{:}{{\textcolor{ctuorange}{:}}}{1}
+{)}{{\textcolor{ctuorange}{)}}}{1}
+{(}{{\textcolor{ctuorange}{(}}}{1}
+{=}{{\textcolor{ctuorange}{=}}}{1}
+{,}{{\textcolor{ctuorange}{,}}}{1},} %basic SCL language for siemens defined%
+
+\lstdefinelanguage{xdc}
+{morekeywords={set_property, current_design, get_ports},
+sensitive=false,
+morecomment=[l]{\#}} %basic xdc file in Vivado syntax highlighting%
+
+\lstdefinelanguage{xsct}
+{morekeywords={xsct, hsi, open_hw_design, -createdts, -hw, -zocl, -platform-name, -overlay, -compile, -out, exit, -git-branch},
+alsoletter={-},
+sensitive=false,
+morecomment=[l]{\#}} %xsct (Xilinx Software Command-Line Tools)%
+
+
+\lstdefinelanguage{Text}
+{morekeywords={},
+alsoletter={-},
+sensitive=false,
+morecomment=[l]{//},
+morecomment=[l]{\#}} %basic text%
+
+\lstdefinelanguage{devicetree}
+{morekeywords={chosen, bootargs, stdout-path, compatible, status},
+alsoletter={-},
+stringstyle=\color{ctuorange},
+moredelim=[s][\color{ctuorange}]{"}{"},
+sensitive=false,
+morecomment=[l]{\#},
+literate={\{}{{\textcolor{ctured}{\{}}}{1}
+{\}}{{\textcolor{ctured}{\}}}}{1}
+} %devicetree%
+
+\lstdefinelanguage{json}
+{morekeywords={},
+upquote=true,
+morestring=[b]",
+stringstyle=\color{ctuorange},
+moredelim=[s][\color{ctuorange}]{"}{"},
+sensitive=false,
+morecomment=[l]{\#},
+literate=
+     *{0}{{{\color{ctured}0}}}{1}
+      {1}{{{\color{ctured}1}}}{1}
+      {2}{{{\color{ctured}2}}}{1}
+      {3}{{{\color{ctured}3}}}{1}
+      {4}{{{\color{ctured}4}}}{1}
+      {5}{{{\color{ctured}5}}}{1}
+      {6}{{{\color{ctured}6}}}{1}
+      {7}{{{\color{ctured}7}}}{1}
+      {8}{{{\color{ctured}8}}}{1}
+      {9}{{{\color{ctured}9}}}{1}
+      {\{}{{{\color{ctured}{\{}}}}{1}
+      {\}}{{{\color{ctured}{\}}}}}{1}
+      {[}{{{\color{ctured}{[}}}}{1}
+      {]}{{{\color{ctured}{]}}}}{1},
+} %json%
+
+
+%%change in previous commands 2.1 em , 1.53em and 1em to 1em to be easy indented not the same
+\begin{document}
+\fontspec{Times New Roman}
+
+\counterwithin{figure}{section}%changing counter of figure, at each section the numbering resets
+\counterwithin{table}{section}%changing counter of table, at each section the numbering resets
+\counterwithin{equation}{section}%changing counter of equation, at each section the numbering resets
+
+\counterwithin{lstlisting}{section}%counter of lstlist - codes, reseting at each section%
+
+
+\renewcommand{\thefigure}{\thesection~-~\arabic{figure}}%defining style of countering
+\renewcommand{\thetable}{\thesection~-~\arabic{table}}
+\renewcommand{\theequation}{\thesection~-~\arabic{equation}}
+\renewcommand{\thelstlisting}{\thesection~-~\arabic{lstlisting}}%delfining style for lstlisting codes, needs to be after begin document as previous renewcommand%
+
+\renewcommand*{\cftsecdotsep}{1}  % use dots in the section entries and their step
+\renewcommand*{\cftsubsecdotsep}{1}
+\renewcommand*{\cftsubsubsecdotsep}{1}
+\renewcommand*{\cftsecnumwidth}{4em} % increase space for Roman numerals
+\renewcommand*{\cftsubsecnumwidth}{4em} %numbering width
+\renewcommand*{\cftsubsubsecnumwidth}{4em} %numbering width
+\renewcommand*{\cftsubsubsecindent}{0em}%no indent for subsubsection
+\renewcommand*{\cftsubsecindent}{0em}%no indent for subsection
+\renewcommand*{\cftsecindent}{0em}%no indent for subsection
+
+
+
+\renewcommand*{\cftfigdotsep}{1}  % use dots in the figure entries and their step
+\renewcommand*{\cftfignumwidth}{4em}
+\renewcommand*{\cftfigindent}{0em}
+
+\renewcommand*{\cfttabdotsep}{1}  % use dots in the figure entries and their step
+\renewcommand*{\cfttabnumwidth}{4em}
+\renewcommand*{\cfttabindent}{0em}
+
+\renewcommand{\cftsecfont}{\fontspec{Times New Roman}\large \bfseries}
+\renewcommand{\cftsubsecfont}{\fontspec{Times New Roman}}
+\renewcommand{\cftsubsubsecfont}{\fontspec{Times New Roman}}
+
+\renewcommand{\cftfigfont}{\fontspec{Times New Roman}}
+\renewcommand{\cfttabfont}{\fontspec{Times New Roman}}
+
+\renewcommand*\contentsname{\textcolor{ctublue}{\MakeTextUppercase{\fontspec{Times New Roman}Obsah}}}
+\renewcommand{\listtablename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{Seznam tabulek}}}}}
+\renewcommand{\listfigurename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{Seznam obrázků}}}}}
+
+
+
+
+%\renewcommand{\thefigure}{\arabic{section}.\arabic{figure}}%changing figure name to be section.subsection. but do no reset
+\setcounter{figure}{0}
+
+\begin{titlepage}
+	\begin{center}
+
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[scale=1]{src/misc/symbol_cvut_konturova_verze.pdf}
+	\end{center}
+\end{figure}
+	{\Large{\textbf{ČESKÉ VYSOKÉ UČENÍ TECHNICKÉ V~PRAZE}}}\\
+	{\textbf{Fakulta elektrotechnická}}\\
+	{\textbf{Katedra elektrických pohonů a trakce}}
+	
+	\vspace{3cm}
+	
+	
+	{\Large\textbf{Možnosti využití SoC platformy procesorů pro řízení elektrických pohonů}}
+	
+	\vspace{1cm}
+	
+	{\Large\textbf{Possibilities of Using SoC Platform Processors for Controlling Electric Drives}}
+	
+	\vspace{2cm}
+	
+	Diplomová práce\\
+	
+	\end{center}
+	
+	\vspace{3cm}
+	
+	\noindent Studijní program: Elektrotechnika, Energetika a Management\\
+	\noindent Studijní obor: Elektrické pohony
+	
+	\vspace{0.5cm}
+	\noindent Vedoucí práce: doc. Ing. Jan Bauer, Ph.D.
+	
+	\vfill
+	
+\begin{center}
+
+	\large{\textbf{Petr Zakopal}}\\
+	\large{\textbf{Praha 2023}}
+	\end{center}
+\end{titlepage}
+
+
+\newpage
+%\pagenumbering{arabic} to arabic page numbering
+\pagenumbering{gobble} %disabling page numbering
+
+\newpage
+
+
+%%ZADÁNÍ PRÁCE
+%verze pro TISK - jen s NEW PAGE
+
+
+%ONLINE VERZE - se zadáním BEZ PODPISŮ
+% online verze - odkomentovat následující dva řádky
+%\null\newpage
+%\includepdf[]{src/docs/zadani_bez_podpisu.pdf}
+
+%\newpage
+%\cleardoublepage
+\null\newpage
+
+\pagenumbering{Roman}
+\setcounter{page}{5}%%3 NUTNO řešit dle zadání etc.
+
+% \noindent \textcolor{ctublue}{{\Large{\textbf{\MakeTextUppercase{Prohlášení}}}}}\\
+% 			Prohlašuji, že jsem předloženou práci vypracoval samostatně a že jsem uvedl veškeré použité informační zdroje v~souladu s~Metodickým pokynem o~dodržování etických principů při přípravě vysokoškolských závěrečných prací.\\
+% 		\vspace{1.5cm}
+		
+	
+
+% 	\noindent	V~Praze dne \rule{3.5cm}{0.4pt} \hspace{6.6cm}  \rule{4cm}{0.4pt}
+	
+% 	\hspace{12.65cm}Petr Zakopal
+
+
+% 		\vspace{14cm}
+		
+% 	\noindent	\textcolor{ctublue}{{\Large{\textbf{\MakeTextUppercase{Poděkování}}}}}\\
+% 	Tímto bych rád poděkoval vedoucímu této práce doc. Ing. Janu Bauerovi, Ph.D. za skvělé vedení práce a cenné rady při jejím vytváření. Dále bych rád poděkoval všem, kteří mě v~mém dosavadním studiu podporovali.
+		
+
+
+%%ABSTRAKT%%
+
+% \newpage
+% %\addcontentsline{toc}{section}{3\quad Abstrakt a klíčová slova}%Added citations to TOC%
+% %\begin{comment}
+% \begin{minipage}[t]{7.37cm}
+% 		%\raggedright
+% 	\textcolor{ctublue}{\Large{\textbf{\MakeTextUppercase{Abstrakt}}}}\\
+	
+% \end{minipage}%
+% \hfill% --- important, otherwise it wont be so nice
+% \begin{minipage}[t]{7.37cm}
+% 		\textcolor{ctublue}{\Large{\textbf{\MakeTextUppercase{Abstract}}}}\\
+		
+% \end{minipage}
+% %\end{comment}
+% 	%\textcolor{ctublue}{\Large{\textbf{\MakeTextUppercase{Abstrakt}}}}\\
+
+% 	%\textcolor{ctublue}{\Large{\textbf{\MakeTextUppercase{Abstract}}}}\\
+
+% \newpage
+\tableofcontents
+\newpage%
+\flushbottom %vyčištění stránky
+\newpage
+\vspace{0pt}
+\listoffigures %seznam obrázků
+\flushbottom %vyčištění stránky
+\newpage
+\listoftables
+\flushbottom
+\newpage
+
+
+\pagenumbering{arabic} %to arabic page numbering - enabling page numbering after gobble which disabled page numbering
+\pagenumbering{gobble}
+\null\newpage
+% \null\newpage %PŘI VERZI ONLINE
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\fontspec{Times New Roman}
+
+\section{Úvod}
+\gls{abbreviation:soc} \gls{symbol:Pn}.
+
+\flushbottom %vyčištění stránky
+\newpage
+%konec úvodu
+
+
+		
+%závěr
+\newpage
+\addcontentsline{toc}{section}{\numberline{}Závěr} 
+\section*{Závěr}
+
+
+\flushbottom %vyčištění stránky
+
+%konec závěru
+
+\newpage
+\setmonofont{Times New Roman}
+\printbibliography[title={{Literatura}}]	
+\nocite{*}
+\setmonofont{Courier}
+\addcontentsline{toc}{section}{\numberline{}Literatura} %Added citations to TOC%
+	\appendix
+	\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{Příloha \thesection:}{2.1em}{}
+	\begin{appendices}
+	\section{Seznam symbolů a zkratek}
+
+		\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
+
+		\fbar
+		\newpage
+		\printglossary[type=symbolslist, style =  myStyleSymbols]
+
+	\end{appendices}
+\end{document}
