@@ -12,7 +12,7 @@
 \usepackage{graphicx} %enhanced support for craphics%
 %\usepackage{mathptmx} %use Times as default text font, and provide maths support%
 \usepackage{cmap} %mapování znaků - vyhledávání v pdf%
-\usepackage[czech]{babel}%CZ%
+\usepackage[english]{babel}%CZ%
 \usepackage[utf8]{inputenc}%kódování%
 \usepackage[T1]{fontenc}%kódování%
 \usepackage{multirow}%Multirow table support
@@ -78,7 +78,7 @@
 \usepackage{physics}% for derivations \dd
 %this works only when using PDFLaTeX%
 \usepackage[list=true,listformat=simple]{subcaption}
-\usepackage[figurename=Obr.,font=small,labelfont=it,textfont=it]{caption} %for renaming figures instead of renewcommand, small for 11pt default is 10pt as needed in word template
+\usepackage[figurename=Fig.,font=small,labelfont=it,textfont=it]{caption} %for renaming figures instead of renewcommand, small for 11pt default is 10pt as needed in word template
 \usepackage[tablename=Tab.,font=small,labelfont=it,
             textfont=it]{caption} %for renaming tables instead of renewcommand
             
@@ -89,8 +89,8 @@
 \usepackage[nonumberlist,nopostdot,section=subsection,numberedsection]{glossaries}
 % section = subsection is for glossaries title to appear as a subsection, numberedsection adds the subsec number
 
-\newglossary[slg]{symbolslist}{symbol}{ntn1}{Seznam symbolů}
-\newglossary[slg]{abbreviationslist}{abbreviation}{ntn2}{Seznam zkratek}
+\newglossary[slg]{symbolslist}{symbol}{ntn1}{List of symbols}
+\newglossary[slg]{abbreviationslist}{abbreviation}{ntn2}{List of abbreviations}
 
 \makeglossaries
 
@@ -338,9 +338,9 @@ literate=
 \renewcommand{\cftfigfont}{\fontspec{Times New Roman}}
 \renewcommand{\cfttabfont}{\fontspec{Times New Roman}}
 
-\renewcommand*\contentsname{\textcolor{ctublue}{\MakeTextUppercase{\fontspec{Times New Roman}Obsah}}}
-\renewcommand{\listtablename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{Seznam tabulek}}}}}
-\renewcommand{\listfigurename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{Seznam obrázků}}}}}
+\renewcommand*\contentsname{\textcolor{ctublue}{\MakeTextUppercase{\fontspec{Times New Roman}Table of Contents}}}
+\renewcommand{\listtablename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{List of tables}}}}}
+\renewcommand{\listfigurename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{List of figures}}}}}
 
 
 
@@ -356,39 +356,39 @@ literate=
 		\includegraphics[scale=1]{src/misc/symbol_cvut_konturova_verze.pdf}
 	\end{center}
 \end{figure}
-	{\Large{\textbf{ČESKÉ VYSOKÉ UČENÍ TECHNICKÉ V~PRAZE}}}\\
-	{\textbf{Fakulta elektrotechnická}}\\
-	{\textbf{Katedra elektrických pohonů a trakce}}
+	{\Large{\textbf{CZECH TECHNICAL UNIVERSITY IN PRAGUE}}}\\
+	{\textbf{Faculty of Electrical Engineering}}\\
+	{\textbf{Department of Electric Drives and Traction}}
 	
 	\vspace{3cm}
 	
 	
-	{\Large\textbf{Možnosti využití SoC platformy procesorů pro řízení elektrických pohonů}}
+	{\Large\textbf{Name of the report}}
 	
 	\vspace{1cm}
 	
-	{\Large\textbf{Possibilities of Using SoC Platform Processors for Controlling Electric Drives}}
+	%{\Large\textbf{Possibilities of Using SoC Platform Processors for Controlling Electric Drives}}
 	
-	\vspace{2cm}
+	%\vspace{2cm}
 	
-	Diplomová práce\\
+	Technical report\\
 	
 	\end{center}
 	
 	\vspace{3cm}
 	
-	\noindent Studijní program: Elektrotechnika, Energetika a Management\\
-	\noindent Studijní obor: Elektrické pohony
+	%\noindent Studijní program: Elektrotechnika, Energetika a Management\\
+	%\noindent Studijní obor: Elektrické pohony
 	
 	\vspace{0.5cm}
-	\noindent Vedoucí práce: doc. Ing. Jan Bauer, Ph.D.
+	%\noindent Vedoucí práce: doc. Ing. Jan Bauer, Ph.D.
 	
 	\vfill
 	
 \begin{center}
 
 	\large{\textbf{Petr Zakopal}}\\
-	\large{\textbf{Praha 2023}}
+	\large{\textbf{Prague 2023}}
 	\end{center}
 \end{titlepage}
 
@@ -414,7 +414,7 @@ literate=
 \null\newpage
 
 \pagenumbering{Roman}
-\setcounter{page}{5}%%3 NUTNO řešit dle zadání etc.
+\setcounter{page}{2}%%3 NUTNO řešit dle zadání etc.
 
 % \noindent \textcolor{ctublue}{{\Large{\textbf{\MakeTextUppercase{Prohlášení}}}}}\\
 % 			Prohlašuji, že jsem předloženou práci vypracoval samostatně a že jsem uvedl veškeré použité informační zdroje v~souladu s~Metodickým pokynem o~dodržování etických principů při přípravě vysokoškolských závěrečných prací.\\
@@ -476,7 +476,7 @@ literate=
 \pagenumbering{arabic}
 \fontspec{Times New Roman}
 
-\section{Úvod}
+\section{Introduction}
 \gls{abbreviation:soc} \gls{symbol:Pn}.
 
 \flushbottom %vyčištění stránky
@@ -487,8 +487,8 @@ literate=
 		
 %závěr
 \newpage
-\addcontentsline{toc}{section}{\numberline{}Závěr} 
-\section*{Závěr}
+\addcontentsline{toc}{section}{\numberline{}Conclusion} 
+\section*{Conclusion}
 
 
 \flushbottom %vyčištění stránky
@@ -497,14 +497,14 @@ literate=
 
 \newpage
 \setmonofont{Times New Roman}
-\printbibliography[title={{Literatura}}]	
+\printbibliography[title={{References}}]	
 \nocite{*}
 \setmonofont{Courier}
-\addcontentsline{toc}{section}{\numberline{}Literatura} %Added citations to TOC%
+\addcontentsline{toc}{section}{\numberline{}References} %Added citations to TOC%
 	\appendix
-	\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{Příloha \thesection:}{2.1em}{}
+	\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{Appendix \thesection:}{2.1em}{}
 	\begin{appendices}
-	\section{Seznam symbolů a zkratek}
+	\section{List of symbols and abbreviations}
 
 		\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
 
