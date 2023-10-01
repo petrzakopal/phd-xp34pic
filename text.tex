@@ -503,7 +503,7 @@ To preserve the compatibility of the design with multiple vendors, the custom so
 
 \subsection{Newton Rapshon algorithm for calculating the division}\label{subsection:newton-raphson-algorithm-for-calculating-the-division}
 General Newton Raphson (\gls{abbreviation:nr}) algorithm is a well known way how to solve equations the numerical way. It is the reason why it is utilized in many algorithms. However, the negative aspect of \gls{abbreviation:nr} is that it's convergency strongly depends on initial values of unknown variables. When the initial variables are chosen poorly, the performed number of iterations before the convergency is reached can be high.\par
-To reach the fastest convergency possible (determined in number of iterations) apart from the scaling the dominator into interval [0.5,1] the initial value calculation formula should be utilized. \cite{burke-fixed-point-math-library}
+To reach the fastest convergency possible (determined in number of iterations) apart from the scaling the dominator into the interval [0.5,1] the initial value calculation formula should be utilized. \cite{burke-fixed-point-math-library}
 The initial value formula \ref{eq:initial-nr-value-formula} is applied after the scaling of denominator is performed. The algorithm developed for the appropriate scaling is explained in the \hyperref[subsec:calculating-number-of-bits-to-shift-the-denominator]{\textit{Calculating number of bits to shift the denominator}}.
 
 \begin{equation}\label{eq:initial-nr-value-formula}
