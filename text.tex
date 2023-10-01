@@ -294,6 +294,18 @@ literate=
       {]}{{{\color{ctured}{]}}}}{1},
 } %json%
 
+\lstdefinelanguage{pseudocode}
+{morekeywords={if, else, positive, negative, edge, end},
+alsoletter={-},
+stringstyle=\color{ctuorange},
+moredelim=[s][\color{ctuorange}]{"}{"},
+sensitive=false,
+morecomment=[l]{\//},
+literate={\{}{{\textcolor{ctured}{\{}}}{1}
+{\}}{{\textcolor{ctured}{\}}}}{1}
+{(}{{{\color{ctured}{(}}}}{1}
+{)}{{{\color{ctured}{)}}}}{1}
+} %devicetree%
 
 %%change in previous commands 2.1 em , 1.53em and 1em to 1em to be easy indented not the same
 \begin{document}
@@ -477,14 +489,67 @@ literate=
 \fontspec{Times New Roman}
 
 \section{Introduction}
-\gls{abbreviation:soc} \gls{symbol:Pn}.
+This is the introduction.
 
 \flushbottom %vyčištění stránky
 \newpage
 %konec úvodu
 
 \section{Calculating the division of fixed point numbers}
+Usually, when using numerical methods to solve the transcendetal equations, there is a need to calculate the division of two input numbers. Even for solving one set of two equations with Newton Raphson (\gls{abbreviation:nr}) method, the calculation of reciprocal value of the Jacobian determinant is needed.\par
+There are available some \gls{abbreviation:ip} blocks, which are capable of calculating the division of two numbers, but the blocks are usually vendor specific intellectual property \gls{abbreviation:ip} \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
+The negative side of vendor specific \gls{abbreviation:ip} is, that it is hard to use them with any other \gls{abbreviation:fpga} chip than the vendor specific. On the other hand the vendor specific \gls{abbreviation:ip} is usually optimized to use the specific type of resources available at the vendor's chip whci resolves in better performance.\par
+To preserve the compatibility of the design with multiple vendors, the custom solution for division design based on the very known Newton Rapshon (\gls{abbreviation:nr}) algorithm was developed. \cite{burke-fixed-point-math-library}
 
+\subsection{Newton Rapshon algorithm for calculating the division}\label{subsection:newton-raphson-algorithm-for-calculating-the-division}
+General Newton Raphson (\gls{abbreviation:nr}) algorithm is a well known way how to solve equations the numerical way. It is the reason why it is utilized in many algorithms. However, the negative aspect of \gls{abbreviation:nr} is that it's convergency strongly depends on initial values of unknown variables. When the initial variables are chosen poorly, the performed number of iterations before the convergency is reached can be high.\par
+To reach the fastest convergency possible (determined in number of iterations) apart from the scaling the dominator into interval [0.5,1] the initial value calculation formula should be utilized. \cite{burke-fixed-point-math-library}
+The initial value formula \ref{eq:initial-nr-value-formula} is applied after the scaling of denominator is performed. The algorithm developed for the appropriate scaling is explained in the \hyperref[subsec:calculating-number-of-bits-to-shift-the-denominator]{\textit{Calculating number of bits to shift the denominator}}.
+
+\begin{equation}\label{eq:initial-nr-value-formula}
+x_0 = \frac{48}{17} - \frac{32}{17} D,
+\end{equation}
+where the $x_0$ is the initial value for \gls{abbreviation:nr} algorithm and $D$ is the denominator value for calculating the expression $N/D$.\par
+Because of the fixed point number format \textit{Q32.15} is used, the fractional numbers in equation \ref{eq:initial-nr-value-formula} are rounded to 2.8229 (32'b00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'b00000000000000001\_111000011100101 in binary) respectively.\par
+After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea for using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication, which can be synthetized in the \gls{abbreviation:fpga} fabric. For the \gls{abbreviation:nr} algorithm the function which root is $1/D$ is crucial. There may be many functions, which root is the searched value $1/D$ but the most trivial is eq. \ref{eq:equation-with-appropriate-root}.
+
+\begin{equation}\label{eq:equation-with-appropriate-root}
+  \text{F} (x) = \frac{1}{x} - D.
+\end{equation}
+
+\subsection{IP block design}
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
+   \caption{Top module design for the \gls{abbreviation:ip} block design.}
+  \label{fig:top-module}
+\end{figure}
+
+
+
+\fbar
+\subsubsection{Data Path Unit}
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
+   \caption{Alloccation and timing diagram for the Data Path Unit part of the \gls{abbreviation:ip}.}
+  \label{fig:allocation-timing}
+\end{figure}
+
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
+   \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the \gls{abbreviation:ip}.}
+  \label{fig:rtl}
+\end{figure}
+
+
+\fbar
+\subsubsection{Control Unit}
+The encoded operations in CV signal bits are depicted in the table \ref{tab:control-signal-division-unit}.
 \begin{table}[htbp!]
   \centering
   \caption{Control signal encoding table for instructions to be processed by the Division Module.}
@@ -497,27 +562,54 @@ literate=
       \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{State}} & \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{RTL Code}} & \textbf{ld0} & \textbf{ld1} & \textbf{ld2} & \textbf{ld3} & \textbf{ld4} & \textbf{SelR1} & \textbf{SelR2{[}1{]}} & \textbf{SelR2{[}0{]}} & \textbf{SelR3} & \textbf{SelR4} & \textbf{SelSh1} & \textbf{SelM1{[}1{]}} & \textbf{SelM1{[}0{]}} & \textbf{SelM2} & \textbf{SelS1} & \multicolumn{1}{c!{\vrule width 2pt}}{\multirow{-2}{*}{\cellcolor[HTML]{FDA977}\textbf{CV}}} \\ \noalign{\hrule height 2pt}
       S0 & R1 ← D; & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2000h \\ \hline
       S1 & R1 ← R1\;\textless{}\textless \; 32; (Sh1) & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 2210h \\ \hline
-      \multirow{2}{*}{S2} & R2   ← 1.882 x R1; (M1) & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & \multirow{2}{*}{1804h} \\ 
+      \multirow{2}{*}{S2} & R2   ← 1.882 x R1; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1804h} \\ 
        & R3 ← N; &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\hline
-       \multirow{2}{*}{S3} & R2 ← 2.82 - R2; (Sub1) & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & \multirow{2}{*}{18C0h} \\ 
+       \multirow{2}{*}{S3} & R2 ← 2.82 - R2; (Sub1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{18C0h} \\ 
        & R3 ← R3\;\textless{}\textless\;32; (Sh1) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\hline
       S4 & R4 ← R2 x R1; (M1) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 420h \\ \hline
-       & R4 ← R2 x R4; (M1) & 0 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 1528h \\
+       & R4 ← R2 x R4; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & 1528h \\
       \multirow{-2}{*}{S5} & R2 ← 2 x   R2; (M2) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ \hline
       S6 & R2 ← R2 - R4;   (S1) & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1081h \\ \hline
       S7 & R4 ← R2 x R3;   (M2) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 402h  \\ \hline
       S8 & R0 ← R4; & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 4000h\\\noalign{\hrule height 2pt}
       \end{tabular}
     }
-  \label{tab:xilinx-kria-description}
+  \label{tab:control-signal-division-unit}
 \end{table}
+\fbar
+\subsection{Calculating number of bits to shift the denominator}\label{subsec:calculating-number-of-bits-to-shift-the-denominator}
+As presented in the section \hyperref[subsection:newton-raphson-algorithm-for-calculating-the-division]{\textit{Newton Rapshon algorithm for calculating the division}} the denominator must be appropriately scaled for the division algorithm to work. This section presents algorithm for scaling the denominator specified in the fixed point number format \textit{Q32.15}. After the scaling value is successfully determined, the numerator is scaled accordingly.
+\par
+The presented algorithm shifts the value of denominator at every positive edge of the clock signal and saves the shifted value in the \texttt{compare} register. Then the combinational circuit is utilized to compare the shifted value in \texttt{compare} register with the number \texttt{1} specified in \textit{Q32.15} format. If the compared value is the same or lower than \texttt{1} the shifting algorithm is done and the value \texttt{scaleToShift} is successfully found. If not, the inner value of shifting bits is incremented and the algorithm proceeds to the next iteration.\par
+The presented algorithm is packed in the \textit{denominatorSizeScaleUnit} module and it's pseudocode is depicted in the code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
 
-		
+\begin{lstlisting}[language={pseudocode}, caption={Pseudocode for the denominatorSizeScaleUnit module algorithm.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
+  at every negative edge of clock or positive edge of reset
+  if(rst)
+    scaleToShift = 0;
+    scaleToShiftInternal = 1;
+    started = 0;
+  end if
+  else if (start)
+  started = 1;
+  end else if
+
+  at every positive edge of clock
+  if (compare <= 32'b00000000000000001_000000000000000)
+  done = 1;
+  started = 0;
+  scaleToShift = scaleToShiftInternal;
+  end if
+  else
+  done = 0;
+  scaleToShiftInternal = scaleToShiftInternal + 1;
+  end else
+\end{lstlisting}
 %závěr
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
 \section*{Conclusion}
-
+And this is the conclusion of my report.
 
 \flushbottom %vyčištění stránky
 
