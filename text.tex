@@ -511,45 +511,76 @@ x_0 = \frac{48}{17} - \frac{32}{17} D,
 \end{equation}
 where the $x_0$ is the initial value for \gls{abbreviation:nr} algorithm and $D$ is the denominator value for calculating the expression $N/D$.\par
 Because of the fixed point number format \textit{Q32.15} is used, the fractional numbers in equation \ref{eq:initial-nr-value-formula} are rounded to 2.8229 (32'b00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'b00000000000000001\_111000011100101 in binary) respectively.\par
-After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea for using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication, which can be synthetized in the \gls{abbreviation:fpga} fabric. For the \gls{abbreviation:nr} algorithm the function which root is $1/D$ is crucial. There may be many functions, which root is the searched value $1/D$ but the most trivial is eq. \ref{eq:equation-with-appropriate-root}.
+After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea for using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication, which can be synthetized in the \gls{abbreviation:fpga} fabric. For the \gls{abbreviation:nr} algorithm the function which root is $1/D$ is crucial. There may be many functions, which root is the searched value $1/D$ but the most trivial is eq. \ref{eq:equation-with-appropriate-root}.\par
 
 \begin{equation}\label{eq:equation-with-appropriate-root}
   \text{F} (x) = \frac{1}{x} - D.
 \end{equation}
 
-\subsection{IP block design}
+For the derivative at the point of $x_i$ then applies eq. \ref{eq:nr-division-derivative-at-the-point}.
 
+\begin{equation}\label{eq:nr-division-derivative-at-the-point}
+  \frac{\dd F(x_i)}{\dd x} = F'(x_i) = \frac{F (x_{i+1}) - F (x_i)}{x_{i+1}-x_i}.
+\end{equation}
+
+Because finding root of the equation \ref{eq:equation-with-appropriate-root}, the value of $F (x_{i+1})$ is set to be zero. After separating the $x_{i+1}$ value of the eq. \ref{eq:nr-division-derivative-at-the-point} and derivating the function $F (x_i)$ the obtained algorithm for a value $x_{i+1}$ is obtained in eq. \ref{eq:derivative-nr-new-value-algorithm}.\par
+
+\begin{equation}\label{eq:derivative-nr-new-value-algorithm}
+  x_{i+1} = -\frac{F (x_i)}{F' (x_i)} + x_i = - \frac{F (x_i)}{-\frac{1}{x_i^2}} + x_i = (\frac{1}{x_i} - D) x_i^2 + x_i = x_i - D x_i^2 + x_i = 2 x_i - D x_i^2.
+\end{equation}
+
+Usually, the iterative algorithm is stopped, when the value $F(x_{i+1}) - F(x_i)$ (called defect) reaches certain value set by the stop condition. However, in this algorithm, the stop condition is not yet implemented. Based on the observation carried on the N-R algorithm the obtained result is sufficient after 5 iterations.
+
+The mathematically expressed algorithm is then transformed into calculation flow suitable for implementing in the FPGA. The top module design for this algorithm is presented in the section \hyperref[subsubsec:division-top-module-design]{\textit{Top module design}}, the control and data unit for calculating the value $x_{i+1}$ is presented in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}}
+
+\subsection{IP block design}\label{subsec:division-ip-block-design}
+The design of this division unit is separated into 4 main modules:
+\begin{itemize}
+  \item the \textbf{data unit module}, used for manipulating data and making calculation operations,
+  \item the \textbf{control unit module}, used for controlling the \textbf{data unit module} and \textbf{scaling unit module}, this unit is a Finite State Machine (\gls{abbreviation:fsm}),
+  \item \textbf{scaling unit module}, used for calculating the number of bits needed for shifting the denominator value to the interval [0.5,1].
+\end{itemize}
+\subsubsection{Top module design}\label{subsubsec:division-top-module-design}
+The top module wraps all of the presented modules (\textbf{data unit module}, \textbf{control unit module}, \textbf{scaling unit module}). The basic structure of connected modules in this top design is depicted in the fig. \ref{fig:division-top-module}. Thanks to this wrapper it is possible to test the created modules with Verilog Testbench, Verilator \cite{verilator} or Cocotb \cite{cocotb}.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
    \caption{Top module design for the \gls{abbreviation:ip} block design.}
-  \label{fig:top-module}
+  \label{fig:division-top-module}
 \end{figure}
 
 
 
 \fbar
-\subsubsection{Data Path Unit}
-
-\begin{figure}[htbp!]
+\subsubsection{Allocation and Timing}\label{subsubsec:division-allocation-and-timing}
+The diagram which describes the data flow and timing by steps of the algorithm is displayed in the figure \ref{fig:division-allocation-timing}.\par
+The whole algorithm consists of nine steps. The first four steps are used for calculating the initial value of $x_0$ as described in the equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, the root of the equation \ref{eq:equation-with-appropriate-root} so the searched value of $1/D$. The next iteration starts at the step labeled as \textit{S5}. The iterative process continues till the stop condition (eg. number of iterations) is met.
+\begin{figure}
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
    \caption{Alloccation and timing diagram for the Data Path Unit part of the \gls{abbreviation:ip}.}
-  \label{fig:allocation-timing}
+  \label{fig:division-allocation-timing}
 \end{figure}
 
-
+\fbar
+\subsubsection{Data Path Module}
+The structure of created Data Path Module is depicted in the figure \ref{fig:division-rtl}. The module was specifically designed to serve the needs of the division algorithm. It consists of five registers labeled $R0$ through $R4$, two multipliers $M1$, $M2$ and one bit shifter.\par
+The module si controlled by the presented control unit \gls{abbreviation:fsm} with the control signal labeled as CV. The encoding table with the labels which corresponds with the Data Path Unit module is presented in the section \hyperref[subsubsection:division-control-unit]{\textit{Control Unit}}.\par
+The result of each iteration from the division algorithm is passed to a register $R0$.\par
+The Data Path Module unit also covers the possibility of negative denominator and numerator. Because the values are stored in a custom \textit{Q32.15} fixed point format, the algorithm checks if the $D$ or $N$ values are higher than $0h8000$ value and determine it's actual sign and the sign if the result. If the analyzed number is determined negative, it is transformed to value positive and then used in the presented division algorithm. This transformation is needed because of the algorithm calculating the bits to shift the denominator in the interval.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
    \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the \gls{abbreviation:ip}.}
-  \label{fig:rtl}
+  \label{fig:division-rtl}
 \end{figure}
 
 
 \fbar
-\subsubsection{Control Unit}
-The encoded operations in CV signal bits are depicted in the table \ref{tab:control-signal-division-unit}.
+\subsubsection{Control Unit}\label{subsubsection:division-control-unit}
+The signals from Control Unit to Data Path Module are encoded in the CV signal. The CV signal with the corresponding instructions for the steps $S0$–$S8$ of the \gls{abbreviation:fsm} is presented in the table \ref{tab:control-signal-division-unit}. For cleaner code, the signal is passed to the Control Unit in the hexadecimal format.\par
+The number of the iteration is also set in the Control Unit. The value is used in this module to determine the stop condition of the calculation.\par
+As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}} section, after the step \textit{S8}, the \gls{abbreviation:fsm} restarts at the state \textit{S4} with new $x_i$ values to be used in the current iteration. This jump is not depicted in the table for CV signal.
 \begin{table}[htbp!]
   \centering
   \caption{Control signal encoding table for instructions to be processed by the Division Module.}
@@ -605,6 +636,12 @@ The presented algorithm is realized in the \textit{denominatorSizeScaleUnit} mod
   scaleToShiftInternal = scaleToShiftInternal + 1;
   end else
 \end{lstlisting}
+
+\subsection{Simulation results}
+The simulation via Verilog testbench was made to determine the correctness of presented division module. The Icarus Verilog simulator was used to simulate the module and GTKWave was used to display the VCD simulation output file.\par
+As for the simulation output it can be stated, that the module works correctly for positive and negative numbers of fixed point format \textit{Q32.15}.\par
+The algorithm used in this module is able to calculate the propper result in much less clock cycles than the full division algorithm used in the division module in the package \cite{burke-fixed-point-math-library}.\par
+Thus the presented module may be used as a submodule in more complex modules.\par
 %závěr
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
