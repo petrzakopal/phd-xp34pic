@@ -34,7 +34,7 @@
 %when using LuaLaTex, defining Times Fonts from your system - it has to be named like this and inserted ttf file in the folder of your tex file%
 \usepackage{fontspec}
 \selectlanguage{czech}
-\setmainfont[Ligatures=TeX,BoldFont={* Bold}] {Times New Roman}
+\setmainfont[Ligatures=TeX,BoldFont={Times New Roman Bold}] {Times New Roman}
                                 
 \setsansfont[Ligatures=TeX,BoldFont={* Bold}]{Times New Roman}
                                       
@@ -95,19 +95,22 @@
 \makeglossaries
 
 % include files with definitions
-\include{src/glossaries/abbreviations}
-\include{src/glossaries/symbols}
+\input{src/glossaries/abbreviations.tex}
+\input{src/glossaries/symbols.tex}
+
 
 \newglossarystyle{myStyleAbbreviations}{
- \renewenvironment{theglossary}%
+\renewenvironment{theglossary}%
      {\begin{longtable}[l]{llp{\glsdescwidth}p{\glspagelistwidth}}}%
      {\end{longtable}}%
   \renewcommand*{\glossaryheader}{}%
   \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glossaryentryfield}[5]{%
-   \bfseries \glstarget{##1}{##2} & ##3\glspostdescription\space ##5\\}%
-  \renewcommand*{\glossarysubentryfield}[6]{%
-     & \glstarget{##2}{\strut}##4\glspostdescription\space ##6\\}%
+  \renewcommand{\glossentry}[2]{%
+  \glsentryitem{##1} \glstarget{##1}{##2} &
+    \textbf{\glossentryname{##1}} &
+    \glossentrydesc{##1} &
+    ##2\tabularnewline
+  }%
   \renewcommand*{\glsgroupskip}{}%  Pokud chci seskupovat podle abeced: \renewcommand*{\glsgroupskip}{ & \\}
 }
 
@@ -353,7 +356,6 @@ literate={\{}{{\textcolor{ctured}{\{}}}{1}
 \renewcommand*\contentsname{\textcolor{ctublue}{\MakeTextUppercase{\fontspec{Times New Roman}Table of Contents}}}
 \renewcommand{\listtablename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{List of tables}}}}}
 \renewcommand{\listfigurename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{List of figures}}}}}
-
 
 
 
@@ -695,7 +697,7 @@ And this is the conclusion of my report. \gls{symbol:Pn}.
 	\begin{appendices}
 	\section{List of symbols and abbreviations}
 
-		%\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
+		\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
 
 		\fbar
 		\newpage
