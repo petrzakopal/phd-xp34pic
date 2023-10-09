@@ -644,12 +644,27 @@ The simulation via Verilog testbench was made to determine the correctness of pr
 As for the simulation output it can be stated, that the module works correctly for positive and negative numbers of fixed point format \textit{Q32.15}.\par
 The algorithm used in this module is able to calculate the propper result in much less clock cycles than the full division algorithm used in the division module in the package \cite{burke-fixed-point-math-library}.\par
 Thus the presented module may be used as a submodule in more complex modules.\par
+Following figures present VCD wave simulation outputs for selected $N$ and $D$. The clock frequency was set 250 MHz. Pseudocode Verilog snippet for the test bench is presented int he listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift} when the \textit{start} signal is set on low.
 
+\begin{lstlisting}[language={pseudocode}, caption={Pseudocode snippet for the Verilog simulation test bench.}, label= {lst:division-testbench-verilog-pseudocode}]
+    timescale 1ns/1ns 
+    #10; // wait for 10 units of time
+    #0 rstScale = 1; startScale = 0; // reset unit for determining the number of bits to shift in the denominator and do not start the unit yet
+    N = 32'b00000000100110000_000010000000000; D=32'b11111111111111111_110000000000000; // set the numerator to N = 304.03125, denominator to D = -0.25
+    #10 rstScale = 0; // wait for 10 units of time and stop the reset of scaling unit
+    #10 startScale = 1; // start the algorithm for scaling unit
+    #20 rst = 1; start = 0; // reset the division unit
+    #30 rst = 0; // stop reseting of the division unit
+    #20 start = 1; // start the division unit
+    #20 start = 0;
+    #1000; // wait 1000 units of time
+    $finish; // finish the simulation
+\end{lstlisting}
 
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-10-div-7.png}
-   \caption{Selected signals of simulation of division N/D = 10 / 7.}
+    \caption{Selected signals of simulation of division N/D = 10 / 7. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
   \label{fig:division-10-div-7}
 \end{figure}
 
@@ -657,14 +672,14 @@ Thus the presented module may be used as a submodule in more complex modules.\pa
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-1-div-0-25.png}
-   \caption{Selected signals of simulation of division N/D = 1 / 0.25.}
+   \caption{Selected signals of simulation of division N/D = 1 / 0.25. The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-1-div-0-25}
 \end{figure}
 
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-1-div-minus-0-25.png}
-    \caption{Selected signals of simulation of division N/D = 1 / (-0.25).}
+    \caption{Selected signals of simulation of division N/D = 1 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-1-div-minus-0-25}
 \end{figure}
 
@@ -672,9 +687,17 @@ Thus the presented module may be used as a submodule in more complex modules.\pa
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-304-03215-div-min-0-25.png}
-    \caption{Selected signals of simulation of division N/D = 304.03215 / (-0.25).}
+    \caption{Selected signals of simulation of division N/D = 304.03215 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-304-03215-div-min-0-25}
 \end{figure}
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-10-div-519.png}
+    \caption{Selected signals of simulation of division N/D = 10 / (519). The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+  \label{fig:division-10-div-519}
+\end{figure}
+
 
 %závěr
 \newpage
