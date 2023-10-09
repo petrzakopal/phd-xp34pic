@@ -38,7 +38,7 @@
                                 
 \setsansfont[Ligatures=TeX,BoldFont={* Bold}]{Times New Roman}
                                       
-\setmonofont{Courier}
+\setmonofont{CourierPrime-Regular}
  
 %\usepackage[italic]{mathastext} %for text in math environment, better looking times then
 
@@ -642,11 +642,43 @@ The simulation via Verilog testbench was made to determine the correctness of pr
 As for the simulation output it can be stated, that the module works correctly for positive and negative numbers of fixed point format \textit{Q32.15}.\par
 The algorithm used in this module is able to calculate the propper result in much less clock cycles than the full division algorithm used in the division module in the package \cite{burke-fixed-point-math-library}.\par
 Thus the presented module may be used as a submodule in more complex modules.\par
+
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-10-div-7.png}
+   \caption{Selected signals of simulation of division N/D = 10 / 7.}
+  \label{fig:division-10-div-7}
+\end{figure}
+
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-1-div-0-25.png}
+   \caption{Selected signals of simulation of division N/D = 1 / 0.25.}
+  \label{fig:division-1-div-0-25}
+\end{figure}
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-1-div-minus-0-25.png}
+    \caption{Selected signals of simulation of division N/D = 1 / (-0.25).}
+  \label{fig:division-1-div-minus-0-25}
+\end{figure}
+
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-304-03215-div-min-0-25.png}
+    \caption{Selected signals of simulation of division N/D = 304.03215 / (-0.25).}
+  \label{fig:division-304-03215-div-min-0-25}
+\end{figure}
+
 %závěr
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
 \section*{Conclusion}
-And this is the conclusion of my report.
+And this is the conclusion of my report. \gls{symbol:Pn}.
 
 \flushbottom %vyčištění stránky
 
@@ -656,14 +688,14 @@ And this is the conclusion of my report.
 \setmonofont{Times New Roman}
 \printbibliography[title={{References}}]	
 \nocite{*}
-\setmonofont{Courier}
+\setmonofont{CourierPrime-Regular}
 \addcontentsline{toc}{section}{\numberline{}References} %Added citations to TOC%
 	\appendix
 	\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{Appendix \thesection:}{2.1em}{}
 	\begin{appendices}
 	\section{List of symbols and abbreviations}
 
-		\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
+		%\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
 
 		\fbar
 		\newpage
