@@ -897,6 +897,97 @@ end
             From the equation \ref{eq:example-cordic-calculation} the values $x_2$ and $y_2$ represent the value of $\cos (57,535\;˚)$ and $\sin (57,535\;˚)$ respectively.
 
     \subsection{Implementation}\label{subsec:cordic-implementation}
+        The \gls{abbreviation:cordic} algorithm was for simplicity prototyped in python. This turned out very beneficial as the debugging of the code is much faster. The less complex and abstract python code may help with understanding and creating the designed algorithms more than Mathematica which uses some higher abstraction layers to make calculations optimized and easier for more complex problems. But when designing the low level mathematical algorithms, the lower and easier language the more easy is then to implement the design in Verilog or any other hardware description language.\par
+        The python code was as well used to precalculate the \gls{abbreviation:lut} for scaling factor and arcus tangens values for $z_i$ calculations.\par
+        For the clarity, the python implementation is presented in the code \ref{lst:python-cordic}. The code also calculates the error of the \gls{abbreviation:cordic} calculated value from the python math library functions.
+
+\begin{lstlisting}[language={python}, caption={Python code of \gls{abbreviation:cordic} implementation.}, label= {lst:python-cordic}]
+import math
+
+# Defining starting values and empty arrays
+totalNumberOfIterations = 12 # 12 - best tradeof between value and iterations
+atanValues = []
+scalingValues = [1]
+initialXValueCordic = 1
+initialYValueCordic = 0
+initialZValueCordic = - 1.248  # angle for which to calculate cordic
+initialSigmaValueCordic = 1
+
+for x in range(totalNumberOfIterations):
+    # Generating arcus tanges values of precalculated angles based on number of iterations
+    atanValues.append(math.atan(1*2**(-x)))
+    # Generating precalculated scaling values based on a number of iterations
+    scalingValues.append(scalingValues[x]*math.cos(atanValues[x]))
+
+print("atanValues: ", atanValues)
+print("scalingValues: ", scalingValues)
+
+
+# Checking the initial value and moving it in the interval
+if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
+    zValue = initialZValueCordic - 3.141592
+    sigmaValue = -1
+    print("value in second q")
+elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
+    zValue = initialZValueCordic - 3.141592
+    sigmaValue = 1
+    print("value in third q")
+elif (initialZValueCordic < 0):
+    sigmaValue = -1
+    zValue = initialZValueCordic
+    print("value in fourth q")
+else:
+    zValue = initialZValueCordic  # For angle
+    sigmaValue = initialSigmaValueCordic  # For +- next angle
+    print("value in first")
+
+# Passing starting values to the calculation values
+xValue = initialXValueCordic  # For cos
+yValue = initialYValueCordic  # For sin
+
+
+# CORDIC ALGORITHM
+for x in range(totalNumberOfIterations):
+
+    # Calculating next values of the current iteration x
+    xNextValue = xValue - (sigmaValue*yValue)*2**(-x)
+    yNextValue = yValue + (sigmaValue*xValue)*2**(-x)
+    zNextValue = zValue - sigmaValue * atanValues[x]
+
+    # Determining the signum of next angle (addition or subtraction)
+    if zNextValue >= 0:
+        sigmaNextValue = 1
+    else:
+        sigmaNextValue = -1
+
+    # Values for new iteration
+    xValue = xNextValue
+    yValue = yNextValue
+    zValue = zNextValue
+    sigmaValue = sigmaNextValue
+
+    print("iteration:", x, "xValue:", xValue, "yValue:", yValue, "zValue:", zValue, "sigmaValue:", sigmaValue, "\n")
+
+# Calculating results by scaling the result values from CORDIC by the scalingValue which depends on number of iterations which were made
+resultCos = scalingValues[x-1] * xValue
+resultSin = scalingValues[x-1] * yValue
+
+# Changing results sign based on the rotation of the initialZValueCordic
+if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
+    resultCos = - resultCos
+elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
+    resultCos = - resultCos
+    resultSin = - resultSin
+
+#Calculating values based on the math library
+mathResultCos = math.cos(initialZValueCordic)
+mathResultSin = math.sin(initialZValueCordic)
+
+# Calculating the error of CORDIC calculated values from the python math functions
+errorCos = abs(resultCos) - abs(mathResultCos)
+errorSin = abs(resultSin) - abs(mathResultSin)
+\end{lstlisting}
+
     \subsection{Simulation results}
 
 %závěr
