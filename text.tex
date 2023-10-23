@@ -698,6 +698,174 @@ Following figures present VCD wave simulation outputs for selected $N$ and $D$. 
   \label{fig:division-10-div-519}
 \end{figure}
 
+\section{Using CORDIC to calculate trigonometric functions}
+    There are few approaches when there is a need to calculate the trigonometric functions. In this work, the \gls{abbreviation:cordic} was used. To get more flexibility in the calculation the implementation of \gls{abbreviation:cordic} algorithm was chosen above the \gls{abbreviation:lut} for calculation.\par
+    The \gls{abbreviation:lut} method may be fast, but the accuracy depends on the size of the table. When using the \gls{abbreviation:cordic} one can influence the precision by using more iterations of the algorithm. The modified algorithm may be used to calculate non-trivial functions, such as hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays} In this work only the calculation of $sinus$ and $cosinus$ functions is used.
+    \subsection{Theory}
+        The theory of the first \gls{abbreviation:cordic} was proposed by Volder in \cite{volder-cordic-trigonomtric-computing-technique}. This algorithm computes a coordinate conversion between rectangular ($x$, $y$) and polar ($R$, $\theta$) coordinates. The algorithm was then generalized by Walther in \cite{walther-a-unified-algorithm-for-elementary-functions} to include circular, linear and hyperbolic transforms. This paper utilizes only circular transforms to calculate $sinus$ and $cosinus$ functions. Only the most basic approach to the algorithm will be presented.\par
+        The rotation of a vector in the rectangular coordinate system ($x$, $y$) may be described by matrix-vector multiplication depicted in the eq. \ref{eq:rotation}.
+
+        \begin{equation}\label{eq:rotation}
+             \begin{pmatrix}
+                 x_\text{R}\\
+                 y_\text{R}
+             \end{pmatrix}
+             =
+             \begin{pmatrix}
+                 \cos (\theta) & -\sin (\theta)\\
+                 \sin (\theta) & \cos (\theta)
+             \end{pmatrix}
+             \begin{pmatrix}
+                 x_\text{in}\\
+                 y_\text{in}
+             \end{pmatrix},
+        \end{equation}
+
+        where $x_\text{R}$ and $y_\text{R}$ are coordinates of a rotated vector, $\theta$ is the angle for which the vector with coordinates $x_\text{in}$ and $y_\text{in}$ was rotated.\par
+        Then when simplifying the equation
+
+
+        \begin{equation}\label{eq:rotation-simplifying}
+             \begin{pmatrix}
+                 x_\text{R}\\
+                 y_\text{R}
+             \end{pmatrix}
+             = \cos (\theta)
+             \begin{pmatrix}
+                 1 & -\tan (\theta)\\
+                 \tan (\theta) & 1
+             \end{pmatrix}
+             \begin{pmatrix}
+                 x_\text{in}\\
+                 y_\text{in}
+             \end{pmatrix}
+        \end{equation}
+
+        it can be seen, that only multiplication by scaling factor of precalculated values of $\cos (\theta)$, multiplication by $\tan (\theta)$, subtraction and addiction operations are needed. However, the multiplication by $\tan (\theta)$ can be interchanged. The interchange may be done for angles $\theta$ for which the equation \ref{eq:tan-theta-2} is true. The when implementing the algorithm to the \gls{abbreviation:fpga} the multiplication may be swapped for signed right bit shift.
+
+        \begin{equation}\label{eq:tan-theta-2}
+            \tan (\theta) = 2^{-1}.
+        \end{equation}
+        \par
+        Then when the values $x_\text{in} = 1$ and $y_\text{in} = 0$ are used, the result for $sinus$ and $cosinus$ can be easily obtained from $x_\text{R}$ and $y_\text{R}$ as expressed in the equation \ref{eq:xr-yr-when-initial-values-1-0}.
+
+        \begin{equation}\label{eq:xr-yr-when-initial-values-1-0}
+            x_\text{R} = x_\text{in} \cos (\theta) - y_\text{in} \sin (\theta) = | \theta = 0 | = \cos (\theta)
+            y_\text{R} = x_\text{in} \sin (\theta) + y_\text{in} \cos (\theta) = | \theta = 0 | = \sin (\theta)
+        \end{equation}
+
+            The algorithm may be further simplified by expecting that the algorithm is designed to use more than 6 iterations and thus the scaling constant represented by multipliying $cosinus$ of different $\theta$ values converges to $0,60725$. So there is no need to precalculate all the scaling values and use only the value of the convergence. In this paper the scaling values are precalculated and passed from the custom \gls{abbreviation:lut} module.\par
+            As can be seen from the section \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algortihm teory itself, it needs to be determined, if the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). For that, the set of the equations is expanded with value $z_i$. The complete set of equations which are used in the \hyperref[subsec:cordic-implementation]{\textit{Implementation}} are as follows.
+
+            \begin{equation}
+                \begin{gathered}
+                x [i+1] = x [i] - \sigma_i 2^{-i} y[i],\\
+                y [i+1] = y [i] + \sigma_i 2^{-i} x[i],\\
+                z [i+1] = z [i] - \sigma_i \atan (2^{-i}).
+                \end{gathered}
+            \end{equation}
+            The $\sigma$ is determined based on the sign of the $z$ variable
+
+            \begin{equation}
+                \sigma_i = 
+                \left\{
+                \begin{array}{lr}
+                    -1,\;\text{if}\;z_i \le 0\\
+                    1,\;\text{if}\;z_i \ge 0\\
+                    0,\;\text{if}\;z_i = 0
+                \end{array}
+                \right\}
+            \end{equation}
+
+        \subsubsection{Example of calculation}\label{subsubsec:example-of-calculation}
+            The general approach of \gls{abbreviation:cordic} algorithm may be explained on the example for calculating the $sinus$ and $cosinus$ values for the angle $\theta = 57,535\;˚$. Firstly, the angle may be destructurized in the base angles, for which the equation \ref{eq:tan-theta-2} is true. In this example the is destructurized as $57,535 = 45 + 25,565 -14,03$.\par
+            The index $i$ of the variables $x_i$ and $y_i$ in the following equations means the number of iteration of the algorithm.
+
+            \begin{equation}
+                0.\;\text{iteration}\;
+                \begin{pmatrix}
+                    x_0\\y_0
+                \end{pmatrix}
+                =
+                \cos (45\;°)
+                \begin{pmatrix}
+                    1 & -1\\
+                    1 & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_\text{in}\\
+                    y_\text{in}
+                \end{pmatrix},
+            \end{equation}
+
+            
+            \begin{equation}
+                1.\;\text{iteration}\;
+                \begin{pmatrix}
+                    x_1\\y_1
+                \end{pmatrix}
+                =
+                \cos (26,565\;°)
+                \begin{pmatrix}
+                    1 & -2^{-1}\\
+                    2^{-1} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_0\\
+                    y_0
+                \end{pmatrix},
+            \end{equation}
+
+
+            \begin{equation}
+                2.\;\text{iteration}\;
+                \begin{pmatrix}
+                    x_2\\y_2
+                \end{pmatrix}
+                =
+                \cos (-14,03\;°)
+                \begin{pmatrix}
+                    1 & -2^{-2}\\
+                    2^{-2} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_1\\
+                    y_1
+                \end{pmatrix}.
+            \end{equation}
+
+            Then after substitution the value of $x_2$ and $y_2$ may be obtained.\par
+            \begin{equation}\label{eq:example-cordic-calculation}
+                \begin{pmatrix}
+                    x_2\\y_2
+                \end{pmatrix}
+                =
+                \cos (45\;°)
+                \cos (25,565\;°)
+                \cos (-14,03\;°)
+                \begin{pmatrix}
+                    1 & -2^{-2}\\
+                    2^{-2} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    1 & -2^{-1}\\
+                    2^{-1} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    1 & -1\\
+                    1 & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_\text{in}\\
+                    y_\text{in}
+                \end{pmatrix}.
+            \end{equation}
+
+            \par
+            From the equation \ref{eq:example-cordic-calculation} the values $x_2$ and $y_2$ represent the value of $\cos (57,535\;˚)$ and $\sin (57,535\;˚)$ respectively.
+
+    \subsection{Implementation}\label{subsec:cordic-implementation}
+    \subsection{Simulation results}
 
 %závěr
 \newpage
