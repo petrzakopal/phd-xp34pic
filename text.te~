@@ -764,26 +764,25 @@ Following figures present VCD wave simulation outputs for selected $N$ and $D$. 
                 \begin{gathered}
                 x [i+1] = x [i] - \sigma_i 2^{-i} y[i],\\
                 y [i+1] = y [i] + \sigma_i 2^{-i} x[i],\\
-                z~[i+1] = z~[i] - \sigma_i \atan (2^{-i}).
+                z [i+1] = z [i] - \sigma_i \atan (2^{-i}).
                 \end{gathered}
             \end{equation}
-            The $\sigma_{i+1}$ is determined based on the sign of the $z_{i+1}$ variable
+            The $\sigma$ is determined based on the sign of the $z$ variable
 
             \begin{equation}
-                \sigma_{i+1} = 
+                \sigma_i = 
                 \left\{
                 \begin{array}{lr}
-                    -1,\;\text{if}\;z_{i+1} < 0\\
-                    1,\;\text{if}\;z_{i+1} > 0\\
-                    0,\;\text{if}\;z_{i+1} = 0
+                    -1,\;\text{if}\;z_i \le 0\\
+                    1,\;\text{if}\;z_i \ge 0\\
+                    0,\;\text{if}\;z_i = 0
                 \end{array}
                 \right\}
             \end{equation}
             \par
             The algorithm as presented calculates the correct values for $sinus$ and $cosinus$ functions only in the first and fourth quadrant ($3\pi/2$ to $\pi/2$ counter-clockwise). For usage of the whole $2\pi$ range, corresponding actions before the 0. iteration must be made.\par
             The algorithm must make checks, to determine the quadrant, where the desired angle $\theta$ for which the $sinus$ and $cosinus$ functions are to be calculated. This is done by \texttt{if} statements at the algorithm values initialization and at the final function value calculation. If the desired argument of the functions is not in the first or fourth quadrant then the angle is transfered from the actual quadrant to the first or fourth quadrant. Based on the quadrant, to which the angle is transformed, the $\sigma_i$ value is set. The corresponding if statements a the algorithm initialization are presented in the pseudocode \ref{lst:cordic-initial-if-statements}.\par
-            Similar if statements are used at the final calculation of $sinus$ and $cosinus$ values. The if statements are presented in the pseudocode \ref{lst:cordic-ending-if-statements}.\par
-            The pseudocodes use \texttt{initialZValue} as a desired angle $\theta$, for which to calculate the function values, \texttt{zValue} as a temporary value for calculating the iterations for $z_{i}$ variables, \texttt{sigmaValue} for temporary value holding the current iteration value of $\sigma_i$, the \texttt{resultCos} and \texttt{resultSin} variables are used for storing the temporary and final values of the $\cos (\theta)$ and $\sin (\theta)$ values respectively.
+            Similar if statements are used at the final calculation of $sinus$ and $cosinus$ values. The if statements are presented in the pseudocode \ref{lst:cordic-ending-if-statements}.
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode for if statements used at the value initialization of the \gls{abbreviation:cordic} algorithm.}, label= {lst:cordic-initial-if-statements}]
 if((initialZValue > 1.5707)&(initialZValue < 3.141592))
