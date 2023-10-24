@@ -1053,6 +1053,34 @@ After the python implementation and debugging has been finalized, the circuit Ve
             \label{tab:control-signal-cordic-unit}
         \end{table}
     \subsection{Simulation results}
+    The testbench for testing the design is created with cocotb and simulated with Verilator.\par
+    As can be seen when implementing the algorithm where the actual iteration value for \textit{sinus} and \textit{cosinus} is calculated, the number of cycles needed for the final calculation can be calculated
+
+    \begin{equation}
+        NoCyc_\text{result every iteration} = 2 + (5 NoIt),
+    \end{equation}
+
+    where $NoCyc$ (-) is the number of cycles and $NoIt$ is the number of iterations for the \gls{abbreviation:cordic} algorithm. The $2$ value is for \textit{S0} and \textit{S1} and the multiplication by 5 is because of states \textit{S2}–\textit{S6}. When the result of the \gls{abbreviation:cordic} algorithm is calculated only once at the end of the algorithm, the number of iteration can be determined by
+
+    \begin{equation}
+        NoCyc_\text{result at the end} = 2 + (3 NoIt) + 2,
+    \end{equation}
+    where the multiplication by value 3 is caused by states \textit{S2}–\textit{S4} and the addition of the second 2 is casued by states \textit{S5}–\textit{S6}.\par
+
+        \begin{figure}[htbp!]
+            \centering
+            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim.png}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1,2479$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \label{fig:cordic-verilog-whole-sim}
+        \end{figure}
+
+        \begin{figure}[htbp!]
+            \centering
+            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-end-of-the-simulation.png}
+            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1,2479$ rad. The result is passed to the registers R9 and R10.}
+            \label{fig:cordic-verilog-end-of-the-simulation}
+        \end{figure}
+
 
 %závěr
 \newpage
