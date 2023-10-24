@@ -582,7 +582,7 @@ The Data Path Module unit also covers the possibility of negative denominator an
 
 
 \fbar
-\subsubsection{Control Unit}\label{subsubsection:division-control-unit}
+\subsubsection{Control Unit}\label{subsubsec:division-control-unit}
 The signals from Control Unit to Data Path Module are encoded in the CV signal. The CV signal with the corresponding instructions for the steps $S0$–$S8$ of the \gls{abbreviation:fsm} is presented in the table \ref{tab:control-signal-division-unit}. For cleaner code, the signal is passed to the Control Unit in the hexadecimal format.\par
 The number of the iteration is also set in the Control Unit. The value is used in this module to determine the stop condition of the calculation.\par
 As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}} section, after the step \textit{S8}, the \gls{abbreviation:fsm} restarts at the state \textit{S4} with new $x_i$ values to be used in the current iteration. This jump is not depicted in the table for CV signal.
@@ -758,7 +758,7 @@ Following figures present VCD wave simulation outputs for selected $N$ and $D$. 
         \end{equation}
 
             The algorithm may be further simplified by expecting that the algorithm is designed to use more than 6 iterations and thus the scaling constant represented by multipliying $cosinus$ of different $\theta$ values converges to $0,60725$. So there is no need to precalculate all the scaling values and use only the value of the convergence. In this paper the scaling values are precalculated and passed from the custom \gls{abbreviation:lut} module.\par
-            As can be seen from the section \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algortihm teory itself, it needs to be determined, if the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). For that, the set of the equations is expanded with value $z_i$. The complete set of equations which are used in the \hyperref[subsec:cordic-implementation]{\textit{Implementation}} are as follows.
+            As can be seen from the section \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algortihm teory itself, it needs to be determined, if the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). For that, the set of the equations is expanded with value $z_i$. The complete set of equations which are used in the implementation are as follows.
 
             \begin{equation}
                 \begin{gathered}
@@ -896,7 +896,7 @@ end
             \par
             From the equation \ref{eq:example-cordic-calculation} the values $x_2$ and $y_2$ represent the value of $\cos (57,535\;˚)$ and $\sin (57,535\;˚)$ respectively.
 
-    \subsection{Implementation}\label{subsec:cordic-implementation}
+    \subsection{Python Implementation}\label{subsec:cordic-python-implementation}
         The \gls{abbreviation:cordic} algorithm was for simplicity prototyped in python. This turned out very beneficial as the debugging of the code is much faster. The less complex and abstract python code may help with understanding and creating the designed algorithms more than Mathematica which uses some higher abstraction layers to make calculations optimized and easier for more complex problems. But when designing the low level mathematical algorithms, the lower and easier language the more easy is then to implement the design in Verilog or any other hardware description language.\par
         The python code was as well used to precalculate the \gls{abbreviation:lut} for scaling factor and arcus tangens values for $z_i$ calculations.\par
         For the clarity, the python implementation is presented in the code \ref{lst:python-cordic}. The code also calculates the error of the \gls{abbreviation:cordic} calculated value from the python math library functions.
@@ -991,14 +991,19 @@ errorSin = abs(resultSin) - abs(mathResultSin)
 \par
 After the python implementation and debugging has been finalized, the circuit Verilog implementation of the algorithm could be initiated. Same as for the Division Unit IP, presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module was designed. This approach based on the application specific circuit design should be by its nature faster and more safe than creating the custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa}.
 
-    \subsubsection{Control Unit}
-        
-        \begin{table}[htbp!]
-            \centering
-            \caption{Control signal encoding table for instructions to be processed by the Division Module.}
-            \vspace*{0.15cm}
-            \resizebox{\textwidth}{!}
-                {
+    \subsection{IP block design}
+        \subsubsection{Top module design}
+        \subsubsection{Allocation and Timing}
+        \subsubsection{Data Path Module}
+        \subsubsection{Control Unit}
+        Same way as in a Division Module Control unit, presented in \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}} section, the control signal encoding table \ref{tab:control-signal-cordic-unit} for Data Path \gls{abbreviation:cordic} unit is created. The control signal in the Verilog design is named CS.\par
+        The branches of if statements used in the design has been colorcoded in the table for improved clarity. The iteation jumps are not depicted in the control signal table. The jumps may be performed from the step \textit{S4}, when the speed of the calculation is the main concern, or from \textit{S6}, when the alogrithm function is presented. The steps \textit{S5} and \textit{S6} are mainly focused on multiplying the result of iteration by the appropriate scaling value and on transforming the results based on the quadrant of the original wanted angle value.
+            \begin{table}[htbp!]
+                \centering
+                \caption{Control signal encoding table for instructions to be processed by the \gls{abbreviation:cordic} Module.}
+                \vspace*{0.15cm}
+                \resizebox{\textwidth}{!}
+                    {
 \begin{tabular}{!{\vrule width 2pt} c !{\vrule width 2pt} l !{\vrule width 2pt} c c c !{\vrule width 2pt} c  c c  c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c !{\vrule width 2pt}}\noalign{\hrule height 2pt}
 \cellcolor[HTML]{B4C7DC}  & \cellcolor[HTML]{B4C7DC}                                                          & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{22}}  & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{21}}  & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{20}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{19}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{18}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{17}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{16}}  & \cellcolor[HTML]{5983B0}\textbf{15}         & \cellcolor[HTML]{5983B0}\textbf{14}         & \cellcolor[HTML]{5983B0}\textbf{13}         & \cellcolor[HTML]{5983B0}\textbf{12}         & \cellcolor[HTML]{729FCF}\textbf{11}         & \cellcolor[HTML]{729FCF}\textbf{10}           & \cellcolor[HTML]{729FCF}\textbf{9}            & \cellcolor[HTML]{729FCF}\textbf{8}          & \cellcolor[HTML]{B4C7DC}\textbf{7}          & \cellcolor[HTML]{B4C7DC}\textbf{6}          & \cellcolor[HTML]{B4C7DC}\textbf{5}          & \cellcolor[HTML]{B4C7DC}\textbf{4}          & \cellcolor[HTML]{DEE6EF}\textbf{3}          & \cellcolor[HTML]{DEE6EF}\textbf{2}          & \cellcolor[HTML]{DEE6EF}\textbf{1}          & \cellcolor[HTML]{DEE6EF}\textbf{0}          & \cellcolor[HTML]{FDA978}                              \\
     \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{State}} & \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{RTL Code}}                       & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{ld1}} & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{ld2}} & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{ld3}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld4}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld5}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld6}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld7}} & \cellcolor[HTML]{5983B0}\textbf{ld8}        & \cellcolor[HTML]{5983B0}\textbf{ld9}        & \cellcolor[HTML]{5983B0}\textbf{ld10}       & \cellcolor[HTML]{5983B0}\textbf{SelR1}      & \cellcolor[HTML]{729FCF}\textbf{SelR2}      & \cellcolor[HTML]{729FCF}\textbf{SelR4{[}1{]}} & \cellcolor[HTML]{729FCF}\textbf{SelR4{[}0{]}} & \cellcolor[HTML]{729FCF}\textbf{SelR5}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR6}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR7}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR9}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR10}     & \cellcolor[HTML]{DEE6EF}\textbf{SelM1}      & \cellcolor[HTML]{DEE6EF}\textbf{SelM2}      & \cellcolor[HTML]{DEE6EF}\textbf{SelSub1}    & \cellcolor[HTML]{DEE6EF}\textbf{SelSub2}    & \multirow{-2}{*}{\cellcolor[HTML]{FDA978}\textbf{CV}} \\\noalign{\hrule height 2pt}
