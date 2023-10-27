@@ -538,7 +538,7 @@ Usually, the iterative algorithm is stopped, when the value $F(x_{i+1}) - F(x_i)
 
 The mathematically expressed algorithm is then transformed into calculation flow suitable for implementing in the FPGA. The top module design for this algorithm is presented in the section \hyperref[subsubsec:division-top-module-design]{\textit{Top module design}}, the control and data unit for calculating the value $x_{i+1}$ is presented in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}}
 
-\subsection{IP block design}\label{subsec:division-ip-block-design}
+\subsection{IP Block Design}\label{subsec:division-ip-block-design}
 The design of this division unit is separated into 4 main modules:
 \begin{itemize}
   \item the \textbf{data unit module}, used for manipulating data and making calculation operations,
@@ -704,7 +704,7 @@ Following figures present VCD wave simulation outputs for selected $N$ and $D$. 
 \section{Using CORDIC to calculate trigonometric functions}
     There are few approaches when there is a need to calculate the trigonometric functions. In this work, the \gls{abbreviation:cordic} was used. To get more flexibility in the calculation the implementation of \gls{abbreviation:cordic} algorithm was chosen above the \gls{abbreviation:lut} for calculation.\par
     The \gls{abbreviation:lut} method may be fast, but the accuracy depends on the size of the table. When using the \gls{abbreviation:cordic} one can influence the precision by using more iterations of the algorithm. The modified algorithm may be used to calculate non-trivial functions, such as hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays} In this work only the calculation of $sinus$ and $cosinus$ functions is used.
-    \subsection{Theory}
+    \subsection{Theory}\label{subsec:cordic-theory}
         The theory of the first \gls{abbreviation:cordic} was proposed by Volder in \cite{volder-cordic-trigonomtric-computing-technique}. This algorithm computes a coordinate conversion between rectangular ($x$, $y$) and polar ($R$, $\theta$) coordinates. The algorithm was then generalized by Walther in \cite{walther-a-unified-algorithm-for-elementary-functions} to include circular, linear and hyperbolic transforms. This paper utilizes only circular transforms to calculate $sinus$ and $cosinus$ functions. Only the most basic approach to the algorithm will be presented.\par
         The rotation of a vector in the rectangular coordinate system ($x$, $y$) may be described by matrix-vector multiplication depicted in the eq. \ref{eq:rotation}.
 
@@ -992,9 +992,11 @@ errorSin = abs(resultSin) - abs(mathResultSin)
 After the python implementation and debugging has been finalized, the circuit Verilog implementation of the algorithm could be initiated. Same as for the Division Unit IP, presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module was designed. This approach based on the application specific circuit design should be by its nature faster and more safe than creating the custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa}.
 
     \fbar
-    \subsection{IP block design}
+    \subsection{IP Block Design}
     \fbar
         \subsubsection{Top module design}
+            The top module design of the \gls{abbreviation:cordic} \gls{abbreviation:ip} is shown in the picture \ref{fig:cordic-top-module}. As can be seen, the structure is very much similar to the Division Unit top module. When using the approach to create a customized circuit for algorithm the flow of creating the top modules is likely to be similar with minor differences in signals, inputs and variables.\par
+            The Data Path Moule in the top design incorporates the precalculated \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues}. The \gls{abbreviation:lut} memory module's structure is very simple and therefore the Verilog interpretation is depicted only for \textit{atanValues} variable. The value of \textit{totalNumberOfIterations} is set to be 12 in this implementation, thus the \gls{abbreviation:lut} is 12x32 bits in size. Obivously the already presented custom fixed point \textit{Q32.15} format is required.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-top-module.pdf}
@@ -1003,6 +1005,7 @@ After the python implementation and debugging has been finalized, the circuit Ve
             \end{figure}
         \fbar
         \subsubsection{Allocation and Timing}
+            In the picture \ref{fig:cordic-allocation-timing} the allocation and timing diagram is depicted. As can be seen, the if statements which are implemented in the control unit are documented here as well. The explanation why the if statements are needed is stated in the \gls{abbreviation:cordic} \hyperref[subsec:cordic-theory]{\textit{Theory}} section. As stated in the section for \gls{abbreviation:cordic} \hyperref[subsubsec:cordic-control-unit]{\textit{Control Unit}} there are two approaches of iteration cycles. The designer may choose jump from \textit{S4} to \textit{S2} for faster algorithm or from \textit{S6} to \textit{S2} for demonstrative aproach. The jumps in the allocation and timing diagram are not shown.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-allocation-timing.pdf}
@@ -1011,14 +1014,45 @@ After the python implementation and debugging has been finalized, the circuit Ve
             \end{figure}
         \fbar
         \subsubsection{Data Path Module}
+            The picture \ref{fig:cordic-rtl} visualize the Data Path part of the Top Module design including calculation and storing units. The memory \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues} are not depicted as a separate registers but as inputs to the calculation units. The results of $sinus$ and $cosinus$ functions, in python implementation named as \textit{resultSin} and \textit{resultCos} are saved to registers R9 and R10. The \textbf{NEG} blocks aren't in fact implemented as a standalone blocks for making negative numbers. The negation is activated in a corresponding target register when the appropriate \textbf{SelR$_x$} is activated. (where $x$ is here the number of a corresponding register R9 or R10)\par
+            As was stated before, the implementation of the \gls{abbreviation:lut} memory module for $atanValues$ is depicted in this section in code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-rtl.pdf}
                 \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:cordic} \gls{abbreviation:ip} Data Path Unit \gls{abbreviation:ip}.}
                 \label{fig:cordic-rtl}
             \end{figure}
+            
+            \fbar
+            \begin{lstlisting}[language={verilog}, caption={Verilog code of a atanValues \gls{abbreviation:lut} implementation. The \gls{abbreviation:lut} structure for scalingValues is very similar and therefore not depicted here.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
+module atanValuesCordicLUT(index, returnValue);
+
+input [3:0] index;
+output reg signed [31:0] returnValue;
+
+
+always@(index)
+begin
+    case(index)
+        4'b0000: returnValue = 32'sb00000000000000000_110010010000111; // 0.7853981633974483
+        4'b0001: returnValue = 32'sb00000000000000000_011101101011000; // 0.4636476090008061
+        4'b0010: returnValue = 32'sb00000000000000000_001111101011011; // 0.24497866312686414
+        4'b0011: returnValue = 32'sb00000000000000000_000111111101010; // 0.12435499454676144
+        4'b0100: returnValue = 32'sb00000000000000000_000011111111101; // 0.06241880999595735
+        4'b0101: returnValue = 32'sb00000000000000000_000001111111111; // 0.031239833430268277
+        4'b0110: returnValue = 32'sb00000000000000000_000000111111111; // 0.015623728620476831
+        4'b0111: returnValue = 32'sb00000000000000000_000000011111111; // 0.007812341060101111
+        4'b1000: returnValue = 32'sb00000000000000000_000000001111111; // 0.007812341060101111
+        4'b1001: returnValue = 32'sb00000000000000000_000000000111111; // 0.0019531225164788188
+        4'b1010: returnValue = 32'sb00000000000000000_000000000011111; // 0.0009765621895593195
+        4'b1011: returnValue = 32'sb00000000000000000_000000000001111; // 0.0004882812111948983
+        default: returnValue = 32'sb10000000000000000_000000000000000; // 0
+    endcase
+end
+
+endmodule\end{lstlisting}
         \fbar
-        \subsubsection{Control Unit}
+        \subsubsection{Control Unit}\label{subsubsec:cordic-control-unit}
         Same way as in a Division Module Control unit, presented in \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}} section, the control signal encoding table \ref{tab:control-signal-cordic-unit} for Data Path \gls{abbreviation:cordic} unit is created. The control signal in the Verilog design is named CS.\par
         The branches of if statements used in the design has been colorcoded in the table for improved clarity. The iteation jumps are not depicted in the control signal table. The jumps may be performed from the step \textit{S4}, when the speed of the calculation is the main concern, or from \textit{S6}, when the alogrithm function is presented. The steps \textit{S5} and \textit{S6} are mainly focused on multiplying the result of iteration by the appropriate scaling value and on transforming the results based on the quadrant of the original wanted angle value.
             \begin{table}[htbp!]
@@ -1093,17 +1127,24 @@ After the python implementation and debugging has been finalized, the circuit Ve
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1,2479$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1.2479$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-end-of-the-simulation.png}
-            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1,2479$ rad. The result is passed to the registers R9 and R10.}
+            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1.2479$ rad. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-end-of-the-simulation}
         \end{figure}
 
+\section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using custom circuit implementation}
+    All the presented parts in previous sections may be utilized to solve the system of nonlinear equations. This work leads to solving the transcendetal equations for Selective Harmonic Elimination. But the best approach is to firstly solve an easier set of equations to determine, if the approach of \gls{abbreviation:nr} is viable.
+    \subsection{Theory}
+    \subsection{IP Block Design}
+        \subsubsection{Top module design}
+        \subsubsection{Allocation and Timing}
+        \subsubsection{Control Unit}
 
 %závěr
 \newpage
