@@ -34,11 +34,11 @@
 %when using LuaLaTex, defining Times Fonts from your system - it has to be named like this and inserted ttf file in the folder of your tex file%
 \usepackage{fontspec}
 \selectlanguage{czech}
-\setmainfont[Ligatures=TeX,BoldFont={* Bold}] {Times New Roman}
+\setmainfont[Ligatures=TeX,BoldFont={Times New Roman Bold}] {Times New Roman}
                                 
 \setsansfont[Ligatures=TeX,BoldFont={* Bold}]{Times New Roman}
                                       
-\setmonofont{Courier}
+\setmonofont{CourierPrime-Regular}
  
 %\usepackage[italic]{mathastext} %for text in math environment, better looking times then
 
@@ -95,19 +95,22 @@
 \makeglossaries
 
 % include files with definitions
-\include{src/glossaries/abbreviations}
-\include{src/glossaries/symbols}
+\input{src/glossaries/abbreviations.tex}
+\input{src/glossaries/symbols.tex}
+
 
 \newglossarystyle{myStyleAbbreviations}{
- \renewenvironment{theglossary}%
+\renewenvironment{theglossary}%
      {\begin{longtable}[l]{llp{\glsdescwidth}p{\glspagelistwidth}}}%
      {\end{longtable}}%
   \renewcommand*{\glossaryheader}{}%
   \renewcommand*{\glsgroupheading}[1]{}%
-  \renewcommand*{\glossaryentryfield}[5]{%
-   \bfseries \glstarget{##1}{##2} & ##3\glspostdescription\space ##5\\}%
-  \renewcommand*{\glossarysubentryfield}[6]{%
-     & \glstarget{##2}{\strut}##4\glspostdescription\space ##6\\}%
+  \renewcommand{\glossentry}[2]{%
+  \glsentryitem{##1} \glstarget{##1}{##2} &
+    \textbf{\glossentryname{##1}} &
+    \glossentrydesc{##1} &
+    ##2\tabularnewline
+  }%
   \renewcommand*{\glsgroupskip}{}%  Pokud chci seskupovat podle abeced: \renewcommand*{\glsgroupskip}{ & \\}
 }
 
@@ -305,8 +308,11 @@ literate={\{}{{\textcolor{ctured}{\{}}}{1}
 {\}}{{\textcolor{ctured}{\}}}}{1}
 {(}{{{\color{ctured}{(}}}}{1}
 {)}{{{\color{ctured}{)}}}}{1}
-} %devicetree%
-
+{\&}{{{\color{ctublue}{\&}}}}{1}
+{=}{{{\color{ctublue}{=}}}}{1}
+{<}{{{\color{ctublue}{<}}}}{1}
+{>}{{{\color{ctublue}{>}}}}{1}
+} 
 %%change in previous commands 2.1 em , 1.53em and 1em to 1em to be easy indented not the same
 \begin{document}
 \fontspec{Times New Roman}
@@ -353,7 +359,6 @@ literate={\{}{{\textcolor{ctured}{\{}}}{1}
 \renewcommand*\contentsname{\textcolor{ctublue}{\MakeTextUppercase{\fontspec{Times New Roman}Table of Contents}}}
 \renewcommand{\listtablename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{List of tables}}}}}
 \renewcommand{\listfigurename}{{\fontspec{Times New Roman}\textcolor{ctublue}{\MakeTextUppercase{{List of figures}}}}}
-
 
 
 
@@ -495,7 +500,7 @@ This is the introduction.
 \newpage
 %konec úvodu
 
-\section{Calculating the division of fixed point numbers}
+\section{Calculating the division of fixed point numbers}\label{sec:calculating-the-division-of-fixed-point-numbers}
 Usually, when using numerical methods to solve the transcendetal equations, there is a need to calculate the division of two input numbers. Even for solving one set of two equations with Newton Raphson (\gls{abbreviation:nr}) method, the calculation of reciprocal value of the Jacobian determinant is needed.\par
 There are available some \gls{abbreviation:ip} blocks, which are capable of calculating the division of two numbers, but the blocks are usually vendor specific intellectual property \gls{abbreviation:ip} \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
 The negative side of vendor specific \gls{abbreviation:ip} is, that it is hard to use them with any other \gls{abbreviation:fpga} chip than the vendor specific. On the other hand the vendor specific \gls{abbreviation:ip} is usually optimized to use the specific type of resources available at the vendor's chip whci resolves in better performance.\par
@@ -533,7 +538,7 @@ Usually, the iterative algorithm is stopped, when the value $F(x_{i+1}) - F(x_i)
 
 The mathematically expressed algorithm is then transformed into calculation flow suitable for implementing in the FPGA. The top module design for this algorithm is presented in the section \hyperref[subsubsec:division-top-module-design]{\textit{Top module design}}, the control and data unit for calculating the value $x_{i+1}$ is presented in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}}
 
-\subsection{IP block design}\label{subsec:division-ip-block-design}
+\subsection{IP Block Design}\label{subsec:division-ip-block-design}
 The design of this division unit is separated into 4 main modules:
 \begin{itemize}
   \item the \textbf{data unit module}, used for manipulating data and making calculation operations,
@@ -545,7 +550,7 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
-   \caption{Top module design for the \gls{abbreviation:ip} block design.}
+   \caption{Top module design for the division unit \gls{abbreviation:ip} block design.}
   \label{fig:division-top-module}
 \end{figure}
 
@@ -555,10 +560,10 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \subsubsection{Allocation and Timing}\label{subsubsec:division-allocation-and-timing}
 The diagram which describes the data flow and timing by steps of the algorithm is displayed in the figure \ref{fig:division-allocation-timing}.\par
 The whole algorithm consists of nine steps. The first four steps are used for calculating the initial value of $x_0$ as described in the equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, the root of the equation \ref{eq:equation-with-appropriate-root} so the searched value of $1/D$. The next iteration starts at the step labeled as \textit{S5}. The iterative process continues till the stop condition (eg. number of iterations) is met.
-\begin{figure}
+\begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
-   \caption{Alloccation and timing diagram for the Data Path Unit part of the \gls{abbreviation:ip}.}
+   \caption{Alloccation and timing diagram for the Data Path Unit part of the division \gls{abbreviation:ip}.}
   \label{fig:division-allocation-timing}
 \end{figure}
 
@@ -571,13 +576,13 @@ The Data Path Module unit also covers the possibility of negative denominator an
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
-   \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the \gls{abbreviation:ip}.}
+   \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the division \gls{abbreviation:ip}.}
   \label{fig:division-rtl}
 \end{figure}
 
 
 \fbar
-\subsubsection{Control Unit}\label{subsubsection:division-control-unit}
+\subsubsection{Control Unit}\label{subsubsec:division-control-unit}
 The signals from Control Unit to Data Path Module are encoded in the CV signal. The CV signal with the corresponding instructions for the steps $S0$–$S8$ of the \gls{abbreviation:fsm} is presented in the table \ref{tab:control-signal-division-unit}. For cleaner code, the signal is passed to the Control Unit in the hexadecimal format.\par
 The number of the iteration is also set in the Control Unit. The value is used in this module to determine the stop condition of the calculation.\par
 As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}} section, after the step \textit{S8}, the \gls{abbreviation:fsm} restarts at the state \textit{S4} with new $x_i$ values to be used in the current iteration. This jump is not depicted in the table for CV signal.
@@ -587,21 +592,21 @@ As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{All
     \vspace*{0.15cm}
      \resizebox{\textwidth}{!}
     {
-      \begin{tabular}{!{\vrule width 2pt} c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c | c !{\vrule width 2pt}}\noalign{\hrule height 2pt}
+      \begin{tabular}{!{\vrule width 2pt} c !{\vrule width 2pt} c !{\vrule width 2pt} c  c  c !{\vrule width 2pt} c  c  c  c !{\vrule width 2pt} c  c  c  c !{\vrule width 2pt} c  c  c  c !{\vrule width 2pt} c !{\vrule width 2pt}}\noalign{\hrule height 2pt}
         \cellcolor[HTML]{B4C7DC} & \cellcolor[HTML]{B4C7DC} & \cellcolor[HTML]{5983B0}\textbf{14} & \cellcolor[HTML]{5983B0}\textbf{13} & \cellcolor[HTML]{5983B0}\textbf{12} & \cellcolor[HTML]{729FCF}\textbf{11} & \cellcolor[HTML]{729FCF}\textbf{10} & \cellcolor[HTML]{729FCF}\textbf{9} & \cellcolor[HTML]{729FCF}\textbf{8} & \cellcolor[HTML]{B4C7DC}\textbf{7} & \cellcolor[HTML]{B4C7DC}\textbf{6} & \cellcolor[HTML]{B4C7DC}\textbf{5} & \cellcolor[HTML]{B4C7DC}\textbf{4} & \cellcolor[HTML]{DEE6EF}\textbf{3} & \cellcolor[HTML]{DEE6EF}\textbf{2} & \cellcolor[HTML]{DEE6EF}\textbf{1} & \cellcolor[HTML]{DEE6EF}\textbf{0} & \multicolumn{1}{c!{\vrule width 2pt}}{\cellcolor[HTML]{FDA977}} \\
       \rowcolor[HTML]{B4C7DC} 
       \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{State}} & \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{RTL Code}} & \textbf{ld0} & \textbf{ld1} & \textbf{ld2} & \textbf{ld3} & \textbf{ld4} & \textbf{SelR1} & \textbf{SelR2{[}1{]}} & \textbf{SelR2{[}0{]}} & \textbf{SelR3} & \textbf{SelR4} & \textbf{SelSh1} & \textbf{SelM1{[}1{]}} & \textbf{SelM1{[}0{]}} & \textbf{SelM2} & \textbf{SelS1} & \multicolumn{1}{c!{\vrule width 2pt}}{\multirow{-2}{*}{\cellcolor[HTML]{FDA977}\textbf{CV}}} \\ \noalign{\hrule height 2pt}
-      S0 & R1 ← D; & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2000h \\ \hline
-      S1 & R1 ← R1\;\textless{}\textless \; 32; (Sh1) & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 2210h \\ \hline
-      \multirow{2}{*}{S2} & R2   ← 1.882 x R1; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1804h} \\ 
-       & R3 ← N; &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\hline
-       \multirow{2}{*}{S3} & R2 ← 2.82 - R2; (Sub1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{18C0h} \\ 
-       & R3 ← R3\;\textless{}\textless\;32; (Sh1) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\hline
-      S4 & R4 ← R2 x R1; (M1) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 420h \\ \hline
-       & R4 ← R2 x R4; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & 1528h \\
-      \multirow{-2}{*}{S5} & R2 ← 2 x   R2; (M2) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ \hline
-      S6 & R2 ← R2 - R4;   (S1) & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1081h \\ \hline
-      S7 & R4 ← R2 x R3;   (M2) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 402h  \\ \hline
+      S0 & R1 ← D; & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2000h \\ \noalign{\hrule height 2pt}
+      S1 & R1 ← R1\;\textless{}\textless \; 32; (Sh1) & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 15'h2210 \\ \noalign{\hrule height 2pt}
+      \multirow{2}{*}{S2} & R2   ← 1.882 x R1; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{15'h1804} \\ 
+       & R3 ← N; &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\noalign{\hrule height 2pt}
+       \multirow{2}{*}{S3} & R2 ← 2.82 - R2; (Sub1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{15'h18C0} \\ 
+       & R3 ← R3\;\textless{}\textless\;32; (Sh1) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\noalign{\hrule height 2pt}
+      S4 & R4 ← R2 x R1; (M1) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 420h \\ \noalign{\hrule height 2pt}
+       & R4 ← R2 x R4; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & 15'h1528 \\
+      \multirow{-2}{*}{S5} & R2 ← 2 x   R2; (M2) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ \noalign{\hrule height 2pt}
+      S6 & R2 ← R2 - R4;   (S1) & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 15'h1081 \\ \noalign{\hrule height 2pt}
+      S7 & R4 ← R2 x R3;   (M2) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 15'h402  \\ \noalign{\hrule height 2pt}
       S8 & R0 ← R4; & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 4000h\\\noalign{\hrule height 2pt}
       \end{tabular}
     }
@@ -642,11 +647,510 @@ The simulation via Verilog testbench was made to determine the correctness of pr
 As for the simulation output it can be stated, that the module works correctly for positive and negative numbers of fixed point format \textit{Q32.15}.\par
 The algorithm used in this module is able to calculate the propper result in much less clock cycles than the full division algorithm used in the division module in the package \cite{burke-fixed-point-math-library}.\par
 Thus the presented module may be used as a submodule in more complex modules.\par
+Following figures present VCD wave simulation outputs for selected $N$ and $D$. The clock frequency was set 250 MHz. Pseudocode Verilog snippet for the test bench is presented int he listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift} when the \textit{start} signal is set on low.
+
+\begin{lstlisting}[language={pseudocode}, caption={Pseudocode snippet for the Verilog simulation test bench.}, label= {lst:division-testbench-verilog-pseudocode}]
+    timescale 1ns/1ns 
+    #10; // wait for 10 units of time
+    #0 rstScale = 1; startScale = 0; // reset unit for determining the number of bits to shift in the denominator and do not start the unit yet
+    N = 32'b00000000100110000_000010000000000; D=32'b11111111111111111_110000000000000; // set the numerator to N = 304.03125, denominator to D = -0.25
+    #10 rstScale = 0; // wait for 10 units of time and stop the reset of scaling unit
+    #10 startScale = 1; // start the algorithm for scaling unit
+    #20 rst = 1; start = 0; // reset the division unit
+    #30 rst = 0; // stop reseting of the division unit
+    #20 start = 1; // start the division unit
+    #20 start = 0;
+    #1000; // wait 1000 units of time
+    $finish; // finish the simulation
+\end{lstlisting}
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-10-div-7.png}
+    \caption{Selected signals of simulation of division N/D = 10 / 7. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+  \label{fig:division-10-div-7}
+\end{figure}
+
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-1-div-0-25.png}
+   \caption{Selected signals of simulation of division N/D = 1 / 0.25. The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+  \label{fig:division-1-div-0-25}
+\end{figure}
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-1-div-minus-0-25.png}
+    \caption{Selected signals of simulation of division N/D = 1 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+  \label{fig:division-1-div-minus-0-25}
+\end{figure}
+
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-304-03215-div-min-0-25.png}
+    \caption{Selected signals of simulation of division N/D = 304.03215 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+  \label{fig:division-304-03215-div-min-0-25}
+\end{figure}
+
+\begin{figure}[htbp!]
+  \centering
+  \includegraphics[width=1\textwidth]{src/png/division-10-div-519.png}
+    \caption{Selected signals of simulation of division N/D = 10 / (519). The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+  \label{fig:division-10-div-519}
+\end{figure}
+
+\section{Using CORDIC to calculate trigonometric functions}
+    There are few approaches when there is a need to calculate the trigonometric functions. In this work, the \gls{abbreviation:cordic} was used. To get more flexibility in the calculation the implementation of \gls{abbreviation:cordic} algorithm was chosen above the \gls{abbreviation:lut} for calculation.\par
+    The \gls{abbreviation:lut} method may be fast, but the accuracy depends on the size of the table. When using the \gls{abbreviation:cordic} one can influence the precision by using more iterations of the algorithm. The modified algorithm may be used to calculate non-trivial functions, such as hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays} In this work only the calculation of $sinus$ and $cosinus$ functions is used.
+    \subsection{Theory}\label{subsec:cordic-theory}
+        The theory of the first \gls{abbreviation:cordic} was proposed by Volder in \cite{volder-cordic-trigonomtric-computing-technique}. This algorithm computes a coordinate conversion between rectangular ($x$, $y$) and polar ($R$, $\theta$) coordinates. The algorithm was then generalized by Walther in \cite{walther-a-unified-algorithm-for-elementary-functions} to include circular, linear and hyperbolic transforms. This paper utilizes only circular transforms to calculate $sinus$ and $cosinus$ functions. Only the most basic approach to the algorithm will be presented.\par
+        The rotation of a vector in the rectangular coordinate system ($x$, $y$) may be described by matrix-vector multiplication depicted in the eq. \ref{eq:rotation}.
+
+        \begin{equation}\label{eq:rotation}
+             \begin{pmatrix}
+                 x_\text{R}\\
+                 y_\text{R}
+             \end{pmatrix}
+             =
+             \begin{pmatrix}
+                 \cos (\theta) & -\sin (\theta)\\
+                 \sin (\theta) & \cos (\theta)
+             \end{pmatrix}
+             \begin{pmatrix}
+                 x_\text{in}\\
+                 y_\text{in}
+             \end{pmatrix},
+        \end{equation}
+
+        where $x_\text{R}$ and $y_\text{R}$ are coordinates of a rotated vector, $\theta$ is the angle for which the vector with coordinates $x_\text{in}$ and $y_\text{in}$ was rotated.\par
+        Then when simplifying the equation
+
+
+        \begin{equation}\label{eq:rotation-simplifying}
+             \begin{pmatrix}
+                 x_\text{R}\\
+                 y_\text{R}
+             \end{pmatrix}
+             = \cos (\theta)
+             \begin{pmatrix}
+                 1 & -\tan (\theta)\\
+                 \tan (\theta) & 1
+             \end{pmatrix}
+             \begin{pmatrix}
+                 x_\text{in}\\
+                 y_\text{in}
+             \end{pmatrix}
+        \end{equation}
+
+        it can be seen, that only multiplication by scaling factor of precalculated values of $\cos (\theta)$, multiplication by $\tan (\theta)$, subtraction and addiction operations are needed. However, the multiplication by $\tan (\theta)$ can be interchanged. The interchange may be done for angles $\theta$ for which the equation \ref{eq:tan-theta-2} is true. The when implementing the algorithm to the \gls{abbreviation:fpga} the multiplication may be swapped for signed right bit shift.
+
+        \begin{equation}\label{eq:tan-theta-2}
+            \tan (\theta) = 2^{-1}.
+        \end{equation}
+        \par
+        Then when the values $x_\text{in} = 1$ and $y_\text{in} = 0$ are used, the result for $sinus$ and $cosinus$ can be easily obtained from $x_\text{R}$ and $y_\text{R}$ as expressed in the equation \ref{eq:xr-yr-when-initial-values-1-0}.
+
+        \begin{equation}\label{eq:xr-yr-when-initial-values-1-0}
+            x_\text{R} = x_\text{in} \cos (\theta) - y_\text{in} \sin (\theta) = | \theta = 0 | = \cos (\theta)
+            y_\text{R} = x_\text{in} \sin (\theta) + y_\text{in} \cos (\theta) = | \theta = 0 | = \sin (\theta)
+        \end{equation}
+
+            The algorithm may be further simplified by expecting that the algorithm is designed to use more than 6 iterations and thus the scaling constant represented by multipliying $cosinus$ of different $\theta$ values converges to $0,60725$. So there is no need to precalculate all the scaling values and use only the value of the convergence. In this paper the scaling values are precalculated and passed from the custom \gls{abbreviation:lut} module.\par
+            As can be seen from the section \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algortihm teory itself, it needs to be determined, if the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). For that, the set of the equations is expanded with value $z_i$. The complete set of equations which are used in the implementation are as follows.
+
+            \begin{equation}
+                \begin{gathered}
+                x [i+1] = x [i] - \sigma_i 2^{-i} y[i],\\
+                y [i+1] = y [i] + \sigma_i 2^{-i} x[i],\\
+                z~[i+1] = z~[i] - \sigma_i \atan (2^{-i}).
+                \end{gathered}
+            \end{equation}
+            The $\sigma_{i+1}$ is determined based on the sign of the $z_{i+1}$ variable
+
+            \begin{equation}
+                \sigma_{i+1} = 
+                \left\{
+                \begin{array}{lr}
+                    -1,\;\text{if}\;z_{i+1} < 0\\
+                    1,\;\text{if}\;z_{i+1} > 0\\
+                    0,\;\text{if}\;z_{i+1} = 0
+                \end{array}
+                \right\}
+            \end{equation}
+            \par
+            The algorithm as presented calculates the correct values for $sinus$ and $cosinus$ functions only in the first and fourth quadrant ($3\pi/2$ to $\pi/2$ counter-clockwise). For usage of the whole $2\pi$ range, corresponding actions before the 0. iteration must be made.\par
+            The algorithm must make checks, to determine the quadrant, where the desired angle $\theta$ for which the $sinus$ and $cosinus$ functions are to be calculated. This is done by \texttt{if} statements at the algorithm values initialization and at the final function value calculation. If the desired argument of the functions is not in the first or fourth quadrant then the angle is transfered from the actual quadrant to the first or fourth quadrant. Based on the quadrant, to which the angle is transformed, the $\sigma_i$ value is set. The corresponding if statements a the algorithm initialization are presented in the pseudocode \ref{lst:cordic-initial-if-statements}.\par
+            Similar if statements are used at the final calculation of $sinus$ and $cosinus$ values. The if statements are presented in the pseudocode \ref{lst:cordic-ending-if-statements}.\par
+            The pseudocodes use \texttt{initialZValue} as a desired angle $\theta$, for which to calculate the function values, \texttt{zValue} as a temporary value for calculating the iterations for $z_{i}$ variables, \texttt{sigmaValue} for temporary value holding the current iteration value of $\sigma_i$, the \texttt{resultCos} and \texttt{resultSin} variables are used for storing the temporary and final values of the $\cos (\theta)$ and $\sin (\theta)$ values respectively.
+
+\begin{lstlisting}[language={pseudocode}, caption={Pseudocode for if statements used at the value initialization of the \gls{abbreviation:cordic} algorithm.}, label= {lst:cordic-initial-if-statements}]
+if((initialZValue > 1.5707)&(initialZValue < 3.141592))
+    sigmaValue = -1
+    zValue = initialZValue - 3.141592
+else if((initialZValue > 3.141592)&(initialZValue < 4.7123))
+    sigmaValue = 1
+    zValue = initialZValue - 3.141592
+else
+    zValue = initialZValue
+    sigmaValue = 1
+end
+\end{lstlisting}
+
+
+\begin{lstlisting}[language={pseudocode}, caption={Pseudocode for if statements used at the final $sinus$ and $cosinus$ value calculation.}, label= {lst:cordic-ending-if-statements}]
+if((initialZValue > 1.5707)&(initialZValue < 3.141592))
+    resultCos = - resultCos
+    resultSin = resultSin
+else if((initialZValue > 3.141592)&(initialZValue < 4.7123))
+    resultCos = - resultCos
+    resultSin = - resultSin
+end
+\end{lstlisting}
+
+        \subsubsection{Example of calculation}\label{subsubsec:example-of-calculation}
+            The general approach of \gls{abbreviation:cordic} algorithm may be explained on the example for calculating the $sinus$ and $cosinus$ values for the angle $\theta = 57,535\;˚$. Firstly, the angle may be destructurized in the base angles, for which the equation \ref{eq:tan-theta-2} is true. In this example the is destructurized as $57,535 = 45 + 25,565 -14,03$.\par
+            The index $i$ of the variables $x_i$ and $y_i$ in the following equations means the number of iteration of the algorithm.
+
+            \begin{equation}
+                0.\;\text{iteration}\;
+                \begin{pmatrix}
+                    x_0\\y_0
+                \end{pmatrix}
+                =
+                \cos (45\;°)
+                \begin{pmatrix}
+                    1 & -1\\
+                    1 & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_\text{in}\\
+                    y_\text{in}
+                \end{pmatrix},
+            \end{equation}
+
+            
+            \begin{equation}
+                1.\;\text{iteration}\;
+                \begin{pmatrix}
+                    x_1\\y_1
+                \end{pmatrix}
+                =
+                \cos (26,565\;°)
+                \begin{pmatrix}
+                    1 & -2^{-1}\\
+                    2^{-1} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_0\\
+                    y_0
+                \end{pmatrix},
+            \end{equation}
+
+
+            \begin{equation}
+                2.\;\text{iteration}\;
+                \begin{pmatrix}
+                    x_2\\y_2
+                \end{pmatrix}
+                =
+                \cos (-14,03\;°)
+                \begin{pmatrix}
+                    1 & -2^{-2}\\
+                    2^{-2} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_1\\
+                    y_1
+                \end{pmatrix}.
+            \end{equation}
+
+            Then after substitution the value of $x_2$ and $y_2$ may be obtained.\par
+            \begin{equation}\label{eq:example-cordic-calculation}
+                \begin{pmatrix}
+                    x_2\\y_2
+                \end{pmatrix}
+                =
+                \cos (45\;°)
+                \cos (25,565\;°)
+                \cos (-14,03\;°)
+                \begin{pmatrix}
+                    1 & -2^{-2}\\
+                    2^{-2} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    1 & -2^{-1}\\
+                    2^{-1} & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    1 & -1\\
+                    1 & 1
+                \end{pmatrix}
+                \begin{pmatrix}
+                    x_\text{in}\\
+                    y_\text{in}
+                \end{pmatrix}.
+            \end{equation}
+
+            \par
+            From the equation \ref{eq:example-cordic-calculation} the values $x_2$ and $y_2$ represent the value of $\cos (57,535\;˚)$ and $\sin (57,535\;˚)$ respectively.
+
+    \subsection{Python Implementation}\label{subsec:cordic-python-implementation}
+        The \gls{abbreviation:cordic} algorithm was for simplicity prototyped in python. This turned out very beneficial as the debugging of the code is much faster. The less complex and abstract python code may help with understanding and creating the designed algorithms more than Mathematica which uses some higher abstraction layers to make calculations optimized and easier for more complex problems. But when designing the low level mathematical algorithms, the lower and easier language the more easy is then to implement the design in Verilog or any other hardware description language.\par
+        The python code was as well used to precalculate the \gls{abbreviation:lut} for scaling factor and arcus tangens values for $z_i$ calculations.\par
+        For the clarity, the python implementation is presented in the code \ref{lst:python-cordic}. The code also calculates the error of the \gls{abbreviation:cordic} calculated value from the python math library functions.
+
+\begin{lstlisting}[language={python}, caption={Python code of \gls{abbreviation:cordic} implementation.}, label= {lst:python-cordic}]
+import math
+
+# Defining starting values and empty arrays
+totalNumberOfIterations = 12 # 12 - best tradeof between value and iterations
+atanValues = []
+scalingValues = [1]
+initialXValueCordic = 1
+initialYValueCordic = 0
+initialZValueCordic = - 1.248  # angle for which to calculate cordic
+initialSigmaValueCordic = 1
+
+for x in range(totalNumberOfIterations):
+    # Generating arcus tanges values of precalculated angles based on number of iterations
+    atanValues.append(math.atan(1*2**(-x)))
+    # Generating precalculated scaling values based on a number of iterations
+    scalingValues.append(scalingValues[x]*math.cos(atanValues[x]))
+
+print("atanValues: ", atanValues)
+print("scalingValues: ", scalingValues)
+
+
+# Checking the initial value and moving it in the interval
+if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
+    zValue = initialZValueCordic - 3.141592
+    sigmaValue = -1
+    print("value in second q")
+elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
+    zValue = initialZValueCordic - 3.141592
+    sigmaValue = 1
+    print("value in third q")
+elif (initialZValueCordic < 0):
+    sigmaValue = -1
+    zValue = initialZValueCordic
+    print("value in fourth q")
+else:
+    zValue = initialZValueCordic  # For angle
+    sigmaValue = initialSigmaValueCordic  # For +- next angle
+    print("value in first")
+
+# Passing starting values to the calculation values
+xValue = initialXValueCordic  # For cos
+yValue = initialYValueCordic  # For sin
+
+
+# CORDIC ALGORITHM
+for x in range(totalNumberOfIterations):
+
+    # Calculating next values of the current iteration x
+    xNextValue = xValue - (sigmaValue*yValue)*2**(-x)
+    yNextValue = yValue + (sigmaValue*xValue)*2**(-x)
+    zNextValue = zValue - sigmaValue * atanValues[x]
+
+    # Determining the signum of next angle (addition or subtraction)
+    if zNextValue >= 0:
+        sigmaNextValue = 1
+    else:
+        sigmaNextValue = -1
+
+    # Values for new iteration
+    xValue = xNextValue
+    yValue = yNextValue
+    zValue = zNextValue
+    sigmaValue = sigmaNextValue
+
+    print("iteration:", x, "xValue:", xValue, "yValue:", yValue, "zValue:", zValue, "sigmaValue:", sigmaValue, "\n")
+
+# Calculating results by scaling the result values from CORDIC by the scalingValue which depends on number of iterations which were made
+resultCos = scalingValues[x-1] * xValue
+resultSin = scalingValues[x-1] * yValue
+
+# Changing results sign based on the rotation of the initialZValueCordic
+if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
+    resultCos = - resultCos
+elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
+    resultCos = - resultCos
+    resultSin = - resultSin
+
+#Calculating values based on the math library
+mathResultCos = math.cos(initialZValueCordic)
+mathResultSin = math.sin(initialZValueCordic)
+
+# Calculating the error of CORDIC calculated values from the python math functions
+errorCos = abs(resultCos) - abs(mathResultCos)
+errorSin = abs(resultSin) - abs(mathResultSin)
+\end{lstlisting}
+
+\par
+After the python implementation and debugging has been finalized, the circuit Verilog implementation of the algorithm could be initiated. Same as for the Division Unit IP, presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module was designed. This approach based on the application specific circuit design should be by its nature faster and more safe than creating the custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa}.
+
+    \fbar
+    \subsection{IP Block Design}
+    \fbar
+        \subsubsection{Top module design}
+            The top module design of the \gls{abbreviation:cordic} \gls{abbreviation:ip} is shown in the picture \ref{fig:cordic-top-module}. As can be seen, the structure is very much similar to the Division Unit top module. When using the approach to create a customized circuit for algorithm the flow of creating the top modules is likely to be similar with minor differences in signals, inputs and variables.\par
+            The Data Path Moule in the top design incorporates the precalculated \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues}. The \gls{abbreviation:lut} memory module's structure is very simple and therefore the Verilog interpretation is depicted only for \textit{atanValues} variable. The value of \textit{totalNumberOfIterations} is set to be 12 in this implementation, thus the \gls{abbreviation:lut} is 12x32 bits in size. Obivously the already presented custom fixed point \textit{Q32.15} format is required.
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/cordic-top-module.pdf}
+                \caption{Top module design for the \gls{abbreviation:cordic} \gls{abbreviation:ip} block design.}
+                \label{fig:cordic-top-module}
+            \end{figure}
+        \fbar
+        \subsubsection{Allocation and Timing}
+            In the picture \ref{fig:cordic-allocation-timing} the allocation and timing diagram is depicted. As can be seen, the if statements which are implemented in the control unit are documented here as well. The explanation why the if statements are needed is stated in the \gls{abbreviation:cordic} \hyperref[subsec:cordic-theory]{\textit{Theory}} section. As stated in the section for \gls{abbreviation:cordic} \hyperref[subsubsec:cordic-control-unit]{\textit{Control Unit}} there are two approaches of iteration cycles. The designer may choose jump from \textit{S4} to \textit{S2} for faster algorithm or from \textit{S6} to \textit{S2} for demonstrative aproach. The jumps in the allocation and timing diagram are not shown.
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/cordic-allocation-timing.pdf}
+                \caption{Alloccation and timing diagram for the Data Path Unit part of the \gls{abbreviation:cordic} \gls{abbreviation:ip}.}
+                \label{fig:cordic-allocation-timing}
+            \end{figure}
+        \fbar
+        \subsubsection{Data Path Module}
+            The picture \ref{fig:cordic-rtl} visualize the Data Path part of the Top Module design including calculation and storing units. The memory \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues} are not depicted as a separate registers but as inputs to the calculation units. The results of $sinus$ and $cosinus$ functions, in python implementation named as \textit{resultSin} and \textit{resultCos} are saved to registers R9 and R10. The \textbf{NEG} blocks aren't in fact implemented as a standalone blocks for making negative numbers. The negation is activated in a corresponding target register when the appropriate \textbf{SelR$_x$} is activated. (where $x$ is here the number of a corresponding register R9 or R10)\par
+            As was stated before, the implementation of the \gls{abbreviation:lut} memory module for $atanValues$ is depicted in this section in code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/cordic-rtl.pdf}
+                \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:cordic} \gls{abbreviation:ip} Data Path Unit \gls{abbreviation:ip}.}
+                \label{fig:cordic-rtl}
+            \end{figure}
+            
+            \fbar
+            \begin{lstlisting}[language={verilog}, caption={Verilog code of a atanValues \gls{abbreviation:lut} implementation. The \gls{abbreviation:lut} structure for scalingValues is very similar and therefore not depicted here.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
+module atanValuesCordicLUT(index, returnValue);
+
+input [3:0] index;
+output reg signed [31:0] returnValue;
+
+
+always@(index)
+begin
+    case(index)
+        4'b0000: returnValue = 32'sb00000000000000000_110010010000111; // 0.7853981633974483
+        4'b0001: returnValue = 32'sb00000000000000000_011101101011000; // 0.4636476090008061
+        4'b0010: returnValue = 32'sb00000000000000000_001111101011011; // 0.24497866312686414
+        4'b0011: returnValue = 32'sb00000000000000000_000111111101010; // 0.12435499454676144
+        4'b0100: returnValue = 32'sb00000000000000000_000011111111101; // 0.06241880999595735
+        4'b0101: returnValue = 32'sb00000000000000000_000001111111111; // 0.031239833430268277
+        4'b0110: returnValue = 32'sb00000000000000000_000000111111111; // 0.015623728620476831
+        4'b0111: returnValue = 32'sb00000000000000000_000000011111111; // 0.007812341060101111
+        4'b1000: returnValue = 32'sb00000000000000000_000000001111111; // 0.007812341060101111
+        4'b1001: returnValue = 32'sb00000000000000000_000000000111111; // 0.0019531225164788188
+        4'b1010: returnValue = 32'sb00000000000000000_000000000011111; // 0.0009765621895593195
+        4'b1011: returnValue = 32'sb00000000000000000_000000000001111; // 0.0004882812111948983
+        default: returnValue = 32'sb10000000000000000_000000000000000; // 0
+    endcase
+end
+
+endmodule\end{lstlisting}
+        \fbar
+        \subsubsection{Control Unit}\label{subsubsec:cordic-control-unit}
+        Same way as in a Division Module Control unit, presented in \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}} section, the control signal encoding table \ref{tab:control-signal-cordic-unit} for Data Path \gls{abbreviation:cordic} unit is created. The control signal in the Verilog design is named CS.\par
+        The branches of if statements used in the design has been colorcoded in the table for improved clarity. The iteation jumps are not depicted in the control signal table. The jumps may be performed from the step \textit{S4}, when the speed of the calculation is the main concern, or from \textit{S6}, when the alogrithm function is presented. The steps \textit{S5} and \textit{S6} are mainly focused on multiplying the result of iteration by the appropriate scaling value and on transforming the results based on the quadrant of the original wanted angle value.
+            \begin{table}[htbp!]
+                \centering
+                \caption{Control signal encoding table for instructions to be processed by the \gls{abbreviation:cordic} Module.}
+                \vspace*{0.15cm}
+                \resizebox{\textwidth}{!}
+                    {
+\begin{tabular}{!{\vrule width 2pt} c !{\vrule width 2pt} l !{\vrule width 2pt} c c c !{\vrule width 2pt} c  c c  c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c c c c !{\vrule width 2pt} c !{\vrule width 2pt}}\noalign{\hrule height 2pt}
+\cellcolor[HTML]{B4C7DC}  & \cellcolor[HTML]{B4C7DC}                                                          & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{22}}  & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{21}}  & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{20}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{19}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{18}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{17}}  & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{16}}  & \cellcolor[HTML]{5983B0}\textbf{15}         & \cellcolor[HTML]{5983B0}\textbf{14}         & \cellcolor[HTML]{5983B0}\textbf{13}         & \cellcolor[HTML]{5983B0}\textbf{12}         & \cellcolor[HTML]{729FCF}\textbf{11}         & \cellcolor[HTML]{729FCF}\textbf{10}           & \cellcolor[HTML]{729FCF}\textbf{9}            & \cellcolor[HTML]{729FCF}\textbf{8}          & \cellcolor[HTML]{B4C7DC}\textbf{7}          & \cellcolor[HTML]{B4C7DC}\textbf{6}          & \cellcolor[HTML]{B4C7DC}\textbf{5}          & \cellcolor[HTML]{B4C7DC}\textbf{4}          & \cellcolor[HTML]{DEE6EF}\textbf{3}          & \cellcolor[HTML]{DEE6EF}\textbf{2}          & \cellcolor[HTML]{DEE6EF}\textbf{1}          & \cellcolor[HTML]{DEE6EF}\textbf{0}          & \cellcolor[HTML]{FDA978}                              \\
+    \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{State}} & \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{RTL Code}}                       & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{ld1}} & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{ld2}} & \cellcolor[HTML]{355269}{\color[HTML]{FFFFFF} \textbf{ld3}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld4}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld5}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld6}} & \cellcolor[HTML]{3465A4}{\color[HTML]{FFFFFF} \textbf{ld7}} & \cellcolor[HTML]{5983B0}\textbf{ld8}        & \cellcolor[HTML]{5983B0}\textbf{ld9}        & \cellcolor[HTML]{5983B0}\textbf{ld10}       & \cellcolor[HTML]{5983B0}\textbf{SelR1}      & \cellcolor[HTML]{729FCF}\textbf{SelR2}      & \cellcolor[HTML]{729FCF}\textbf{SelR4{[}1{]}} & \cellcolor[HTML]{729FCF}\textbf{SelR4{[}0{]}} & \cellcolor[HTML]{729FCF}\textbf{SelR5}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR6}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR7}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR9}      & \cellcolor[HTML]{B4C7DC}\textbf{SelR10}     & \cellcolor[HTML]{DEE6EF}\textbf{SelM1}      & \cellcolor[HTML]{DEE6EF}\textbf{SelM2}      & \cellcolor[HTML]{DEE6EF}\textbf{SelSub1}    & \cellcolor[HTML]{DEE6EF}\textbf{SelSub2}    & \multirow{-2}{*}{\cellcolor[HTML]{FDA978}\textbf{CV}} \\\noalign{\hrule height 2pt}
+                                       & R0 ← totalNumberOfIterations;                                                     &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+                                       & R1 ← initialXValue;                                                               &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+                                       & R2 ← initialYValue;                                                               &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+\multirow{-4}{*}{S0}                   & R3 ← initialZValue;                                                               & \multirow{-4}{*}{1}                                         & \multirow{-4}{*}{1}                                         & \multirow{-4}{*}{1}                                         & \multirow{-4}{*}{0}                                         & \multirow{-4}{*}{0}                                         & \multirow{-4}{*}{0}                                         & \multirow{-4}{*}{0}                                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                           & \multirow{-4}{*}{0}                           & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{0}                         & \multirow{-4}{*}{23'h700000}                          \\\noalign{\hrule height 2pt}
+                                     & \cellcolor[HTML]{D4EA6B}if{[}(R3 \textgreater 1.5707)\&(R3 \textless 3.141592){]} & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                              \\
+                                       & \cellcolor[HTML]{D4EA6B}R4 ← R3 – 3.141592; (Sub1)                                & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                              \\
+                                       & \cellcolor[HTML]{D4EA6B}R5 ← -1;                                                  & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}1}   & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0}   & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}1} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-3}{*}{\cellcolor[HTML]{D4EA6B}24'hC0500}   \\
+                                       & \cellcolor[HTML]{8E86AE}if{[}(R3 \textgreater 3.141592)\&(R3 \textless 4.7123){]} & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                              \\
+                                       & \cellcolor[HTML]{8E86AE}R4 ← R3 – 3.141592; (Sub1)                                & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                              \\
+                                       & \cellcolor[HTML]{8E86AE}R5 ← 1;                                                   & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}1}   & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}   & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}24'hC0400}   \\
+                                       & \cellcolor[HTML]{FFDBB6}if(R3 \textless 0)                                        & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                              \\
+                                       & \cellcolor[HTML]{FFDBB6}R5 ← -1;                                                  & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                              \\
+                                       & \cellcolor[HTML]{FFDBB6}R4 ← R3;                                                  & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}   & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}1}   & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}1} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}24'hC0300}   \\
+                                       & \cellcolor[HTML]{FFA6A6}else                                                      & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                              \\
+                                       & \cellcolor[HTML]{FFA6A6}R4 ← R3;                                                  & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                              \\
+\multirow{-12}{*}{S1}                                      & \cellcolor[HTML]{FFA6A6}R5 ← 1;                                                   & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}1}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}   & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}1}   & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}24'hC0200}   \\\noalign{\hrule height 2pt}
+                                       & R6 ← R1 x R5; (Mul1)                                                              &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+                                       & R7 ← R2 x R5; (Mul2)                                                              &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+\multirow{-3}{*}{S2}                   & R8 ← atanValues{[}numberOfIteration{]} x R5; (Mul3)                               & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{1}                                         & \multirow{-3}{*}{1}                                         & \multirow{-3}{*}{1}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                           & \multirow{-3}{*}{0}                           & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{1}                         & \multirow{-3}{*}{1}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{1}                         & \multirow{-3}{*}{1}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{24'h380CC}                           \\\noalign{\hrule height 2pt}
+                                       & R6 ← R6 \textgreater{}\textgreater numberOfIteration; (Sh1)                       &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+                                       & R7 ← R7 \textgreater{}\textgreater numberOfIteration; (Sh2)                       &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+\multirow{-3}{*}{S3}                   & R4 ← R4 – R8; (Sub2)                                                              & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{1}                                         & \multirow{-3}{*}{0}                                         & \multirow{-3}{*}{1}                                         & \multirow{-3}{*}{1}                                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                           & \multirow{-3}{*}{0}                           & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{0}                         & \multirow{-3}{*}{1}                         & \multirow{-3}{*}{1}                         & \multirow{-3}{*}{24'hB0003}                           \\\noalign{\hrule height 2pt}
+                                     & \cellcolor[HTML]{D4EA6B}R4 \textgreater{}= 0;                                     & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                              \\
+                                       & \cellcolor[HTML]{D4EA6B}R1 ← R1 – R7; (Sub2)                                      & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                              \\
+                                       & \cellcolor[HTML]{D4EA6B}R2 ← R2 + R6; (Add1)                                      & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                      & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                    & \cellcolor[HTML]{D4EA6B}                              \\
+                                       & \cellcolor[HTML]{D4EA6B}R5 ← 1;                                                   & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}1}                 & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}1}                 & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}1}                 & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}1} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}1} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0}   & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0}   & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}0} & \multirow{-4}{*}{\cellcolor[HTML]{D4EA6B}24'h641800}  \\
+                                       & \cellcolor[HTML]{8E86AE}R4 \textless 0;                                           & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                              \\
+                                       & \cellcolor[HTML]{8E86AE}R1 ← R1 – R7; (Sub2)                                      & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                              \\
+                                       & \cellcolor[HTML]{8E86AE}R2 ← R2 + R6; (Add1)                                      & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                              \\
+ \multirow{-8}{*}{S4}                                      & \cellcolor[HTML]{8E86AE}R5 ← -1;                                                  & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}1}                 & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}1}                 & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}1}                 & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}1} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}1} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0}   & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0}   & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}1} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-4}{*}{\cellcolor[HTML]{8E86AE}24'h641900}  \\\noalign{\hrule height 2pt}
+                                       & R9 ← R1 x scalingValues{[}numberOfIteration{]}; (Mul1)                            &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                                             &                                             &                                             &                                             &                                             &                                             &                                               &                                               &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                             &                                                       \\
+\multirow{-2}{*}{S5}                   & R10 ← R2 x scalingValues{[}numberOfIteration{]}; (Mul2)                           & \multirow{-2}{*}{0}                                         & \multirow{-2}{*}{0}                                         & \multirow{-2}{*}{0}                                         & \multirow{-2}{*}{0}                                         & \multirow{-2}{*}{0}                                         & \multirow{-2}{*}{0}                                         & \multirow{-2}{*}{0}                                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{1}                         & \multirow{-2}{*}{1}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{0}                           & \multirow{-2}{*}{0}                           & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{1}                         & \multirow{-2}{*}{1}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{0}                         & \multirow{-2}{*}{24'h6030}                            \\\noalign{\hrule height 2pt}
+                                    & \cellcolor[HTML]{8E86AE}if{[}(R3 \textgreater 3.141592)\&(R3 \textless 4.7123){]} & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                              \\
+                                       & \cellcolor[HTML]{8E86AE}R9 ← R9 x (-1); (Neg1)                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                      & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                    & \cellcolor[HTML]{8E86AE}                              \\
+                                       & \cellcolor[HTML]{8E86AE}R10 ← R10 x (-1); (Neg2)                                  & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}1} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}1} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}   & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0}   & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}0} & \multirow{-3}{*}{\cellcolor[HTML]{8E86AE}24'h6000}    \\
+                                       & \cellcolor[HTML]{FFDBB6}if{[}(R3 \textgreater 1.5707)\&(R3\textless{}3.141592){]} & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                              \\
+                                       & \cellcolor[HTML]{FFDBB6}R9 ← R9 x (-1); (Neg1)                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                      & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                    & \cellcolor[HTML]{FFDBB6}                              \\
+                                       & \cellcolor[HTML]{FFDBB6}R10 ← R10;                                                & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}1} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}   & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0}   & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFDBB6}24'h4000}    \\
+                                       & \cellcolor[HTML]{FFA6A6}else                                                      & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                              \\
+                                       & \cellcolor[HTML]{FFA6A6}R9 ← R9;                                                  & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                      & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                    & \cellcolor[HTML]{FFA6A6}                              \\
+ \multirow{-9}{*}{S6}                                      & \cellcolor[HTML]{FFA6A6}R10 ← R10;                                                & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}                 & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}   & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0}   & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}0} & \multirow{-3}{*}{\cellcolor[HTML]{FFA6A6}24'h0}       \\\noalign{\hrule height 2pt}
+\end{tabular}
+                }
+            \label{tab:control-signal-cordic-unit}
+        \end{table}
+    \subsection{Simulation results}
+    The testbench for testing the design is created with cocotb and simulated with Verilator.\par
+    As can be seen when implementing the algorithm where the actual iteration value for \textit{sinus} and \textit{cosinus} is calculated, the number of cycles needed for the final calculation can be calculated
+
+    \begin{equation}
+        NoCyc_\text{result every iteration} = 2 + (5 NoIt),
+    \end{equation}
+
+    where $NoCyc$ (-) is the number of cycles and $NoIt$ is the number of iterations for the \gls{abbreviation:cordic} algorithm. The $2$ value is for \textit{S0} and \textit{S1} and the multiplication by 5 is because of states \textit{S2}–\textit{S6}. When the result of the \gls{abbreviation:cordic} algorithm is calculated only once at the end of the algorithm, the number of iteration can be determined by
+
+    \begin{equation}
+        NoCyc_\text{result at the end} = 2 + (3 NoIt) + 2,
+    \end{equation}
+    where the multiplication by value 3 is caused by states \textit{S2}–\textit{S4} and the addition of the second 2 is casued by states \textit{S5}–\textit{S6}.\par
+
+        \begin{figure}[htbp!]
+            \centering
+            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim.png}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1.2479$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \label{fig:cordic-verilog-whole-sim}
+        \end{figure}
+
+        \begin{figure}[htbp!]
+            \centering
+            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-end-of-the-simulation.png}
+            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1.2479$ rad. The result is passed to the registers R9 and R10.}
+            \label{fig:cordic-verilog-end-of-the-simulation}
+        \end{figure}
+
+\section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using custom circuit implementation}
+    All the presented parts in previous sections may be utilized to solve the system of nonlinear equations. This work leads to solving the transcendetal equations for Selective Harmonic Elimination. But the best approach is to firstly solve an easier set of equations to determine, if the approach of \gls{abbreviation:nr} is viable.
+    \subsection{Theory}
+    \subsection{IP Block Design}
+        \subsubsection{Top module design}
+        \subsubsection{Allocation and Timing}
+        \subsubsection{Control Unit}
+
 %závěr
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
 \section*{Conclusion}
-And this is the conclusion of my report.
+And this is the conclusion of my report. \gls{symbol:Pn}.
 
 \flushbottom %vyčištění stránky
 
@@ -656,7 +1160,7 @@ And this is the conclusion of my report.
 \setmonofont{Times New Roman}
 \printbibliography[title={{References}}]	
 \nocite{*}
-\setmonofont{Courier}
+\setmonofont{CourierPrime-Regular}
 \addcontentsline{toc}{section}{\numberline{}References} %Added citations to TOC%
 	\appendix
 	\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{Appendix \thesection:}{2.1em}{}
