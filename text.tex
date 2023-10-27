@@ -550,7 +550,7 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
-   \caption{Top module design for the \gls{abbreviation:ip} block design.}
+   \caption{Top module design for the division unit \gls{abbreviation:ip} block design.}
   \label{fig:division-top-module}
 \end{figure}
 
@@ -560,10 +560,10 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \subsubsection{Allocation and Timing}\label{subsubsec:division-allocation-and-timing}
 The diagram which describes the data flow and timing by steps of the algorithm is displayed in the figure \ref{fig:division-allocation-timing}.\par
 The whole algorithm consists of nine steps. The first four steps are used for calculating the initial value of $x_0$ as described in the equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, the root of the equation \ref{eq:equation-with-appropriate-root} so the searched value of $1/D$. The next iteration starts at the step labeled as \textit{S5}. The iterative process continues till the stop condition (eg. number of iterations) is met.
-\begin{figure}
+\begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
-   \caption{Alloccation and timing diagram for the Data Path Unit part of the \gls{abbreviation:ip}.}
+   \caption{Alloccation and timing diagram for the Data Path Unit part of the division \gls{abbreviation:ip}.}
   \label{fig:division-allocation-timing}
 \end{figure}
 
@@ -576,7 +576,7 @@ The Data Path Module unit also covers the possibility of negative denominator an
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
-   \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the \gls{abbreviation:ip}.}
+   \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the division \gls{abbreviation:ip}.}
   \label{fig:division-rtl}
 \end{figure}
 
@@ -991,10 +991,33 @@ errorSin = abs(resultSin) - abs(mathResultSin)
 \par
 After the python implementation and debugging has been finalized, the circuit Verilog implementation of the algorithm could be initiated. Same as for the Division Unit IP, presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module was designed. This approach based on the application specific circuit design should be by its nature faster and more safe than creating the custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa}.
 
+    \fbar
     \subsection{IP block design}
+    \fbar
         \subsubsection{Top module design}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/cordic-top-module.pdf}
+                \caption{Top module design for the \gls{abbreviation:cordic} \gls{abbreviation:ip} block design.}
+                \label{fig:cordic-top-module}
+            \end{figure}
+        \fbar
         \subsubsection{Allocation and Timing}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/cordic-allocation-timing.pdf}
+                \caption{Alloccation and timing diagram for the Data Path Unit part of the \gls{abbreviation:cordic} \gls{abbreviation:ip}.}
+                \label{fig:cordic-allocation-timing}
+            \end{figure}
+        \fbar
         \subsubsection{Data Path Module}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/cordic-rtl.pdf}
+                \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:cordic} \gls{abbreviation:ip} Data Path Unit \gls{abbreviation:ip}.}
+                \label{fig:cordic-rtl}
+            \end{figure}
+        \fbar
         \subsubsection{Control Unit}
         Same way as in a Division Module Control unit, presented in \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}} section, the control signal encoding table \ref{tab:control-signal-cordic-unit} for Data Path \gls{abbreviation:cordic} unit is created. The control signal in the Verilog design is named CS.\par
         The branches of if statements used in the design has been colorcoded in the table for improved clarity. The iteation jumps are not depicted in the control signal table. The jumps may be performed from the step \textit{S4}, when the speed of the calculation is the main concern, or from \textit{S6}, when the alogrithm function is presented. The steps \textit{S5} and \textit{S6} are mainly focused on multiplying the result of iteration by the appropriate scaling value and on transforming the results based on the quadrant of the original wanted angle value.
