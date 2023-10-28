@@ -1142,8 +1142,36 @@ endmodule\end{lstlisting}
     All the presented parts in previous sections may be utilized to solve the system of nonlinear equations. This work leads to solving the transcendetal equations for Selective Harmonic Elimination. But the best approach is to firstly solve an easier set of equations to determine, if the approach of \gls{abbreviation:nr} is viable.
     \subsection{Theory}
     \subsection{IP Block Design}
+        
+        \fbar
         \subsubsection{Top module design}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/simple-nr-top-module.pdf}
+                \caption{Top module design for the simple \gls{abbreviation:nr} calculation unit \gls{abbreviation:ip} block design.}
+                \label{fig:simple-nr-top-module}
+            \end{figure}
+
+        \fbar
         \subsubsection{Allocation and Timing}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/simple-nr-allocation-timing.pdf}
+                \caption{Alloccation and timing diagram for the Data Path Unit part of the simple \gls{abbreviation:nr} \gls{abbreviation:ip}.}
+                \label{fig:simple-nr-allocation-timing}
+            \end{figure}
+
+        \fbar
+        \subsubsection{Data Path Unit}
+
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/simple-nr-rtl.pdf}
+                \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the simple \gls{abbreviation:nr} calculation \gls{abbreviation:ip}.}
+                \label{fig:simple-nr-rtl}
+                \end{figure}
+
+        \fbar
         \subsubsection{Control Unit}
 
 %závěr
