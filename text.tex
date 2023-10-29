@@ -500,6 +500,10 @@ This is the introduction.
 \newpage
 %konec úvodu
 
+\section{Notes on all of the circuit designs in Verilog}
+    All of the designs are made in a pure Verilog code and tested via Free and open-source software (\gls{abbreviation:foss}). The choice of \gls{abbreviation:foss} was made to avoid any vendor-locking to a specific hardware or predefined \gls{abbreviation:ip}s. The predefined \gls{abbreviation:ip}s are in most of the times perfected by the vendor of a specific hardware and therefore meant to be used with that vendor's hardware. But not every time the hardware is available or suitable for a specific application. Open source and open hardware has been chosen by academics and many other companies to prevent the vendor-lock-in to happen. When the design and algorithm which is to be created is well understood, one can realize it in open-source way and then, when the vendor of the device is selected, modify it to specific hardware.\par
+    That is the reason why pure Verilog, with Cocotb \cite{cocotb} as a Test Bench creation tool and Verilator \cite{verilator} as a simulator has been selected for designing the circuits presented in this paper.\par
+
 \section{Calculating the division of fixed point numbers}\label{sec:calculating-the-division-of-fixed-point-numbers}
 Usually, when using numerical methods to solve the transcendetal equations, there is a need to calculate the division of two input numbers. Even for solving one set of two equations with Newton Raphson (\gls{abbreviation:nr}) method, the calculation of reciprocal value of the Jacobian determinant is needed.\par
 There are available some \gls{abbreviation:ip} blocks, which are capable of calculating the division of two numbers, but the blocks are usually vendor specific intellectual property \gls{abbreviation:ip} \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
