@@ -1128,6 +1128,8 @@ endmodule\end{lstlisting}
     \end{equation}
     where the multiplication by value 3 is caused by states \textit{S2}–\textit{S4} and the addition of the second 2 is casued by states \textit{S5}–\textit{S6}.\par
 
+    The frequency of the clock signal in this design is currently set as 50 MHz.
+
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim.png}
@@ -1356,7 +1358,16 @@ S11 &  & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x &
 
     \fbar
     \subsection{Simulation results}
-        The test bench for simulation was made using Cocotb \cite{cocotb} with the Verilator \cite{verilator} as a simulator.
+        The test bench for simulation was made using Cocotb \cite{cocotb} with the Verilator \cite{verilator} as a simulator. The result of the calculation may be seen in the registers R1 and R2. The results are $x_1 = - 0.707489$ and $x_2 = - 1.353759$\par
+        The clock signal frequency for this design is currently 20 MHz.
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/png/simple-nr-sim.png}
+                \caption{The whole Verilog simulation of a simple \gls{abbreviation:nr} algorithm. The result is may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
+                \label{fig:simple-nr-sim}
+            \end{figure}
+
+
 %závěr
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
