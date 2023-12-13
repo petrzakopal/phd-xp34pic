@@ -501,38 +501,38 @@ This is the introduction.
 %konec úvodu
 
 \section{Notes on all of the circuit designs in Verilog}
-    All of the designs are made in a pure Verilog code and tested via Free and open-source software (\gls{abbreviation:foss}). The choice of \gls{abbreviation:foss} was made to avoid any vendor-locking to a specific hardware or predefined \gls{abbreviation:ip}s. The predefined \gls{abbreviation:ip}s are in most of the times perfected by the vendor of a specific hardware and therefore meant to be used with that vendor's hardware. But not every time the hardware is available or suitable for a specific application. Open source and open hardware has been chosen by academics and many other companies to prevent the vendor-lock-in to happen. When the design and algorithm which is to be created is well understood, one can realize it in open-source way and then, when the vendor of the device is selected, modify it to specific hardware.\par
-    That is the reason why pure Verilog, with Cocotb \cite{cocotb} as a Test Bench creation tool and Verilator \cite{verilator} as a simulator has been selected for designing the circuits presented in this paper.\par
+    All of the designs are created using pure Verilog code and tested through Free and Open-Source Software (\gls{abbreviation:foss}). The decision to opt for \gls{abbreviation:foss}  was deliberate, aiming to prevent any vendor-locking to specific hardware or predefined \gls{abbreviation:ip}s. Predefined \gls{abbreviation:ip}s  are often optimized by a specific hardware vendor and intended for use with that vendor's hardware. However, the hardware may not always be available or suitable for a specific application. Academics and numerous companies opt for open-source and open-hardware approaches to prevent vendor lock-in. Once the design and algorithm are thoroughly understood, they can be initially implemented without any specific platform in mind. Later, when selecting the device vendor, the design can be modified to suit the specific hardware requirements.\par
+    That is why Verilog, with Cocotb \cite{cocotb} (Test Bench creation tool) and Verilator \cite{verilator} (simulator) have been used for designing the circuits presented in this paper.\par
 
 \section{Calculating the division of fixed point numbers}\label{sec:calculating-the-division-of-fixed-point-numbers}
-Usually, when using numerical methods to solve the transcendetal equations, there is a need to calculate the division of two input numbers. Even for solving one set of two equations with Newton Raphson (\gls{abbreviation:nr}) method, the calculation of reciprocal value of the Jacobian determinant is needed.\par
-There are available some \gls{abbreviation:ip} blocks, which are capable of calculating the division of two numbers, but the blocks are usually vendor specific intellectual property \gls{abbreviation:ip} \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
-The negative side of vendor specific \gls{abbreviation:ip} is, that it is hard to use them with any other \gls{abbreviation:fpga} chip than the vendor specific. On the other hand the vendor specific \gls{abbreviation:ip} is usually optimized to use the specific type of resources available at the vendor's chip whci resolves in better performance.\par
-To preserve the compatibility of the design with multiple vendors, the custom solution for division design based on the very known Newton Rapshon (\gls{abbreviation:nr}) algorithm was developed. \cite{burke-fixed-point-math-library}
+Typically, when employing numerical methods to solve transcendental equations, the calculation of the division of two input numbers becomes necessary. This requirement persists even when applying the Newton-Raphson (\gls{abbreviation:nr}) method to solve a set of two equations, as it entails computing the reciprocal value of the Jacobian determinant.\par
+There are some \gls{abbreviation:ip} blocks available, which are capable of calculating the division of two numbers, but the blocks are usually either vendor specific intellectual property \gls{abbreviation:ip} \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
+The drawback of vendor-specific \gls{abbreviation:ip}s lies in their limited compatibility, often preventing their use with \gls{abbreviation:fpga} chips from different vendors. On the other hand the vendor specific \gls{abbreviation:ip}s are usually optimized and able to use the specific type of resources available at the vendor's chip which resolve in better performance.\par
+To preserve the compatibility of the design with chips from multiple vendors, the custom solution for division design based on the very known Newton Raphson (\gls{abbreviation:nr}) algorithm was developed. \cite{burke-fixed-point-math-library}
 
 \subsection{Newton Rapshon algorithm for calculating the division}\label{subsection:newton-raphson-algorithm-for-calculating-the-division}
-General Newton Raphson (\gls{abbreviation:nr}) algorithm is a well known way how to solve equations the numerical way. It is the reason why it is utilized in many algorithms. However, the negative aspect of \gls{abbreviation:nr} is that it's convergency strongly depends on initial values of unknown variables. When the initial variables are chosen poorly, the performed number of iterations before the convergency is reached can be high.\par
+General Newton Raphson (\gls{abbreviation:nr}) algorithm is a well known approach to numerically solve equations. It is the reason why it is utilized in many algorithms. However, the negative aspect of \gls{abbreviation:nr} is that it's convergency strongly depends on initial values of unknown variables. When the initial variables are chosen poorly, the performed number of iterations before the convergency is reached can be high.\par
 To reach the fastest convergency possible (determined in number of iterations) apart from the scaling the dominator into the interval [0.5,1] the initial value calculation formula should be utilized. \cite{burke-fixed-point-math-library}
-The initial value formula \ref{eq:initial-nr-value-formula} is applied after the scaling of denominator is performed. The algorithm developed for the appropriate scaling is explained in the \hyperref[subsec:calculating-number-of-bits-to-shift-the-denominator]{\textit{Calculating number of bits to shift the denominator}}.
+The formula for calculating the initial value eq. \ref{eq:initial-nr-value-formula} is applied after the scaling of denominator is performed. The algorithm developed for the appropriate scaling is explained in the \hyperref[subsec:calculating-number-of-bits-to-shift-the-denominator]{\textit{Calculating number of bits to shift the denominator}}.
 
 \begin{equation}\label{eq:initial-nr-value-formula}
 x_0 = \frac{48}{17} - \frac{32}{17} D,
 \end{equation}
 where the $x_0$ is the initial value for \gls{abbreviation:nr} algorithm and $D$ is the denominator value for calculating the expression $N/D$.\par
-Because of the fixed point number format \textit{Q32.15} is used, the fractional numbers in equation \ref{eq:initial-nr-value-formula} are rounded to 2.8229 (32'b00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'b00000000000000001\_111000011100101 in binary) respectively.\par
-After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea for using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication, which can be synthetized in the \gls{abbreviation:fpga} fabric. For the \gls{abbreviation:nr} algorithm the function which root is $1/D$ is crucial. There may be many functions, which root is the searched value $1/D$ but the most trivial is eq. \ref{eq:equation-with-appropriate-root}.\par
+Because the fixed point number format \textit{Q32.15} is used, the fractional numbers in equation \ref{eq:initial-nr-value-formula} are rounded to 2.8229 (32'sb00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'sb00000000000000001\_111000011100101 in binary) respectively.\par
+After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea for using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication, which can be synthetized in the \gls{abbreviation:fpga} fabric. For the \gls{abbreviation:nr} algorithm the function with root is $1/D$ is essential. There may be many functions, which root is the searched value $1/D$ but the most trivial is eq. \ref{eq:equation-with-appropriate-root}.\par
 
 \begin{equation}\label{eq:equation-with-appropriate-root}
   \text{F} (x) = \frac{1}{x} - D.
 \end{equation}
 
-For the derivative at the point of $x_i$ then applies eq. \ref{eq:nr-division-derivative-at-the-point}.
+\noindent For the derivative at the point of $x_i$ then applies eq. \ref{eq:nr-division-derivative-at-the-point}.
 
 \begin{equation}\label{eq:nr-division-derivative-at-the-point}
   \frac{\dd F(x_i)}{\dd x} = F'(x_i) = \frac{F (x_{i+1}) - F (x_i)}{x_{i+1}-x_i}.
 \end{equation}
 
-Because finding root of the equation \ref{eq:equation-with-appropriate-root}, the value of $F (x_{i+1})$ is set to be zero. After separating the $x_{i+1}$ value of the eq. \ref{eq:nr-division-derivative-at-the-point} and derivating the function $F (x_i)$ the obtained algorithm for a value $x_{i+1}$ is obtained in eq. \ref{eq:derivative-nr-new-value-algorithm}.\par
+\noindent Because finding root of the equation \ref{eq:equation-with-appropriate-root}, the value of $F (x_{i+1})$ is set to be zero. After separating the $x_{i+1}$ value of the eq. \ref{eq:nr-division-derivative-at-the-point} and derivating the function $F (x_i)$ the obtained algorithm for a value $x_{i+1}$ is obtained from eq. \ref{eq:derivative-nr-new-value-algorithm}.\par
 
 \begin{equation}\label{eq:derivative-nr-new-value-algorithm}
   x_{i+1} = -\frac{F (x_i)}{F' (x_i)} + x_i = - \frac{F (x_i)}{-\frac{1}{x_i^2}} + x_i = (\frac{1}{x_i} - D) x_i^2 + x_i = x_i - D x_i^2 + x_i = 2 x_i - D x_i^2.
@@ -540,17 +540,17 @@ Because finding root of the equation \ref{eq:equation-with-appropriate-root}, th
 
 Usually, the iterative algorithm is stopped, when the value $F(x_{i+1}) - F(x_i)$ (called defect) reaches certain value set by the stop condition. However, in this algorithm, the stop condition is not yet implemented. Based on the observation carried on the N-R algorithm the obtained result is sufficient after 5 iterations.
 
-The mathematically expressed algorithm is then transformed into calculation flow suitable for implementing in the FPGA. The top module design for this algorithm is presented in the section \hyperref[subsubsec:division-top-module-design]{\textit{Top module design}}, the control and data unit for calculating the value $x_{i+1}$ is presented in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}}
+The mathematically expressed algorithm is then transformed into programmable algorithm suitable for \gls{abbreviation:fpga} implementation. The top module design for this algorithm is presented in the section \hyperref[subsubsec:division-top-module-design]{\textit{Top module design}}, the control and data unit for calculating the value $x_{i+1}$ is presented in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}}
 
 \subsection{IP Block Design}\label{subsec:division-ip-block-design}
-The design of this division unit is separated into 4 main modules:
+The design of this unit is consists of 4 main modules:
 \begin{itemize}
   \item the \textbf{data unit module}, used for manipulating data and making calculation operations,
-  \item the \textbf{control unit module}, used for controlling the \textbf{data unit module} and \textbf{scaling unit module}, this unit is a Finite State Machine (\gls{abbreviation:fsm}),
+  \item the \textbf{control unit module}, used for controlling the \textbf{data unit module} and \textbf{scaling unit module},
   \item \textbf{scaling unit module}, used for calculating the number of bits needed for shifting the denominator value to the interval [0.5,1].
 \end{itemize}
 \subsubsection{Top module design}\label{subsubsec:division-top-module-design}
-The top module wraps all of the presented modules (\textbf{data unit module}, \textbf{control unit module}, \textbf{scaling unit module}). The basic structure of connected modules in this top design is depicted in the fig. \ref{fig:division-top-module}. Thanks to this wrapper it is possible to test the created modules with Verilog Testbench, Verilator \cite{verilator} or Cocotb \cite{cocotb}.
+The top module wraps all of the presented modules (\textbf{data unit module}, \textbf{control unit module}, \textbf{scaling unit module}). The basic structure of connected modules of this top design is depicted in the fig. \ref{fig:division-top-module}. Thanks to this wrapper it is possible to test the created modules with Verilog Testbench, Verilator \cite{verilator} or Cocotb \cite{cocotb}.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
@@ -562,8 +562,8 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 
 \fbar
 \subsubsection{Allocation and Timing}\label{subsubsec:division-allocation-and-timing}
-The diagram which describes the data flow and timing by steps of the algorithm is displayed in the figure \ref{fig:division-allocation-timing}.\par
-The whole algorithm consists of nine steps. The first four steps are used for calculating the initial value of $x_0$ as described in the equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, the root of the equation \ref{eq:equation-with-appropriate-root} so the searched value of $1/D$. The next iteration starts at the step labeled as \textit{S5}. The iterative process continues till the stop condition (eg. number of iterations) is met.
+The diagram of the data flow and timing of the algorithm is displayed in the Figure \ref{fig:division-allocation-timing}.\par
+The whole algorithm consists of nine steps. The first four steps are used for calculating the initial value of $x_0$ as described in the equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, the root of the equation \ref{eq:equation-with-appropriate-root} so the searched value of $1/D$. The following iteration begins at the step labeled as \textit{S5}. The iterative process continues until a predefined stop condition is met, such as reaching a specified number of iterations.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
@@ -573,10 +573,10 @@ The whole algorithm consists of nine steps. The first four steps are used for ca
 
 \fbar
 \subsubsection{Data Path Module}
-The structure of created Data Path Module is depicted in the figure \ref{fig:division-rtl}. The module was specifically designed to serve the needs of the division algorithm. It consists of five registers labeled $R0$ through $R4$, two multipliers $M1$, $M2$ and one bit shifter.\par
-The module si controlled by the presented control unit \gls{abbreviation:fsm} with the control signal labeled as CV. The encoding table with the labels which corresponds with the Data Path Unit module is presented in the section \hyperref[subsubsection:division-control-unit]{\textit{Control Unit}}.\par
+The structure of the Data Path Module is depicted in the Figure \ref{fig:division-rtl}. The module was specifically designed to serve the needs of the division algorithm. It comprises five registers labeled $R0$ through $R4$, two multipliers $M1$, $M2$ and one bit shifter.\par
+The module is controlled by the control unit with the control signal labeled as CV. The encoding table with the labels which corresponds to the Data Path Unit module is presented in the section \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}}.\par
 The result of each iteration from the division algorithm is passed to a register $R0$.\par
-The Data Path Module unit also covers the possibility of negative denominator and numerator. Because the values are stored in a custom \textit{Q32.15} fixed point format, the algorithm checks if the $D$ or $N$ values are higher than $0h8000$ value and determine it's actual sign and the sign if the result. If the analyzed number is determined negative, it is transformed to value positive and then used in the presented division algorithm. This transformation is needed because of the algorithm calculating the bits to shift the denominator in the interval.
+The Data Path Module unit also covers the possibility of negative denominator and numerator. Because the values are stored in a custom \textit{Q32.15} fixed point format (whole number comprises of 32 bits, 15 bits fractional part, 17 bits integer part), the algorithm checks if the $D$ or $N$ values are higher than $0h8000$ and determine it's actual sign and the sets sign of the result. If the analyzed number is determined negative, it is transformed to value positive and then used in the presented division algorithm. This transformation is needed because of the algorithm calculating the bits to shift the denominator in the interval.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
@@ -621,7 +621,7 @@ As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{All
 As presented in the section \hyperref[subsection:newton-raphson-algorithm-for-calculating-the-division]{\textit{Newton Rapshon algorithm for calculating the division}} the denominator must be appropriately scaled for the division algorithm to work. This section presents algorithm for scaling the denominator specified in the fixed point number format \textit{Q32.15}. After the scaling value is successfully determined, the numerator is scaled accordingly.
 \par
 The presented algorithm shifts the value of denominator at every positive edge of the clock signal and saves the shifted value in the \texttt{compare} register. Then the combinational circuit is utilized to compare the shifted value in \texttt{compare} register with the number \texttt{1} specified in \textit{Q32.15} format. If the compared value is the same or lower than \texttt{1} the shifting algorithm is done and the value \texttt{scaleToShift} is successfully found. If not, the inner value of shifting bits is incremented and the algorithm proceeds to the next iteration.\par
-The presented algorithm is realized in the \textit{denominatorSizeScaleUnit} module and it's pseudocode is depicted in the code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
+tHe presented algorithm is realized in the \textit{denominatorSizeScaleUnit} module and it's pseudocode is depicted in the code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode for the denominatorSizeScaleUnit module algorithm.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
   at every negative edge of clock or positive edge of reset
@@ -651,7 +651,7 @@ The simulation via Verilog testbench was made to determine the correctness of pr
 As for the simulation output it can be stated, that the module works correctly for positive and negative numbers of fixed point format \textit{Q32.15}.\par
 The algorithm used in this module is able to calculate the propper result in much less clock cycles than the full division algorithm used in the division module in the package \cite{burke-fixed-point-math-library}.\par
 Thus the presented module may be used as a submodule in more complex modules.\par
-Following figures present VCD wave simulation outputs for selected $N$ and $D$. The clock frequency was set 250 MHz. Pseudocode Verilog snippet for the test bench is presented int he listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift} when the \textit{start} signal is set on low.
+VCD simulation output waveforms are depicted on the following Figures. The simulations were conducted for arbitrary selected $N$ and $D$. The clock frequency was set 250 MHz. Pseudocode Verilog snippet for the test bench is present in the listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift} when the \textit{start} signal is set on low.
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode snippet for the Verilog simulation test bench.}, label= {lst:division-testbench-verilog-pseudocode}]
     timescale 1ns/1ns 
@@ -706,10 +706,10 @@ Following figures present VCD wave simulation outputs for selected $N$ and $D$. 
 \end{figure}
 
 \section{Using CORDIC to calculate trigonometric functions}
-    There are few approaches when there is a need to calculate the trigonometric functions. In this work, the \gls{abbreviation:cordic} was used. To get more flexibility in the calculation the implementation of \gls{abbreviation:cordic} algorithm was chosen above the \gls{abbreviation:lut} for calculation.\par
-    The \gls{abbreviation:lut} method may be fast, but the accuracy depends on the size of the table. When using the \gls{abbreviation:cordic} one can influence the precision by using more iterations of the algorithm. The modified algorithm may be used to calculate non-trivial functions, such as hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays} In this work only the calculation of $sinus$ and $cosinus$ functions is used.
+    There are numerous ways how to calculate the trigonometric functions. To gain more flexibility the Coordinate Rotation Digital Computer (\gls{abbreviation:cordic}) was chosen above the Look-Up Table (\gls{abbreviation:lut}) implementation.\par
+    The \gls{abbreviation:lut} method may be fast, but the accuracy depends on the size of the table. When using the \gls{abbreviation:cordic} the precision depends on number of performed iterations of the algorithm. The modified algorithm may be used to calculate non-trivial functions, such as hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays} In this work only the calculation of $sinus$ and $cosinus$ functions is used.
     \subsection{Theory}\label{subsec:cordic-theory}
-        The theory of the first \gls{abbreviation:cordic} was proposed by Volder in \cite{volder-cordic-trigonomtric-computing-technique}. This algorithm computes a coordinate conversion between rectangular ($x$, $y$) and polar ($R$, $\theta$) coordinates. The algorithm was then generalized by Walther in \cite{walther-a-unified-algorithm-for-elementary-functions} to include circular, linear and hyperbolic transforms. This paper utilizes only circular transforms to calculate $sinus$ and $cosinus$ functions. Only the most basic approach to the algorithm will be presented.\par
+        The theory of the first \gls{abbreviation:cordic} was proposed by Volder in \cite{volder-cordic-trigonomtric-computing-technique}. This algorithm computes a coordinate conversion between rectangular ($x$, $y$) and polar ($R$, $\theta$) coordinates. The algorithm was then generalized by Walther in \cite{walther-a-unified-algorithm-for-elementary-functions} to include circular, linear and hyperbolic transforms. This paper utilizes only circular transforms to calculate $sinus$ and $cosinus$ functions. Only the most basic approach of the algorithm will be presented.\par
         The rotation of a vector in the rectangular coordinate system ($x$, $y$) may be described by matrix-vector multiplication depicted in the eq. \ref{eq:rotation}.
 
         \begin{equation}\label{eq:rotation}
@@ -748,21 +748,23 @@ Following figures present VCD wave simulation outputs for selected $N$ and $D$. 
              \end{pmatrix}
         \end{equation}
 
-        it can be seen, that only multiplication by scaling factor of precalculated values of $\cos (\theta)$, multiplication by $\tan (\theta)$, subtraction and addiction operations are needed. However, the multiplication by $\tan (\theta)$ can be interchanged. The interchange may be done for angles $\theta$ for which the equation \ref{eq:tan-theta-2} is true. The when implementing the algorithm to the \gls{abbreviation:fpga} the multiplication may be swapped for signed right bit shift.
+        \noindent it can be seen, that only multiplication by scaling factor of precalculated values of $\cos (\theta)$, multiplication by $\tan (\theta)$, subtraction and addiction operations are needed. However, the multiplication by $\tan (\theta)$ can be interchanged. The interchange may be done for angles $\theta$ for which the equation \ref{eq:tan-theta-2} is true. The when implementing the algorithm to the \gls{abbreviation:fpga} the multiplication may be swapped for signed right bit shift.
 
         \begin{equation}\label{eq:tan-theta-2}
             \tan (\theta) = 2^{-1}.
         \end{equation}
         \par
-        Then when the values $x_\text{in} = 1$ and $y_\text{in} = 0$ are used, the result for $sinus$ and $cosinus$ can be easily obtained from $x_\text{R}$ and $y_\text{R}$ as expressed in the equation \ref{eq:xr-yr-when-initial-values-1-0}.
+        When the values $x_\text{in} = 1$ and $y_\text{in} = 0$ are used, the result for $sinus$ and $cosinus$ may be easily obtained from $x_\text{R}$ and $y_\text{R}$ as expressed in the equation \ref{eq:xr-yr-when-initial-values-1-0}.
 
         \begin{equation}\label{eq:xr-yr-when-initial-values-1-0}
-            x_\text{R} = x_\text{in} \cos (\theta) - y_\text{in} \sin (\theta) = | \theta = 0 | = \cos (\theta)
+            \begin{gathered}
+            x_\text{R} = x_\text{in} \cos (\theta) - y_\text{in} \sin (\theta) = | \theta = 0 | = \cos (\theta)\\
             y_\text{R} = x_\text{in} \sin (\theta) + y_\text{in} \cos (\theta) = | \theta = 0 | = \sin (\theta)
+            \end{gathered}
         \end{equation}
 
-            The algorithm may be further simplified by expecting that the algorithm is designed to use more than 6 iterations and thus the scaling constant represented by multipliying $cosinus$ of different $\theta$ values converges to $0,60725$. So there is no need to precalculate all the scaling values and use only the value of the convergence. In this paper the scaling values are precalculated and passed from the custom \gls{abbreviation:lut} module.\par
-            As can be seen from the section \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algortihm teory itself, it needs to be determined, if the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). For that, the set of the equations is expanded with value $z_i$. The complete set of equations which are used in the implementation are as follows.
+            The algorithm may be further simplified by expecting that the algorithm is designed to use more than 6 iterations and thus the scaling constant represented by multipliying $cosinus$ of different $\theta$ values converges to $0,60725$. So there is no need to precalculate all the scaling values only the convergenent value may be used. In this paper the precalculated values are passed from the custom \gls{abbreviation:lut} module to the main algorithm.\par
+            As can be seen from the section \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algorithm theory itself, it needs to be determined, if the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). For that, the set of the equations is expanded and new value $z_i$ added. The complete set of equations which are used in the implementation are as follows.
 
             \begin{equation}
                 \begin{gathered}
@@ -784,7 +786,7 @@ Following figures present VCD wave simulation outputs for selected $N$ and $D$. 
                 \right\}
             \end{equation}
             \par
-            The algorithm as presented calculates the correct values for $sinus$ and $cosinus$ functions only in the first and fourth quadrant ($3\pi/2$ to $\pi/2$ counter-clockwise). For usage of the whole $2\pi$ range, corresponding actions before the 0. iteration must be made.\par
+            The algorithm as presented calculates the correct values for $sinus$ and $cosinus$ functions only in the first and fourth quadrant ($3\pi/2$ to $\pi/2$ counter-clockwise). For usage in the whole $2\pi$ range, corresponding actions before the 0. iteration must be made.\par
             The algorithm must make checks, to determine the quadrant, where the desired angle $\theta$ for which the $sinus$ and $cosinus$ functions are to be calculated. This is done by \texttt{if} statements at the algorithm values initialization and at the final function value calculation. If the desired argument of the functions is not in the first or fourth quadrant then the angle is transfered from the actual quadrant to the first or fourth quadrant. Based on the quadrant, to which the angle is transformed, the $\sigma_i$ value is set. The corresponding if statements a the algorithm initialization are presented in the pseudocode \ref{lst:cordic-initial-if-statements}.\par
             Similar if statements are used at the final calculation of $sinus$ and $cosinus$ values. The if statements are presented in the pseudocode \ref{lst:cordic-ending-if-statements}.\par
             The pseudocodes use \texttt{initialZValue} as a desired angle $\theta$, for which to calculate the function values, \texttt{zValue} as a temporary value for calculating the iterations for $z_{i}$ variables, \texttt{sigmaValue} for temporary value holding the current iteration value of $\sigma_i$, the \texttt{resultCos} and \texttt{resultSin} variables are used for storing the temporary and final values of the $\cos (\theta)$ and $\sin (\theta)$ values respectively.
@@ -1227,7 +1229,7 @@ The adjugate matrix is calculated as follows
     After the calculation of the reciprocal value of the determinant of the Jakobi matrix and the adjugate matrix, the inverted Jakobi matrix bay be finally calculated
 
     \begin{equation}
-        \textbf{J}^i^{-1} =
+        \textbf{J}^{-1i} =
         \frac{1}{\text{det}(\textbf{J}^i)}
         \begin{pmatrix}
             \text{adj}(\textbf{J}^i_{00}) & \text{adj}(\textbf{J}^i_{01})\\
@@ -1250,8 +1252,8 @@ The adjugate matrix is calculated as follows
         \end{pmatrix}
         =
         \begin{pmatrix}
-            \textbf{J}_{00}^{-1}^i \;\Delta \text{F}_1^i + \textbf{J}_{01}^{-1}^i \;\Delta \text{F}_2^i\\ 
-            \textbf{J}_{10}^{-1}^i \;\Delta \text{F}_1^i + \textbf{J}_{11}^{-1}^i \;\Delta \text{F}_2^i
+            \textbf{J}_{00}^{-1i} \;\Delta \text{F}_1^i + \textbf{J}_{01}^{-1i} \;\Delta \text{F}_2^i\\ 
+            \textbf{J}_{10}^{-1i} \;\Delta \text{F}_1^i + \textbf{J}_{11}^{-1i} \;\Delta \text{F}_2^i
         \end{pmatrix}.
     \end{equation}
 
@@ -1310,7 +1312,7 @@ The adjugate matrix is calculated as follows
         \subsubsection{Control Unit}\label{subsubsec:simple-nr-control-unit}
 
             The encoding table \ref{tab:control-signal-simple-nr} shows the steps of the algorithm with a corresponding control signal for the Data Path Unit of the simple \gls{abbreviation:nr} algorithm Verilog implementation.\par
-            The \gls{abbreviation:nr} algorithm iteration jumps are carried out from the state \textit{S10} to state \textit{S1}, when the numebr of iteration is lower than the set total number of iterations, which is hardcoded to the Control Unit. At this implementation, the total number of iterations is se to be 5. In fact, the end of the \gls{abbreviation:nr} algorithm should be determined based on the defect value. In this simple example, the value check of the defect is not implemented. The implementationwould be simple though. The value of register holding the defect values R3 and R4 would be wired to the control unit in the corresponding steps \textit{S4} and \textit{S5} respectively and the comparation with the desired defect value would be performed. If the defect value was smaller than the desired value, the next state of the algorithm would be \textit{S11} and therefore the calculation would end. If the defect was larger than the desired value, the next state would be \texxtit{S6} and the iteratioun would complete normally and loop from the state \textit{S10} to \textit{S1}.
+            The \gls{abbreviation:nr} algorithm iteration jumps are carried out from the state \textit{S10} to state \textit{S1}, when the numebr of iteration is lower than the set total number of iterations, which is hardcoded to the Control Unit. At this implementation, the total number of iterations is se to be 5. In fact, the end of the \gls{abbreviation:nr} algorithm should be determined based on the defect value. In this simple example, the value check of the defect is not implemented. The implementationwould be simple though. The value of register holding the defect values R3 and R4 would be wired to the control unit in the corresponding steps \textit{S4} and \textit{S5} respectively and the comparation with the desired defect value would be performed. If the defect value was smaller than the desired value, the next state of the algorithm would be \textit{S11} and therefore the calculation would end. If the defect was larger than the desired value, the next state would be \textit{S6} and the iteratioun would complete normally and loop from the state \textit{S10} to \textit{S1}.
             \begin{table}[htbp!]
                 \centering
                 \caption{Control signal encoding table for instructions to be processed by the simple \gls{abbreviation:nr} alogrithm solve Module.}
