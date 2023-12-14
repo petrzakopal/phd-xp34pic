@@ -1164,6 +1164,20 @@ S2                                                       & \begin{tabular}[c]{@{
             \label{fig:cordic-verilog-end-of-the-simulation}
         \end{figure}
 
+        \begin{figure}[htbp!]
+            \centering
+            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim-10_719.png}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = 10.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \label{fig:cordic-verilog-whole-sim-10_719}
+        \end{figure}
+
+        \begin{figure}[htbp!]
+            \centering
+            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim_minus_6_7195129.png}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \label{fig:cordic-verilog-whole-sim_minus_6_7195129}
+        \end{figure}
+
 \section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using custom circuit implementation}
     All the presented parts in previous sections may be utilized to solve the system of nonlinear equations. This work leads to solving the transcendetal equations for Selective Harmonic Elimination. But the best approach is to firstly solve an easier set of equations to determine, if the approach of \gls{abbreviation:nr} is viable.
     \subsection{Theory}
