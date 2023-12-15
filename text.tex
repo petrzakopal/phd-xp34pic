@@ -916,7 +916,10 @@ atanValues = []
 scalingValues = [1]
 initialXValueCordic = 1
 initialYValueCordic = 0
-initialZValueCordic = - 1.248  # angle for which to calculate cordic
+# initialZValueCordic = 1.248  # angle for which to calculate cordic
+# initialZValueCordic = - 1.248  # angle for which to calculate cordic
+# initialZValueCordic = - 6.7194  # angle for which to calculate cordic
+initialZValueCordic = 10.7194824  # angle for which to calculate cordic
 initialSigmaValueCordic = 1
 
 for x in range(totalNumberOfIterations):
@@ -928,6 +931,22 @@ for x in range(totalNumberOfIterations):
 print("atanValues: ", atanValues)
 print("scalingValues: ", scalingValues)
 
+print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
+print("\n")
+print("initialZValue original: ", initialZValueCordic)
+
+# Moving angle to interval [0,2Pi]
+if initialZValueCordic > 0:
+    while initialZValueCordic > (2*3.141592):
+        initialZValueCordic = initialZValueCordic - 2*3.141592
+else:
+    while initialZValueCordic < (-2*3.141592):
+        initialZValueCordic = initialZValueCordic + 2*3.141592
+
+
+print("initialZValue after moving to [0,2Pi] interval: ", initialZValueCordic)
+print("\n")
+print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
 
 # Checking the initial value and moving it in the interval
 if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
@@ -985,13 +1004,28 @@ elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
     resultCos = - resultCos
     resultSin = - resultSin
 
-#Calculating values based on the math library
+# Calculating values based on the math library
 mathResultCos = math.cos(initialZValueCordic)
 mathResultSin = math.sin(initialZValueCordic)
 
 # Calculating the error of CORDIC calculated values from the python math functions
 errorCos = abs(resultCos) - abs(mathResultCos)
 errorSin = abs(resultSin) - abs(mathResultSin)
+
+# Results printing
+print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
+print("CORDIC results:")
+print("cos: ", resultCos)
+print("sin: ", resultSin)
+print("scaleFactor: ", scalingValues[totalNumberOfIterations-1])
+print("\n")
+print("MATH results:")
+print("cos: ", mathResultCos)
+print("sin: ", mathResultSin)
+print("\n")
+print("error CORDIC-MATH:")
+print("cos: ", errorCos)
+print("sin: ", errorSin)
 \end{lstlisting}
 
 \par
@@ -1138,15 +1172,31 @@ S2                                                       & \begin{tabular}[c]{@{
     As can be seen when implementing the algorithm where the actual iteration value for \textit{sinus} and \textit{cosinus} is calculated, the number of cycles needed for the final calculation can be calculated
 
     \begin{equation}
-        NoCyc_\text{result every iteration} = 2 + (5 NoIt),
+                NoCyc_\text{result every iteration} = 
+                \left\{
+                \begin{array}{lr}
+                    3,\;\text{if}\;initialZValue \in [-2 \pi, 2 \pi]\\
+                    4,\;\text{if}\;initialZValue \notin [-2 \pi, 2 \pi]
+                \end{array}
+                \right\}
+         + \;5 NoIt,
     \end{equation}
 
-    where $NoCyc$ (-) is the number of cycles and $NoIt$ is the number of iterations for the \gls{abbreviation:cordic} algorithm. The $2$ value is for \textit{S0} and \textit{S1} and the multiplication by 5 is because of states \textit{S2}–\textit{S6}. When the result of the \gls{abbreviation:cordic} algorithm is calculated only once at the end of the algorithm, the number of iteration can be determined by
+    where $NoCyc$ (-) is the number of cycles and $NoIt$ is the number of iterations for the \gls{abbreviation:cordic} algorithm. The $4$ value is for \textit{S0}-\textit{S4} and the multiplication by 5 is because of states \textit{S4}–\textit{S8}. When the result of the \gls{abbreviation:cordic} algorithm is calculated only once at the end of the algorithm, the number of iteration can be determined by
 
     \begin{equation}
-        NoCyc_\text{result at the end} = 2 + (3 NoIt) + 2,
+        NoCyc_\text{result at the end} = 
+                \left\{
+                \begin{array}{lr}
+                    3,\;\text{if}\;initialZValue \in [-2 \pi, 2 \pi]\\
+                    4,\;\text{if}\;initialZValue \notin [-2 \pi, 2 \pi]
+                \end{array}
+                \right\}
+            +\;3 NoIt + 2,
     \end{equation}
-    where the multiplication by value 3 is caused by states \textit{S2}–\textit{S4} and the addition of the second 2 is casued by states \textit{S5}–\textit{S6}.\par
+    where the multiplication by value 3 is caused by states \textit{S4}–\textit{S6}, the addition of $4$ is caused by states \textit{S0}-\textit{S4} and the addition of the $2$ is casued by states \textit{S7}–\textit{S8}.\par
+    \par
+    In the simulation the $numberOfCycles$ displayed is more of an index of the cycle, so for angle $\theta$ is the number of iterations depicted on Figure \ref{fig:cordic-verilog-end-of-the-simulation} in fact $63$ not displayed $62$.
 
     The frequency of the clock signal in this design is currently set as 50 MHz.
 
@@ -1174,7 +1224,7 @@ S2                                                       & \begin{tabular}[c]{@{
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim_minus_6_7195129.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = - 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim_minus_6_7195129}
         \end{figure}
 
