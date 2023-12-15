@@ -82,7 +82,6 @@
 \usepackage[tablename=Tab.,font=small,labelfont=it,
             textfont=it]{caption} %for renaming tables instead of renewcommand
             
-
 % List of abbreviations and symbols
 % Original code author: Jakub Kučera
 
@@ -380,7 +379,7 @@ literate={\{}{{\textcolor{ctured}{\{}}}{1}
 	\vspace{3cm}
 	
 	
-	{\Large\textbf{Name of the report}}
+	{\Large\textbf{Low Abstraction Real-Time FPGA Implementation of Selective Harmonic Elimination Algorithm for Voltage Source Inverters Designed Using State of The Art Free and Open Source Software}}
 	
 	\vspace{1cm}
 	
@@ -554,7 +553,7 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
-   \caption{Top module design for the division unit \gls{abbreviation:ip} block design.}
+   \caption{Top module design for the division unit module block design.}
   \label{fig:division-top-module}
 \end{figure}
 
@@ -567,7 +566,7 @@ The whole algorithm consists of nine steps. The first four steps are used for ca
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
-   \caption{Alloccation and timing diagram for the Data Path Unit part of the division \gls{abbreviation:ip}.}
+   \caption{Alloccation and timing diagram for the Data Path Unit part of the division module.}
   \label{fig:division-allocation-timing}
 \end{figure}
 
@@ -580,7 +579,7 @@ The Data Path Module unit also covers the possibility of negative denominator an
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
-   \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the division \gls{abbreviation:ip}.}
+    \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Data Path Unit part of the division module.}
   \label{fig:division-rtl}
 \end{figure}
 
@@ -1040,7 +1039,7 @@ After the python implementation and debugging has been finalized, the circuit Ve
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-top-module.pdf}
-                \caption{Top module design for the \gls{abbreviation:cordic} \gls{abbreviation:ip} block design.}
+                \caption{Top module design for the \gls{abbreviation:cordic} module block design.}
                 \label{fig:cordic-top-module}
             \end{figure}
         \fbar
@@ -1055,7 +1054,7 @@ After the python implementation and debugging has been finalized, the circuit Ve
         \fbar
         \subsubsection{Data Path Module}
             The picture \ref{fig:cordic-rtl} visualize the Data Path part of the Top Module design including calculation and storing units. The memory \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues} are not depicted as a separate registers but as inputs to the calculation units. The results of $sinus$ and $cosinus$ functions, in python implementation named as \textit{resultSin} and \textit{resultCos} are saved to registers R9 and R10. The \textbf{NEG} blocks aren't in fact implemented as a standalone blocks for making negative numbers. The negation is activated in a corresponding target register when the appropriate \textbf{SelR$_x$} is activated. (where $x$ is here the number of a corresponding register R9 or R10)\par
-            As was stated before, the implementation of the \gls{abbreviation:lut} memory module for $atanValues$ is depicted in this section in code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
+            As was stated before, the implementation of the \gls{abbreviation:lut} memory module for $atanValues$ is depicted in Code \ref{lst:atanValuesCordicLUT}, memory module for $scalingValues$ is depicted in Code \ref{lst:scalingValuesCordicLUT}.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-rtl.pdf}
@@ -1064,7 +1063,7 @@ After the python implementation and debugging has been finalized, the circuit Ve
             \end{figure}
             
             \fbar
-            \begin{lstlisting}[language={verilog}, caption={Verilog code of a atanValues \gls{abbreviation:lut} implementation. The \gls{abbreviation:lut} structure for scalingValues is very similar and therefore not depicted here.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
+            \begin{lstlisting}[language={verilog}, caption={Verilog code of the atanValuesCordicLUT  lookup table (\gls{abbreviation:lut}) implementation.}, label= {lst:atanValuesCordicLUT}]
 module atanValuesCordicLUT(index, returnValue);
 
 input [3:0] index;
@@ -1086,10 +1085,35 @@ begin
         4'b1001: returnValue = 32'sb00000000000000000_000000000111111; // 0.0019531225164788188
         4'b1010: returnValue = 32'sb00000000000000000_000000000011111; // 0.0009765621895593195
         4'b1011: returnValue = 32'sb00000000000000000_000000000001111; // 0.0004882812111948983
-        default: returnValue = 32'sb10000000000000000_000000000000000; // 0
+        default: returnValue = 32'sb00000000000000000_000000000000000; // 0
     endcase
 end
+endmodule\end{lstlisting}
 
+            \begin{lstlisting}[language={verilog}, caption={Verilog code of the scalingValuesCordicLUT lookup table (\gls{abbreviation:lut}) implementation.}, label= {lst:scalingValuesCordicLUT}]
+module scalingValuesCordicLUT(index, returnValue);
+
+input [3:0] index;
+output reg signed [31:0] returnValue;
+
+always@(index)
+begin
+    case(index)
+        4'b0000: returnValue <= 32'sb000000000000000001_000000000000000; // 1
+        4'b0001: returnValue <= 32'sb00000000000000000_101101010000010; // 0.7071067811865476
+        4'b0010: returnValue <= 32'sb00000000000000000_101000011110100; // 0.6324555320336759
+        4'b0011: returnValue <= 32'sb00000000000000000_100111010001001; // 0.6135719910778964
+        4'b0100: returnValue <= 32'sb00000000000000000_100110111101110; // 0.6088339125177524
+        4'b0101: returnValue <= 32'sb00000000000000000_100110111000111; // 0.6088339125177524
+        4'b0110: returnValue <= 32'sb00000000000000000_100110110111101; // 0.607351770141296
+        4'b0111: returnValue <= 32'sb00000000000000000_100110110111011; // 0.6072776440935261
+        4'b1000: returnValue <= 32'sb00000000000000000_100110110111010; // 0.6072591122988928
+        4'b1001: returnValue <= 32'sb00000000000000000_100110110111010; // 0.6072544793325625
+        4'b1010: returnValue <= 32'sb00000000000000000_100110110111010; // 0.6072533210898753
+        4'b1011: returnValue <= 32'sb00000000000000000_100110110111010; // 0.6072530315291345
+        default: returnValue <= 32'sb00000000000000000_000000000000000; // 0
+    endcase
+end
 endmodule\end{lstlisting}
         \fbar
         \subsubsection{Control Unit}\label{subsubsec:cordic-control-unit}
@@ -1364,7 +1388,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-top-module.pdf}
-                \caption{Top module design for the simple \gls{abbreviation:nr} calculation unit \gls{abbreviation:ip} block design.}
+                \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation unit module block design.}
                 \label{fig:simple-nr-top-module}
             \end{figure}
 
@@ -1375,7 +1399,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-allocation-timing.pdf}
-                \caption{Allocation and timing diagram for the Data Path Unit part of the simple \gls{abbreviation:nr} \gls{abbreviation:ip}.}
+                \caption{Allocation and timing diagram for the Data Path Unit part of the simple (\gls{abbreviation:nr}) module.}
                 \label{fig:simple-nr-allocation-timing}
             \end{figure}
 
@@ -1386,7 +1410,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-rtl.pdf}
-                \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:ip} Data Path Unit part of the simple \gls{abbreviation:nr} calculation \gls{abbreviation:ip}.}
+                \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Data Path Unit part of the simple Newton-Raphson (\gls{abbreviation:nr}) calculation \gls{abbreviation:ip}.}
                 \label{fig:simple-nr-rtl}
                 \end{figure}
 
@@ -1397,7 +1421,7 @@ The adjugate matrix is calculated as follows
             The \gls{abbreviation:nr} algorithm iteration jumps are carried out from the state \textit{S10} to state \textit{S1}, when the numebr of iteration is lower than the set total number of iterations, which is hardcoded to the Control Unit. At this implementation, the total number of iterations is se to be 5. In fact, the end of the \gls{abbreviation:nr} algorithm should be determined based on the defect value. In this simple example, the value check of the defect is not implemented. The implementationwould be simple though. The value of register holding the defect values R3 and R4 would be wired to the control unit in the corresponding steps \textit{S4} and \textit{S5} respectively and the comparation with the desired defect value would be performed. If the defect value was smaller than the desired value, the next state of the algorithm would be \textit{S11} and therefore the calculation would end. If the defect was larger than the desired value, the next state would be \textit{S6} and the iteratioun would complete normally and loop from the state \textit{S10} to \textit{S1}.
             \begin{table}[htbp!]
                 \centering
-                \caption{Control signal encoding table for instructions to be processed by the simple \gls{abbreviation:nr} alogrithm solve Module.}
+                \caption{Control signal encoding table for instructions to be processed by the simple Newton-Raphson (\gls{abbreviation:nr}) alogrithm solve Module.}
                 \vspace*{0.15cm}
                 \resizebox{\textwidth}{!}
                     {
@@ -1447,19 +1471,49 @@ S11 &  & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x &
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/png/simple-nr-sim.png}
-                \caption{The whole Verilog simulation of a simple \gls{abbreviation:nr} algorithm. The result is may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
+                \caption{The whole Verilog simulation of a simple Newton-Raphson (\gls{abbreviation:nr}) algorithm. The result is may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
                 \label{fig:simple-nr-sim}
             \end{figure}
 
 
 
 \section{Selective Harmonic Elimination}
+    \subsection{Theory}\label{subsec:theory}
+    \subsection{IP Block Design}
+        \subsubsection{Top module design}
+            The top module of this \gls{abbreviation:ip} is very similar to other developed modules for this paper. The design consists of a Control Unit which sends control signals to the Data Unit. The Data Unit, which consists of registers and computational units incorporates few external sub modules for additional calculations, such as \gls{abbreviation:cordic} and division.\par
+            As for every design presented, the units utilize the \textit{Q32.15} fixed point format for it's computational units and registers, the exception being multiplier computational units, which by the principle of multiplication use format \textit{Q64.30} for the results. When the multiplication results are passed to registers, the values are rounded back to globally used format.\par
+            The design is depicted on Figure \ref{fig:she-top-module}.
+
+
+%            \begin{figure}[htbp!]
+%                \centering
+%                \includegraphics[width=1\textwidth]{src/pdf/she-top-module.pdf}
+            %                \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation unit \gls{abbreviation:ip} block design.}
+%                \label{fig:she-top-module}
+%            \end{figure}
+
+        \subsubsection{Allocation and Timing}\label{sh:allocation-and-timing}
+            The Allocation and Timing diagram, depicted on Figure \ref{fig:she-allocation-timing} describes the algorithm presented in the \hyperref[subsec:she-theory]{\textit{Theory}} section. As can be seen from previous sections, this algorithm has been thoroughly tested before Verilog implementation.\par
+            The Verilog implementation consists of totally 13 states \textit{S0}-\textit{S12}. Through states \textit{S1}-\textit{S11} the \gls{abbreviation:nr} algorithm iterates to calculate the ending results. The state \textit{S0} is a starting state after resetting the unit and state \textit{S12} is ending state, which is reached after the successfull calculation of the last algorithm iteration.\par
+            As previously stated, the \gls{abbreviation:she} calculation module consists of various submodules, which may use other iterative algorithms. Iterations of these sobmodule algorithms are not concern of this part and are implicitly accepted as a part of the \gls{abbreviation:she} module algorithm.
+
+
+
+%            \begin{figure}[htbp!]
+%                \centering
+%                \includegraphics[width=1\textwidth]{src/pdf/she-allocation-timing.pdf}
+            %                \caption{Allocation and Timing diagram for the Data Path Unit part of Selective Harmonic Elimination (\gls{abbreviation:she}) module.}
+%                \label{fig:she-allocation-timing}
+%            \end{figure}
+
+        \subsubsection{Data Path Unit}\label{sh:data-path-unit}
     
-        \subsubsection{Control Unit}\label{subsubsec:selective-harmonic-elimination-control-unit}
+        \subsubsection{Control Unit}\label{subsubsec:sh-elimination-control-unit}
 
 \begin{table}[htbp!]
                 \centering
-                \caption{Control signal encoding table for instructions to be processed by the simple \gls{abbreviation:nr} alogrithm solve Module.}
+                \caption{Control signal encoding table for instructions to be processed by the simple Newton-Raphson (\gls{abbreviation:nr}) alogrithm solve Module.}
                 \vspace*{0.15cm}
                 \resizebox{\textwidth}{!}
                     {
@@ -1508,6 +1562,7 @@ S6                                                       & R12 ← 1/R13; (Div1)
 \end{table}
     \fbar
 
+
 %závěr
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
@@ -1527,13 +1582,9 @@ And this is the conclusion of my report. \gls{symbol:Pn}.
 	\appendix
 	\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{Appendix \thesection:}{2.1em}{}
 	\begin{appendices}
-	\section{List of symbols and abbreviations}
-
+	\section{List of Symbols and Abbreviations}
 		\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
-
 		\fbar
-		\newpage
 		\printglossary[type=symbolslist, style =  myStyleSymbols]
-
 	\end{appendices}
 \end{document}
