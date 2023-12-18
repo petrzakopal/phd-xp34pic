@@ -1480,18 +1480,27 @@ S11 &  & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x &
 \section{Selective Harmonic Elimination}
     \subsection{Theory}\label{subsec:theory}
     \subsection{IP Block Design}
+
+        \subsubsection{Algorithm Block Diagram}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/she-overview.pdf}
+                \caption{Block Diagram of the Selective Harmonic Elimination (\gls{abbreviation:she}) using Newton-Raphson algorithm.}
+                \label{fig:she-overview}
+            \end{figure}
+
         \subsubsection{Top module design}
             The top module of this \gls{abbreviation:ip} is very similar to other developed modules for this paper. The design consists of a Control Unit which sends control signals to the Data Unit. The Data Unit, which consists of registers and computational units incorporates few external sub modules for additional calculations, such as \gls{abbreviation:cordic} and division.\par
             As for every design presented, the units utilize the \textit{Q32.15} fixed point format for it's computational units and registers, the exception being multiplier computational units, which by the principle of multiplication use format \textit{Q64.30} for the results. When the multiplication results are passed to registers, the values are rounded back to globally used format.\par
             The design is depicted on Figure \ref{fig:she-top-module}.
 
 
-%            \begin{figure}[htbp!]
-%                \centering
-%                \includegraphics[width=1\textwidth]{src/pdf/she-top-module.pdf}
-            %                \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation unit \gls{abbreviation:ip} block design.}
-%                \label{fig:she-top-module}
-%            \end{figure}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/she-top-module.pdf}
+                           \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation unit \gls{abbreviation:ip} block design.}
+                \label{fig:she-top-module}
+            \end{figure}
 
         \subsubsection{Allocation and Timing}\label{sh:allocation-and-timing}
             The Allocation and Timing diagram, depicted on Figure \ref{fig:she-allocation-timing} describes the algorithm presented in the \hyperref[subsec:she-theory]{\textit{Theory}} section. As can be seen from previous sections, this algorithm has been thoroughly tested before Verilog implementation.\par
@@ -1500,14 +1509,20 @@ S11 &  & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x &
 
 
 
-%            \begin{figure}[htbp!]
-%                \centering
-%                \includegraphics[width=1\textwidth]{src/pdf/she-allocation-timing.pdf}
-            %                \caption{Allocation and Timing diagram for the Data Path Unit part of Selective Harmonic Elimination (\gls{abbreviation:she}) module.}
-%                \label{fig:she-allocation-timing}
-%            \end{figure}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/she-allocation-timing.pdf}
+                           \caption{Allocation and Timing diagram for the Data Path Unit part of Selective Harmonic Elimination (\gls{abbreviation:she}) module.}
+                \label{fig:she-allocation-timing}
+            \end{figure}
 
         \subsubsection{Data Path Unit}\label{sh:data-path-unit}
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/pdf/she-rtl.pdf}
+                \caption{Register transfer level \gls{abbreviation:rtl} scheme of the Selective Harmonic Elimination Data Path Unit.}
+                \label{fig:she-rtl}
+            \end{figure}
     
         \subsubsection{Control Unit}\label{subsubsec:sh-elimination-control-unit}
 
