@@ -620,7 +620,7 @@ As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{All
 As presented in the section \hyperref[subsection:newton-raphson-algorithm-for-calculating-the-division]{\textit{Newton Rapshon algorithm for calculating the division}} the denominator must be appropriately scaled for the division algorithm to work. This section presents algorithm for scaling the denominator specified in the fixed point number format \textit{Q32.15}. After the scaling value is successfully determined, the numerator is scaled accordingly.
 \par
 The presented algorithm shifts the value of denominator at every positive edge of the clock signal and saves the shifted value in the \texttt{compare} register. Then the combinational circuit is utilized to compare the shifted value in \texttt{compare} register with the number \texttt{1} specified in \textit{Q32.15} format. If the compared value is the same or lower than \texttt{1} the shifting algorithm is done and the value \texttt{scaleToShift} is successfully found. If not, the inner value of shifting bits is incremented and the algorithm proceeds to the next iteration.\par
-tHe presented algorithm is realized in the \textit{denominatorSizeScaleUnit} module and it's pseudocode is depicted in the code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
+The presented algorithm is realized in the \textit{denominatorSizeScaleUnit} module and it's pseudocode is depicted in the code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode for the denominatorSizeScaleUnit module algorithm.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
   at every negative edge of clock or positive edge of reset
@@ -1482,6 +1482,86 @@ S11 &  & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x &
 
     \subsection{High level implementation}
     The algorithm was for rapid prototyping implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.
+\begin{lstlisting}[language={python}, caption={Python implementation of the Selective Harmonic Elimination Algorithm with adjustable modulation index.}, label= {lst:she-python}]
+import math
+import argparse  # for parsing command line arguments
+
+# colorama for colors, easier than init class, maybe later
+# source: https://github.com/tartley/colorama
+from colorama import init as colorama_init
+from colorama import Fore
+from colorama import Style
+
+colorama_init(autoreset=True)  # autoreset color on new line
+
+# class with additional styles
+class style:
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+argParser = argparse.ArgumentParser()  # new object
+argParser.add_argument("-mi", "--modulationIndex", help="set the modulation index 0-1") # adding argument
+args = argParser.parse_args()  # parsing args
+modulationIndex = args.modulationIndex
+
+# Set the desired modulation index
+if not modulationIndex:
+    print()
+    print(style.BOLD+Fore.RED + "You did not specify the modulation index with mi command, specify it now:\n" + style.END)
+    modulationIndex = input()
+
+print("You have specified the modulation index: " + modulationIndex + ".\n")
+
+modulationIndex = float(modulationIndex)
+totalNumberOfIterations = 10
+f10 = modulationIndex * 0.7853981  # modulationIndex * pi/4
+f20 = 0
+x10 = 0.0872664  # 5 degree
+x20 = 1.3439035  # 77 degree
+
+x1 = x10
+x2 = x20
+
+# main NR-LOOP
+for numberOfIteration in range(totalNumberOfIterations):
+    prepDeltaF1 = math.cos(x1) - math.cos(x2)
+    deltaF1 = f10 - prepDeltaF1
+
+    prepDeltaF2 = math.cos(5*x1) - math.cos(5*x2)
+    deltaF2 = f20 - prepDeltaF2
+
+    prepJ11 = math.sin(x1)
+    prepJ01 = math.sin(x2)
+    prepJ10 = 5 * math.sin(5*x1)
+    prepJ00 = 5 * math.sin(5*x2)
+
+
+    prepDet1 = prepJ10 * prepJ01
+    prepDet2 = 5 * prepJ11 * math.sin(5*x2)
+
+    prepDet = prepDet1 - prepDet2
+
+    divDet = 1 / prepDet
+
+    jInv00 = divDet * prepJ00
+    jInv01 = divDet * - prepJ01
+    jInv10 = divDet * prepJ10
+    jInv11 = divDet * - prepJ11
+
+
+    deltaX1 = (jInv00 * deltaF1) + (jInv01 * deltaF2)
+    deltaX2 = (jInv10 * deltaF1) + (jInv11 * deltaF2)
+
+    x1 = x1 + deltaX1
+    x2 = x2 + deltaX2
+
+    print(Fore.CYAN + "numberOfIteration: " + str(numberOfIteration) + style.END)
+# End of the main NR-LOOP
+
+print(Fore.GREEN + "x1: " + str(x1) + style.END)
+print(Fore.GREEN + "x2: " + str(x2) + style.END)
+\end{lstlisting}
     \subsection{IP Block Design}
 
         \subsubsection{Algorithm Block Diagram}
@@ -1501,7 +1581,7 @@ S11 &  & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x & x &
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-top-module.pdf}
-                           \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation unit \gls{abbreviation:ip} block design.}
+                           \caption{Top module design for the Selective Harmonic Elimination unit (\gls{abbreviation:she}).}
                 \label{fig:she-top-module}
             \end{figure}
 
@@ -1552,9 +1632,9 @@ And this is the conclusion of my report. \gls{symbol:Pn}.
 	\appendix
 	\titleformat{\section}{\color{ctublue}\fontspec{Times New Roman}\fontsize{15}{15}\bfseries}{Appendix \thesection:}{2.1em}{}
 	\begin{appendices}
-	\section{List of Symbols and Abbreviations}
+	\section{List of and Abbreviations}
 		\printglossary[type=abbreviationslist, style = myStyleAbbreviations]
 		\fbar
-		\printglossary[type=symbolslist, style =  myStyleSymbols]
+		%\printglossary[type=symbolslist, style =  myStyleSymbols]
 	\end{appendices}
 \end{document}
