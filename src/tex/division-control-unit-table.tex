@@ -1,0 +1,29 @@
+\documentclass[./../../text.tex]{subfiles}
+\begin{document}
+\begin{table}[htbp!]
+  \centering
+  \caption{Control signal encoding table for instructions to be processed by the Division Module.}
+    \vspace*{0.15cm}
+     \resizebox{\textwidth}{!}
+    {
+      \begin{tabular}{!{\vrule width 2pt} c !{\vrule width 2pt} c !{\vrule width 2pt} c  c  c !{\vrule width 2pt} c  c  c  c !{\vrule width 2pt} c  c  c  c !{\vrule width 2pt} c  c  c  c !{\vrule width 2pt} c !{\vrule width 2pt}}\noalign{\hrule height 2pt}
+        \cellcolor[HTML]{B4C7DC} & \cellcolor[HTML]{B4C7DC} & \cellcolor[HTML]{5983B0}\textbf{14} & \cellcolor[HTML]{5983B0}\textbf{13} & \cellcolor[HTML]{5983B0}\textbf{12} & \cellcolor[HTML]{729FCF}\textbf{11} & \cellcolor[HTML]{729FCF}\textbf{10} & \cellcolor[HTML]{729FCF}\textbf{9} & \cellcolor[HTML]{729FCF}\textbf{8} & \cellcolor[HTML]{B4C7DC}\textbf{7} & \cellcolor[HTML]{B4C7DC}\textbf{6} & \cellcolor[HTML]{B4C7DC}\textbf{5} & \cellcolor[HTML]{B4C7DC}\textbf{4} & \cellcolor[HTML]{DEE6EF}\textbf{3} & \cellcolor[HTML]{DEE6EF}\textbf{2} & \cellcolor[HTML]{DEE6EF}\textbf{1} & \cellcolor[HTML]{DEE6EF}\textbf{0} & \multicolumn{1}{c!{\vrule width 2pt}}{\cellcolor[HTML]{FDA977}} \\
+      \rowcolor[HTML]{B4C7DC} 
+      \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{State}} & \multirow{-2}{*}{\cellcolor[HTML]{B4C7DC}\textbf{RTL Code}} & \textbf{ld0} & \textbf{ld1} & \textbf{ld2} & \textbf{ld3} & \textbf{ld4} & \textbf{SelR1} & \textbf{SelR2{[}1{]}} & \textbf{SelR2{[}0{]}} & \textbf{SelR3} & \textbf{SelR4} & \textbf{SelSh1} & \textbf{SelM1{[}1{]}} & \textbf{SelM1{[}0{]}} & \textbf{SelM2} & \textbf{SelS1} & \multicolumn{1}{c!{\vrule width 2pt}}{\multirow{-2}{*}{\cellcolor[HTML]{FDA977}\textbf{CS}}} \\ \noalign{\hrule height 2pt}
+      S0 & R1 ← D; & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 2000h \\ \noalign{\hrule height 2pt}
+      S1 & R1 ← R1\;\textless{}\textless \; 32; (Sh1) & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 15'h2210 \\ \noalign{\hrule height 2pt}
+      \multirow{2}{*}{S2} & R2   ← 1.882 x R1; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{15'h1804} \\ 
+       & R3 ← N; &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\noalign{\hrule height 2pt}
+       \multirow{2}{*}{S3} & R2 ← 2.82 - R2; (Sub1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{15'h18C0} \\ 
+       & R3 ← R3\;\textless{}\textless\;32; (Sh1) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\\noalign{\hrule height 2pt}
+      S4 & R4 ← R2 x R1; (M1) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 420h \\ \noalign{\hrule height 2pt}
+       & R4 ← R2 x R4; (M1) & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{1} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & \multirow{2}{*}{0} & 15'h1528 \\
+      \multirow{-2}{*}{S5} & R2 ← 2 x   R2; (M2) &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ \noalign{\hrule height 2pt}
+      S6 & R2 ← R2 - R4;   (S1) & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 15'h1081 \\ \noalign{\hrule height 2pt}
+      S7 & R4 ← R2 x R3;   (M2) & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 15'h402  \\ \noalign{\hrule height 2pt}
+      S8 & R0 ← R4; & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 4000h\\\noalign{\hrule height 2pt}
+      \end{tabular}
+    }
+  \label{tab:control-signal-division-unit}
+\end{table}
+\end{document}
