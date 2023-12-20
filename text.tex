@@ -1425,7 +1425,7 @@ The adjugate matrix is calculated as follows
                 \end{gathered}
                 \label{eq:she-set-of-base-equations}
             \end{equation}
-            The $V_1 = b_1$, $V_5 = b_5$ are amplitudes of 1st, respectively 5th harmonics. Where for the elimination of the 5th harmonics must be true that $b_5 = 0$. So the set of equations \ref{eq:she-set-of-base-equations} may be simplified as set of Equations \ref{eq:she-final-set-of-transcendental-equations}.
+            The $V_1 = b_1$, $V_5 = b_5$ are the amplitudes of 1st, respectively 5th harmonics. Where for the elimination of the 5th harmonics must be true that $b_5 = 0$. So the set of equations \ref{eq:she-set-of-base-equations} may be simplified as set of Equations \ref{eq:she-final-set-of-transcendental-equations}.
 
             \begin{equation}
                 \begin{gathered}
@@ -1434,8 +1434,10 @@ The adjugate matrix is calculated as follows
                 \end{gathered}
                 \label{eq:she-final-set-of-transcendental-equations}
             \end{equation}
+            The solution of the Equations \ref{eq:she-final-set-of-transcendental-equations} is not trivial as they are nonlinear. There may be various methods how to solve the problem, such as Genetic Algorithms \cite{taghizadeh-Harmonic-elimination-of-multilevel-inverters-using-particle-swarm-optimization, Ortiz-Espinoza-PWM-with-Selective-Harmonic-Elimination-Using-Optimization-Inspired-on-Earthquakes-for-AC-Electric-Drives, Abdelqawee_Naser-SELECTIVE-HARMONIC-ELIMINATION-PWM-VOLTAGE-SOURCE-INVERTER-BASED-ON-GENETIC-ALGORITHM} or algebraic methods \cite{wang-A-Comprehensive-Review-of-Solving-Selective-Harmonic-Elimination-Problem-with-Algebraic-Algorithms, Chiasson-A-Complete-Solution-to-the-Harmonic-Elimination-Problem}. One of the well known used algebraic methods is Newton-Raphson (\gls{abbreviation:nr}) algorithm \cite{Balow-A-Selective-Harmonic-Elimination-SHE-Technique-for-the-Multi-Leveled-Inverters}. On this paper, the solution is obtained solely by using \gls{abbreviation:nr} algorithm. The problem of this method is that it is required to set the initial conditions wellm otherwise the solution may not be found. On the other hand, the Genetic Algorithms need to set the initial values as well, but often random numbers from a predefined intervals are used.\par
+            For real time systems, the approach of \gls{abbreviation:she} may often be to precalculate the required switching angles offline and the utilize the \gls{abbreviation:lut} in a microprocessor to determine which set of angles use for the set reference voltage. Nowadays the \gls{abbreviation:fpga} may be more often utilized to calculate the solution. The caclulation may be highly paralelized and optimized to obtain the solution in near real time. In following sections the prototype implementation in Python and final implementaion in Verilog is presented.
     \subsection{High level implementation}
-    The algorithm was for rapid prototyping implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.
+    The algorithm was for rapid prototyping purposes implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.
 \begin{lstlisting}[language={python}, caption={Python implementation of the Selective Harmonic Elimination Algorithm with adjustable modulation index.}, label= {lst:she-python}]
 import math
 import argparse  # for parsing command line arguments
@@ -1526,6 +1528,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                 \label{fig:she-overview}
             \end{figure}
 
+    \FloatBarrier
         \subsubsection{Top module design}
             The top module of this \gls{abbreviation:ip} is very similar to other developed modules for this paper. The design consists of a Control Unit which sends control signals to the Data Unit. The Data Unit, which consists of registers and computational units incorporates few external sub modules for additional calculations, such as \gls{abbreviation:cordic} and division.\par
             As for every design presented, the units utilize the \textit{Q32.15} fixed point format for it's computational units and registers, the exception being multiplier computational units, which by the principle of multiplication use format \textit{Q64.30} for the results. When the multiplication results are passed to registers, the values are rounded back to globally used format.\par
@@ -1539,6 +1542,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                 \label{fig:she-top-module}
             \end{figure}
 
+    \FloatBarrier
         \subsubsection{Allocation and Timing}\label{sh:allocation-and-timing}
             The Allocation and Timing diagram, depicted on Figure \ref{fig:she-allocation-timing} describes the algorithm presented in the \hyperref[subsec:she-theory]{\textit{Theory}} section. As can be seen from previous sections, this algorithm has been thoroughly tested before Verilog implementation.\par
             The Verilog implementation consists of totally 13 states \textit{S0}-\textit{S12}. Through states \textit{S1}-\textit{S11} the \gls{abbreviation:nr} algorithm iterates to calculate the ending results. The state \textit{S0} is a starting state after resetting the unit and state \textit{S12} is ending state, which is reached after the successfull calculation of the last algorithm iteration.\par
@@ -1553,6 +1557,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                 \label{fig:she-allocation-timing}
             \end{figure}
 
+    \FloatBarrier
         \subsubsection{Data Path Unit}\label{sh:data-path-unit}
             \begin{figure}[htbp!]
                 \centering
@@ -1561,10 +1566,11 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                 \label{fig:she-rtl}
             \end{figure}
     
+    \FloatBarrier
         \subsubsection{Control Unit}\label{subsubsec:sh-elimination-control-unit}
 
         \subfile{src/tex/sh-elimination-control-unit-table.tex}
-    \fbar
+    \FloatBarrier
 
 
 %závěr
