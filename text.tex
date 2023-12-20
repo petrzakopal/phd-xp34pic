@@ -1341,7 +1341,99 @@ The adjugate matrix is calculated as follows
 
 \section{Selective Harmonic Elimination}
     \subsection{Theory}\label{subsec:theory}
+    The original theory for Selective Harmonic Elimination was developen in \cite{patel-Generalized-Techniques-of-Harmonic-Elimination-and-Voltage-Control-in-Thyristor-Inverters:-Part-I--Harmonic-Elimination, patel-Generalized-Techniques-of-Harmonic-Elimination-and-Voltage-Control-in-Thyristor-Inverters:-Part-II-----Voltage-Control-Techniques} and later adopted by many researchers and adopted for multiple voltage invertor topologies. Nowdays the strategy is mainly used in traction applications after control and modulation strategies for start up state end and the reference voltage for the drive is high enough so the six step output voltage is utilized. However general six step output signal yields high order harmonics. When the motor is powered by these high order voltage harmonics, the current with high order harmonics (excluding triplen harmonics, because the symmetric 3 phase motor is considered) is then observed. This current harmonics cause undesirable current ripple, torque ripple and losses \cite{mullner-Modelling-and-precalculation-of-additional-losses-of-inverter-fed-asynchronous-induction-machines-for-traction-applications} which decrease the efficiency of the drive.\par
+    To control the output voltage and reduce unwanted harmonics the Selective Harmonic Elimination (\gls{abbreviation:she}) technique may be employed. The elimination is based on generating the output voltage by switching the the components at certain angles, thus generating waveform with number of pulses to which corresponds the number of elliminated harmonics. The calculation is based on the calculation of fourier coefficients. The principle has been modified for different types of converters, such as multilevel, H-bridge converters or generic Voltage Source Inverters (\gls{abbreviation:vsi}). In this paper, the regular two level \gls{abbreviation:vsi} is considered.\par
+    The considered inverter voltage waveform is depicted in Figure \ref{fig:SixStepPlotWaveform}. The harmonic analysis of the generic waveform is depicted in Figure \ref{fig:SixStepPlotHarmonics}. Note that in a 3 phase symmetrical system the tripplen harmonics would be eliminated as well.
+            \begin{figure}[htbp!]
+                \centering
+                \begin{subfigure}{0.45\textwidth}
+                \includegraphics[width=1\textwidth]{src/png/SixStepPlotWaveform.png}
+                    \caption{Generic Six-Step Waveform output of a two level Voltage Source Inverter. The Voltage value is normalized to a \gls{abbreviation:dc} link voltage.}
+                \label{fig:SixStepPlotWaveform}
+                \end{subfigure}
+                \hspace{0.05\textwidth}
+                \begin{subfigure}{0.45\textwidth}
+                \includegraphics[width=1\textwidth]{src/png/SixStepPlotHarmonics.png}
+                \caption{Generic Six-Step Waveform harmonics analysis. The Voltage value is normalized to a DC link voltage.}
+                \label{fig:SixStepPlotHarmonics}
+                \end{subfigure}
+                \caption{}
+            \end{figure}
+            \FloatBarrier
+            As previously mentioned, the method is based on a Fourier coefficient analysis. When the odd quarter-wave symmetry of the waveform is assumend, the $a_n$ Fourier coefficient is zero (as mentioned in the Equation \ref{eq:she-first-fourier-coefficient-zero}), whereas the $b_n$ coefficient may be written as Equation \ref{eq:she-second-fourier-coefficient}.
 
+            \begin{equation}
+                a_n = 0,
+                \label{eq:she-first-fourier-coefficient-zero}
+            \end{equation}
+
+            \begin{equation}
+                b_n = \frac{1}{T} \int_{0}^{T} x(n\omega t)\sin(\omega t) \dd \omega t,
+                \label{eq:she-second-fourier-coefficient}
+            \end{equation}
+            where the $T$ is periode, $x(\omega t)$ description of the \gls{abbreviation:vsi} output waveform and $n$ is the order of the harmonics.
+
+            When assuming quarter-wave symmetry the Equation \ref{eq:she-second-fourier-coefficient} may be rewritten as
+
+            \begin{equation}
+                b_n = \frac{8}{T} \int_{0}^{T/4} x(\omega t) \sin (n\omega t) \dd \omega t = \frac{8}{2 \pi} \int_{0}^{2 \pi/4} x(\omega t) \sin (n\omega t) \dd \omega t = \frac{4}{\pi} \int_{0}^{\frac{\pi}{2}} x(\omega t) \sin (n\omega t) \dd \omega t.
+            \end{equation}
+
+            The function $x(\omega t)$ describes the output voltage pulse value normalized to a \gls{abbreviation:dc} link voltage. The Equation \ref{eq:she-second-fourier-coefficient} may then be rewritten using the substituion of $\omega t$ by the angles $\alpha$ which also describe the output waveform dependent on radians and that the function $x(\alpha)$ yields $1$ when the output voltage pulse is positive and $-1$ when negative. The rewritten equation \ref{eq:she-second-fourier-coefficient} when assuming quarter-wave symmetry
+
+            \begin{equation}
+                b_n = \sum_{k=1}^{M} \frac{8}{T} \int_{\alpha_k}^{\alpha_{k+1}} x(\alpha) \sin(n\alpha) \dd \alpha.
+            \end{equation}
+
+           Where $M$ is number of pulses in half periode of the otput signal. When assuming that the interal is calculated for states when the $x(\alpha_k)$ is $1$ or $-1$, the function may be raplaced by a constant, thus the integral calculation is quite simple.
+
+           \begin{equation}
+               \begin{gathered}
+                    b_n = \frac{4}{\pi} \sum_{k=1}^{M} \frac{1}{n} \left[ - \cos(n\alpha) \right]_{\alpha_k}^{n\alpha_{k+1}}
+                    = \frac{4}{\pi n} \sum_{k=1}^{M} \left[ \cos(n\alpha_k) - \cos(n\alpha_{k-1}) \right].
+               \end{gathered}
+               \label{eq:she-equation-integration}
+           \end{equation}
+
+           The Equation \ref{eq:she-equation-integration} can be then further simplified by observing the results of the summation for $M = 2$.
+            
+            \begin{equation}
+                \begin{gathered}
+                    b_n = \frac{4}{\pi n} \sum_{k=1}^{2} \left[ \cos(n\alpha_k) - \cos(n\alpha_{k-1}) \right] = \frac{4}{\pi n} \left[ (\cos(n\alpha_1) - \cos(n\alpha_2)) + (\cos(n\alpha_2) - \cos(n\alpha_3)) \right]
+                    =
+                    \\
+                    =
+                    \frac{4}{\pi n} (\cos(n\alpha_1) - \cos(n\alpha_3)).
+                \end{gathered}
+            \end{equation}
+
+            According to \cite{patel-Generalized-Techniques-of-Harmonic-Elimination-and-Voltage-Control-in-Thyristor-Inverters:-Part-I--Harmonic-Elimination} and the example calculation for $M = 2$, the further simplification of the Equation \ref{eq:she-equation-integration} is Equation \ref{eq:she-final-transcendetnal-equation}.
+
+            \begin{equation}
+                b_n = \frac{4}{\pi n} \sum_{k=1}^{M} (-1)^{k+1} \cos(n\alpha_k).
+                \label{eq:she-final-transcendetnal-equation}
+            \end{equation}
+
+            Whereas it can be said, that the number of eliminated odd harmonics is $N = M-1$.\par
+
+            To maintain clarity of this paper only the 5th harmonics is being eliminated by the designed unit. The set of equations to be solved to eliminated one harmonics is as follows.
+
+            \begin{equation}
+                \begin{gathered}
+                    V_1 = b_1 = \frac{4}{\pi} \left[ \cos(\alpha_1) - \cos(\alpha_2) \right],\\
+                    V_5 = b_5 = \frac{4}{5 \pi} \left[ \cos(5 \alpha_1) - \cos(5 \alpha_2) \right].\\
+                \end{gathered}
+                \label{eq:she-set-of-base-equations}
+            \end{equation}
+            The $V_1 = b_1$, $V_5 = b_5$ are amplitudes of 1st, respectively 5th harmonics. Where for the elimination of the 5th harmonics must be true that $b_5 = 0$. So the set of equations \ref{eq:she-set-of-base-equations} may be simplified as set of Equations \ref{eq:she-final-set-of-transcendental-equations}.
+
+            \begin{equation}
+                \begin{gathered}
+                    \frac{4 V_1}{\pi} = \cos(\alpha_1) - \cos(\alpha_2),\\
+                    0 = \cos(5 \alpha_1) - \cos(5 \alpha_2).\\
+                \end{gathered}
+                \label{eq:she-final-set-of-transcendental-equations}
+            \end{equation}
     \subsection{High level implementation}
     The algorithm was for rapid prototyping implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.
 \begin{lstlisting}[language={python}, caption={Python implementation of the Selective Harmonic Elimination Algorithm with adjustable modulation index.}, label= {lst:she-python}]
