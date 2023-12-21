@@ -1346,16 +1346,16 @@ The adjugate matrix is calculated as follows
     The considered inverter voltage waveform is depicted in Figure \ref{fig:SixStepPlotWaveform}. The harmonic analysis of the generic waveform is depicted in Figure \ref{fig:SixStepPlotHarmonics}. Note that in a 3 phase symmetrical system the tripplen harmonics would be eliminated as well.
             \begin{figure}[htbp!]
                 \centering
-                \begin{subfigure}{0.45\textwidth}
-                \includegraphics[width=1\textwidth]{src/png/SixStepPlotWaveform.png}
+                \begin{subfigure}[t]{0.45\textwidth}
+                    \includegraphics[width=1\textwidth]{src/png/SixStepPlotWaveform.png}
                     \caption{Generic Six-Step Waveform output of a two level Voltage Source Inverter. The Voltage value is normalized to a \gls{abbreviation:dc} link voltage.}
-                \label{fig:SixStepPlotWaveform}
+                    \label{fig:SixStepPlotWaveform}
                 \end{subfigure}
                 \hspace{0.05\textwidth}
-                \begin{subfigure}{0.45\textwidth}
-                \includegraphics[width=1\textwidth]{src/png/SixStepPlotHarmonics.png}
-                \caption{Generic Six-Step Waveform harmonics analysis. The Voltage value is normalized to a DC link voltage.}
-                \label{fig:SixStepPlotHarmonics}
+                \begin{subfigure}[t]{0.45\textwidth}
+                    \includegraphics[width=1\textwidth]{src/png/SixStepPlotHarmonics.png}
+                    \caption{Generic Six-Step Waveform harmonics analysis. The Voltage value is normalized to a DC link voltage.}
+                    \label{fig:SixStepPlotHarmonics}
                 \end{subfigure}
                 \caption{}
             \end{figure}
@@ -1559,19 +1559,40 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
 
     \FloatBarrier
         \subsubsection{Data Path Unit}\label{sh:data-path-unit}
+            As can be observed from the Figure \ref{fig:she-rtl} the Data Path unit for solving the transcendetal equations is more complex than previously presented units. Obviously the design could be further simplified, i.e., reduce the number of registers and calculation units. This simplification would resoult in a trade of speed for less complexity. The less complex the design, the less \gls{abbreviation:fpga} resources, i.e., \gls{abbreviation:lut}s, is needed for the realization of the design. This paper mainly focuses on speed and clarity, so the design consists of thirteen data registers, four \gls{abbreviation:cordic} units, four multiplication units, two adders, two subtractors, one division unit and one invertor unit, which is implemeted directly in the registers logic.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-rtl.pdf}
-                \caption{Register transfer level \gls{abbreviation:rtl} scheme of the Selective Harmonic Elimination Data Path Unit.}
+                \caption{Register transfer level (\gls{abbreviation:rtl}) scheme of the Selective Harmonic Elimination Data Path Unit.}
                 \label{fig:she-rtl}
             \end{figure}
     
     \FloatBarrier
         \subsubsection{Control Unit}\label{subsubsec:sh-elimination-control-unit}
+            Control unit signal specification can be observed in the Table \ref{tab:control-signal-she-unit}. If the unit design was less complex, i.e., with smaller amount of registers, the control signal length would be smaller, but the number of states would be hightened.
 
         \subfile{src/tex/sh-elimination-control-unit-table.tex}
     \FloatBarrier
 
+    \subsubsection{Inverter output voltage analysis for Verilog implementation}
+        The simulated \gls{abbreviation:vsi} output phase voltage when the \gls{abbreviation:she} algorithm is employed for the modulation index $m = 1$ in Verilog is depicted in the Figure \ref{fig:VerilogPlotWaveform}. The harmonic analysis for the presented waveform may be observed in the Figure \ref{fig:VerilogPlotHarmonics}. As previously stated, please note that in the 3 phase symmetrical system, the triplen harmonics would be eliminated as well. As can be seen, the undesired 5th harmonics has been eliminated. The calculated angles after ten iterations of the \gls{abbreviation:nr} algorithm are $\alpha_1 = 0.06341$ and $\alpha_2 = 1.320098$. Obviously in the design the numbers are formatted using \textit{Q32.15} format.
+
+            \begin{figure}[htbp!]
+                \centering
+                \begin{subfigure}[t]{0.45\textwidth}
+                    \includegraphics[width=1\textwidth]{src/png/VerilogPlotWaveform.png}
+                    \caption{Waveform output of a two level Voltage Source Inverter when the Selective Harmonic Elimination method is applied with Verilog calculated angles. The Voltage value is normalized to a \gls{abbreviation:dc} link voltage.}
+                    \label{fig:VerilogPlotWaveform}
+                \end{subfigure}
+                \hspace{0.05\textwidth}
+                \begin{subfigure}[t]{0.45\textwidth}
+                    \includegraphics[width=1\textwidth]{src/png/VerilogPlotHarmonics.png}
+                    \caption{Waveform harmonics analysis of a output voltage of a two level Voltage Source Inverter utilising switching angles for the Selective Harmonic Elimination calculated in Verilog unit. The Voltage value is normalized to a DC link voltage.}
+                    \label{fig:VerilogPlotHarmonics}
+                \end{subfigure}
+                \caption{}
+            \end{figure}
+            \FloatBarrier
 
 %závěr
 \newpage
