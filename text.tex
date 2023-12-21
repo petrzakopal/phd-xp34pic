@@ -1436,8 +1436,11 @@ The adjugate matrix is calculated as follows
             \end{equation}
             The solution of the Equations \ref{eq:she-final-set-of-transcendental-equations} is not trivial as they are nonlinear. There may be various methods how to solve the problem, such as Genetic Algorithms \cite{taghizadeh-Harmonic-elimination-of-multilevel-inverters-using-particle-swarm-optimization, Ortiz-Espinoza-PWM-with-Selective-Harmonic-Elimination-Using-Optimization-Inspired-on-Earthquakes-for-AC-Electric-Drives, Abdelqawee_Naser-SELECTIVE-HARMONIC-ELIMINATION-PWM-VOLTAGE-SOURCE-INVERTER-BASED-ON-GENETIC-ALGORITHM} or algebraic methods \cite{wang-A-Comprehensive-Review-of-Solving-Selective-Harmonic-Elimination-Problem-with-Algebraic-Algorithms, Chiasson-A-Complete-Solution-to-the-Harmonic-Elimination-Problem}. One of the well known used algebraic methods is Newton-Raphson (\gls{abbreviation:nr}) algorithm \cite{Balow-A-Selective-Harmonic-Elimination-SHE-Technique-for-the-Multi-Leveled-Inverters}. On this paper, the solution is obtained solely by using \gls{abbreviation:nr} algorithm. The problem of this method is that it is required to set the initial conditions wellm otherwise the solution may not be found. On the other hand, the Genetic Algorithms need to set the initial values as well, but often random numbers from a predefined intervals are used.\par
             For real time systems, the approach of \gls{abbreviation:she} may often be to precalculate the required switching angles offline and the utilize the \gls{abbreviation:lut} in a microprocessor to determine which set of angles use for the set reference voltage. Nowadays the \gls{abbreviation:fpga} may be more often utilized to calculate the solution. The caclulation may be highly paralelized and optimized to obtain the solution in near real time. In following sections the prototype implementation in Python and final implementaion in Verilog is presented.
+
+    \subsection{Simplification for Verilog and High level implementation}
     \subsection{High level implementation}
-    The algorithm was for rapid prototyping purposes implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.
+    The algorithm was for rapid prototyping purposes implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.\par
+    The script may be run with command \textit{python3 she.py -mi <number>}, where \textit{<number>} is the requested modulation index.
 \begin{lstlisting}[language={python}, caption={Python implementation of the Selective Harmonic Elimination Algorithm with adjustable modulation index.}, label= {lst:she-python}]
 import math
 import argparse  # for parsing command line arguments
@@ -1575,7 +1578,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
     \FloatBarrier
 
     \subsubsection{Inverter output voltage analysis for Verilog implementation}
-        The simulated \gls{abbreviation:vsi} output phase voltage when the \gls{abbreviation:she} algorithm is employed for the modulation index $m = 1$ in Verilog is depicted in the Figure \ref{fig:VerilogPlotWaveform}. The harmonic analysis for the presented waveform may be observed in the Figure \ref{fig:VerilogPlotHarmonics}. As previously stated, please note that in the 3 phase symmetrical system, the triplen harmonics would be eliminated as well. As can be seen, the undesired 5th harmonics has been eliminated. The calculated angles after ten iterations of the \gls{abbreviation:nr} algorithm are $\alpha_1 = 0.06341$ and $\alpha_2 = 1.320098$. Obviously in the design the numbers are formatted using \textit{Q32.15} format.
+        The simulated \gls{abbreviation:vsi} output phase voltage when the \gls{abbreviation:she} algorithm is employed for the modulation index $m = 1$ in Verilog is depicted in the Figure \ref{fig:VerilogPlotWaveform}. The harmonic analysis for the presented waveform may be observed in the Figure \ref{fig:VerilogPlotHarmonics}. As previously stated, please note that in the 3 phase symmetrical system, the triplen harmonics would be eliminated as well. As can be seen, the undesired 5th harmonics has been eliminated. The calculated angles after ten iterations of the \gls{abbreviation:nr} algorithm are $\alpha_1 = 0.06341$ rad and $\alpha_2 = 1.320098$ rad. Obviously in the design the numbers are formatted using \textit{Q32.15} fixed point format.
 
             \begin{figure}[htbp!]
                 \centering
@@ -1589,6 +1592,26 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                     \includegraphics[width=1\textwidth]{src/png/VerilogPlotHarmonics.png}
                     \caption{Waveform harmonics analysis of a output voltage of a two level Voltage Source Inverter utilising switching angles for the Selective Harmonic Elimination calculated in Verilog unit. The Voltage value is normalized to a DC link voltage.}
                     \label{fig:VerilogPlotHarmonics}
+                \end{subfigure}
+                \caption{}
+            \end{figure}
+
+
+
+
+
+            \begin{figure}[htbp!]
+                \centering
+                \begin{subfigure}[t]{0.45\textwidth}
+                    \includegraphics[width=1\textwidth]{src/png/ComparataionPlotSixStepVerilogSheHarmonics.png}
+                    \caption{Comparation of a Waveform output of a two level Voltage Source Inverter when the Selective Harmonic Elimination method is or is not applied with Verilog calculated angles. The Voltage value is normalized to a \gls{abbreviation:dc} link voltage.}
+                    \label{fig:ComparataionPlotSixStepVerilogSheHarmonics}
+                \end{subfigure}
+                \hspace{0.05\textwidth}
+                \begin{subfigure}[t]{0.45\textwidth}
+                    \includegraphics[width=1\textwidth]{src/png/ComparataionPlotSixStepVerilogSheWaveform.png}
+                    \caption{Compartion of a Waveform harmonics analysis of a output voltage of a two level Voltage Source Inverter with and without the Selective Harmonic Elimination. The Voltage value is normalized to a DC link voltage.}
+                    \label{fig:ComparataionPlotSixStepVerilogSheWaveform}
                 \end{subfigure}
                 \caption{}
             \end{figure}
