@@ -81,6 +81,9 @@
 \usepackage[figurename=Fig.,font=small,labelfont=it,textfont=it]{caption} %for renaming figures instead of renewcommand, small for 11pt default is 10pt as needed in word template
 \usepackage[tablename=Tab.,font=small,labelfont=it,
             textfont=it]{caption} %for renaming tables instead of renewcommand
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
             
 % List of abbreviations and symbols
 % Original code author: Jakub Kučera
@@ -494,7 +497,7 @@ literate={\{}{{\textcolor{ctured}{\{}}}{1}
 
 \section{Introduction}
 This paper presents the design of multiple \gls{abbreviation:fpga} units, which are designed to suit near real-time constraints of controlling the electric drives or for Hardware In Loop systems.\par
-The goal of this paper also was to investigate how to design the speed optimized units using open source toolchain. The final designed unit is capable of solving the Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. Many researches opt in for proprietary design software, which very often offers premade Intelectual Property (\gls{abbreviation:ip}) blocks, which can be used to design the specified circuit. However in this paper the design was created, tested and analyzed solely using the State of The Art Open Source software without any \gls{abbreviation:ip} catalogs. This platformless solution ensures, that the designed units may possibly be synthetized for various \gls{abbreviation:fpga} chips without any major barriers.\par
+The goal of this paper also was to investigate how to design the speed optimized units using open source toolchain. The final designed unit is capable of solving the Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. Many researches opt for proprietary design software, which very often offers premade Intelectual Property (\gls{abbreviation:ip}) blocks, which can be used to design the specified circuit. However in this paper the design was created, tested and analyzed solely using the State of The Art Open Source software without any \gls{abbreviation:ip} catalogs. This platformless solution ensures, that the designed units may possibly be synthetized for various \gls{abbreviation:fpga} chips without any major barriers.\par
 The structure of the paper is as follows: Section \ref{sec:calculating-the-division-of-fixed-point-numbers} presents a unit for division of two arbitrary values by utilizing the Newton-Raphson (\gls{abbreviation:nr}) algorithm. Section \ref{sec:using-cordic-to-calculate-trigonometric-functions} presents design of the Coordinate Rotation Digital Computer (\gls{abbreviation:she}) optimized for speed, rather than lesser complexity. Section \ref{sec:simple-set-of-nonlinear-equations-solved-by-a-newton-raphson-algorithm-using-custom-circuit-implementation} introduces design which solves two non-linear equations with a Newton-Raphson (\gls{abbreviation:nr}) algorithm, presenting suitability of \gls{abbreviation:fpga} designs for iterative algorithms. Section \ref{sec:selective-harmonic-elimination} presents unit for solving the Selective Harmonic Elimination problem using previously developed modules.
 
 \flushbottom %vyčištění stránky
@@ -502,32 +505,32 @@ The structure of the paper is as follows: Section \ref{sec:calculating-the-divis
 %konec úvodu
 
 \section{Notes on all of the circuit designs in Verilog}
-    All of the designs are created using pure Verilog code and tested through Free and Open-Source Software (\gls{abbreviation:foss}). The decision to opt for \gls{abbreviation:foss}  was deliberate, aiming to prevent any vendor-locking to specific hardware or predefined \gls{abbreviation:ip}s. Predefined \gls{abbreviation:ip}s  are often optimized by a specific hardware vendor and intended for use with that vendor's hardware. However, the hardware may not always be available or suitable for a specific application. Academics and numerous companies opt for open-source and open-hardware approaches to prevent vendor lock-in. Once the design and algorithm are thoroughly understood, they can be initially implemented without any specific platform in mind. Later, when selecting the device vendor, the design can be modified to suit the specific hardware requirements.\par
+    All of the designs presented in this paper are created using pure Verilog code and tested through Free and Open-Source Software (\gls{abbreviation:foss}). The decision to opt for \gls{abbreviation:foss}  was deliberate, aiming to prevent any vendor-locking to specific hardware or predefined \gls{abbreviation:ip}s. Predefined \gls{abbreviation:ip}s  are often optimized by a specific hardware vendor and intended for use with that vendor's hardware. However, the hardware may not always be available or suitable for a specific application. Academics and numerous companies opt for open-source and open-hardware approaches to prevent vendor lock-in. Once the design and algorithm are thoroughly understood, they can be initially implemented without any specific platform in mind. Later, when selecting the device vendor, the design can be modified to suit the specific hardware requirements.\par
     That is why Verilog, with Cocotb \cite{cocotb} (Test Bench creation tool) and Verilator \cite{verilator} (simulator) have been used for designing the circuits presented in this paper.\par
 
 \section{Calculating the division of fixed point numbers}\label{sec:calculating-the-division-of-fixed-point-numbers}
-Typically, when employing numerical methods to solve transcendental equations, the calculation of the division of two input numbers becomes necessary. This requirement persists even when applying the Newton-Raphson (\gls{abbreviation:nr}) method to solve a set of two equations, as it entails computing the reciprocal value of the Jacobian determinant.\par
+Typically, when employing numerical methods to solve transcendental equations, the calculation of the division of two input numbers becomes necessary. This requirement persists even when applying the Newton-Raphson (\gls{abbreviation:nr}) method to solve a set of two equations, because computing the reciprocal value of the Jacobian determinant.\par
 There are some \gls{abbreviation:ip} blocks available, which are capable of calculating the division of two numbers, but the blocks are usually either vendor specific intellectual property \gls{abbreviation:ip} \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
 The drawback of vendor-specific \gls{abbreviation:ip}s lies in their limited compatibility, often preventing their use with \gls{abbreviation:fpga} chips from different vendors. On the other hand the vendor specific \gls{abbreviation:ip}s are usually optimized and able to use the specific type of resources available at the vendor's chip which resolve in better performance.\par
 To preserve the compatibility of the design with chips from multiple vendors, the custom solution for division design based on the very known Newton Raphson (\gls{abbreviation:nr}) algorithm was developed. \cite{burke-fixed-point-math-library}
 
 \subsection{Newton Rapshon algorithm for calculating the division}\label{subsection:newton-raphson-algorithm-for-calculating-the-division}
-General Newton Raphson (\gls{abbreviation:nr}) algorithm is a well known approach to numerically solve equations. It is the reason why it is utilized in many algorithms. However, the negative aspect of \gls{abbreviation:nr} is that it's convergency strongly depends on initial values of unknown variables. When the initial variables are chosen poorly, the performed number of iterations before the convergency is reached can be high.\par
-To reach the fastest convergency possible (determined in number of iterations) apart from the scaling the dominator into the interval [0.5,1] the initial value calculation formula should be utilized. \cite{burke-fixed-point-math-library}
-The formula for calculating the initial value eq. \ref{eq:initial-nr-value-formula} is applied after the scaling of denominator is performed. The algorithm developed for the appropriate scaling is explained in the \hyperref[subsec:calculating-number-of-bits-to-shift-the-denominator]{\textit{Calculating number of bits to shift the denominator}}.
+General Newton Raphson (\gls{abbreviation:nr}) algorithm is a well known approach to numerically solve equations. It is the reason why it is utilized in many algorithms. However, the negative aspect of \gls{abbreviation:nr} is that it's convergency strongly depends on initial values of variables. When the initial values are chosen poorly, the performed number of iterations before the convergency is reached can be high.\par
+To reach the fastest convergency possible (determined in number of iterations) apart from the scaling the dominator into the interval [0.5,1] the initial value calculation formula should be utilized. \cite{burke-fixed-point-math-library}\par
+The Equation \ref{eq:initial-nr-value-formula} for calculating the initial value  is applied after the scaling of denominator is performed. The algorithm developed for the appropriate scaling is explained in the \hyperref[subsec:calculating-number-of-bits-to-shift-the-denominator]{\textit{Calculating number of bits to shift the denominator}}.
 
 \begin{equation}\label{eq:initial-nr-value-formula}
 x_0 = \frac{48}{17} - \frac{32}{17} D,
 \end{equation}
-where the $x_0$ is the initial value for \gls{abbreviation:nr} algorithm and $D$ is the denominator value for calculating the expression $N/D$.\par
-Because the fixed point number format \textit{Q32.15} is used, the fractional numbers in equation \ref{eq:initial-nr-value-formula} are rounded to 2.8229 (32'sb00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'sb00000000000000001\_111000011100101 in binary) respectively.\par
-After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea for using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication, which can be synthetized in the \gls{abbreviation:fpga} fabric. For the \gls{abbreviation:nr} algorithm the function with root is $1/D$ is essential. There may be many functions, which root is the searched value $1/D$ but the most trivial is eq. \ref{eq:equation-with-appropriate-root}.\par
+where the $x_0$ is the initial value for \gls{abbreviation:nr} algorithm, $D$ is the denominator value for calculating the expression $N/D$.\par
+Because in the module design implemented via Verilog the fixed point number format \textit{Q32.15} is used, the fractional numbers from Equation \ref{eq:initial-nr-value-formula} are rounded to\newline2.8229 (32'sb00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'sb00000000000000001\_111000011100101 in binary) respectively.\par
+After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea of using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication which can be synthetized in the \gls{abbreviation:fpga} fabric. When employing the \gls{abbreviation:nr} algorithm for finding the values of $N/D$ the function with root is $1/D$ is essential. After the root of the function is found, it is then multiplied by the numerator value, and te solution $N/D$ is obtained. There may be many functions, which root is the searched value $1/D$ but the most trivial is Equation \ref{eq:equation-with-appropriate-root}.\par
 
 \begin{equation}\label{eq:equation-with-appropriate-root}
-  \text{F} (x) = \frac{1}{x} - D.
+  \text{F} (x_i) = \frac{1}{x_i} - D.
 \end{equation}
 
-\noindent For the derivative at the point of $x_i$ then applies eq. \ref{eq:nr-division-derivative-at-the-point}.
+\noindent For the derivative at the point of $x_i$ then applies Equation \ref{eq:nr-division-derivative-at-the-point}.
 
 \begin{equation}\label{eq:nr-division-derivative-at-the-point}
   \frac{\dd F(x_i)}{\dd x} = F'(x_i) = \frac{F (x_{i+1}) - F (x_i)}{x_{i+1}-x_i}.
@@ -551,7 +554,7 @@ The design of this unit is consists of 4 main modules:
   \item \textbf{scaling unit module}, used for calculating the number of bits needed for shifting the denominator value to the interval [0.5,1].
 \end{itemize}
 \subsubsection{Top module design}\label{subsubsec:division-top-module-design}
-The top module wraps all of the presented modules (\textbf{data unit module}, \textbf{control unit module}, \textbf{scaling unit module}). The basic structure of connected modules of this top design is depicted in the fig. \ref{fig:division-top-module}. Thanks to this wrapper it is possible to test the created modules with Verilog Testbench, Verilator \cite{verilator} or Cocotb \cite{cocotb}.
+The top module wraps all of the presented modules (\textbf{data unit module}, \textbf{control unit module}, \textbf{scaling unit module}). The basic structure of connected modules of this top design is depicted in the Figure \ref{fig:division-top-module}. Thanks to this wrapper it is possible to test the created modules with Verilog Testbench, Verilator \cite{verilator} or Cocotb \cite{cocotb}.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
@@ -564,7 +567,7 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \fbar
 \subsubsection{Allocation and Timing}\label{subsubsec:division-allocation-and-timing}
 The diagram of the data flow and timing of the algorithm is displayed in the Figure \ref{fig:division-allocation-timing}.\par
-The whole algorithm consists of nine steps. The first four steps are used for calculating the initial value of $x_0$ as described in the equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, the root of the equation \ref{eq:equation-with-appropriate-root} so the searched value of $1/D$. The following iteration begins at the step labeled as \textit{S5}. The iterative process continues until a predefined stop condition is met, such as reaching a specified number of iterations.
+The whole algorithm comprises nine steps. The initial four steps are used for calculating the initial value of $x_0$ as presented in the Equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, thus the root of the Equation \ref{eq:equation-with-appropriate-root} which in fact is the searched value of $1/D$. The following iteration begins at the step labeled as \textit{S5}. The iterative process continues until a predefined stop condition is satisfied, such as reaching a specified number of iterations.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
@@ -575,9 +578,9 @@ The whole algorithm consists of nine steps. The first four steps are used for ca
 \fbar
 \subsubsection{Data Path Module}
 The structure of the Data Path Module is depicted in the Figure \ref{fig:division-rtl}. The module was specifically designed to serve the needs of the division algorithm. It comprises five registers labeled $R0$ through $R4$, two multipliers $M1$, $M2$ and one bit shifter.\par
-The module is controlled by the control unit with the control signal labeled as CS. The encoding table with the labels which corresponds to the Data Path Unit module is presented in the section \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}}.\par
+The module is controlled by the control unit using the control signal labeled as CS. The encoding table with the labels corresponding to the Data Path Unit module is presented in the section \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}}.\par
 The result of each iteration from the division algorithm is passed to a register $R0$.\par
-The Data Path Module unit also covers the possibility of negative denominator and numerator. Because the values are stored in a custom \textit{Q32.15} fixed point format (whole number comprises of 32 bits, 15 bits fractional part, 17 bits integer part), the algorithm checks if the $D$ or $N$ values are higher than $0h8000$ and determine it's actual sign and the sets sign of the result. If the analyzed number is determined negative, it is transformed to value positive and then used in the presented division algorithm. This transformation is needed because of the algorithm calculating the bits to shift the denominator in the interval.
+The Data Path Module unit also covers the possibility of using negative denominator and numerator. Because the values are stored in a custom \textit{Q32.15} fixed point format (whole number comprises of 32 bits, 15 bits fractional part, 17 bits integer part), the algorithm checks if the $D$ or $N$ values are higher than $0h8000$ and determine it's actual sign and the sets sign of the result. If the analyzed number is determined negative, it is transformed to value positive and then used in the presented division algorithm. This transformation is needed because of the algorithm calculating the bits to shift the denominator in the interval.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
@@ -588,46 +591,63 @@ The Data Path Module unit also covers the possibility of negative denominator an
 
 \fbar
 \subsubsection{Control Unit}\label{subsubsec:division-control-unit}
-The signals from Control Unit to Data Path Module are encoded in the CS signal. The CS signal with the corresponding instructions for the steps $S0$–$S8$ of the \gls{abbreviation:fsm} is presented in the table \ref{tab:control-signal-division-unit}. For cleaner code, the signal is passed to the Control Unit in the hexadecimal format.\par
-The number of the iteration is also set in the Control Unit. The value is used in this module to determine the stop condition of the calculation.\par
-As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}} section, after the step \textit{S8}, the \gls{abbreviation:fsm} restarts at the state \textit{S4} with new $x_i$ values to be used in the current iteration. This jump is not depicted in the table for CS signal.
+Signals from Control Unit to Data Path Module are encoded in the CS signal. Table \ref{tab:control-signal-division-unit} displays the CS signal along with the corresponding instructions for steps $S0$–$S8$ of the \gls{abbreviation:fsm}. To enhance code clarity the signal is passed to the Control Unit in the hexadecimal format.\par
+The number of the iteration of the Finite State Machine (\gls{abbreviation:fsm}) is also set in the Control Unit. This iteration number is subsequently used in the module to check for the stop condition of the calculation loop.\par
+As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}} section, after the step \textit{S8}, the \gls{abbreviation:fsm} restarts at the state \textit{S4} with new $x_i$ values as inputs. This state change is not depicted in the Table \ref{tab:control-signal-division-unit} for CS signal.
+
 \subfile{src/tex/division-control-unit-table.tex}
 \fbar
+
 \subsection{Calculating number of bits to shift the denominator}\label{subsec:calculating-number-of-bits-to-shift-the-denominator}
 As presented in the section \hyperref[subsection:newton-raphson-algorithm-for-calculating-the-division]{\textit{Newton Rapshon algorithm for calculating the division}} the denominator must be appropriately scaled for the division algorithm to work. This section presents algorithm for scaling the denominator specified in the fixed point number format \textit{Q32.15}. After the scaling value is successfully determined, the numerator is scaled accordingly.
 \par
 The presented algorithm shifts the value of denominator at every positive edge of the clock signal and saves the shifted value in the \texttt{compare} register. Then the combinational circuit is utilized to compare the shifted value in \texttt{compare} register with the number \texttt{1} specified in \textit{Q32.15} format. If the compared value is the same or lower than \texttt{1} the shifting algorithm is done and the value \texttt{scaleToShift} is successfully found. If not, the inner value of shifting bits is incremented and the algorithm proceeds to the next iteration.\par
 The presented algorithm is realized in the \textit{denominatorSizeScaleUnit} module and it's pseudocode is depicted in the code \ref{lst:denominatorSizeScaleUnit-pseudocode}.
 
-\begin{lstlisting}[language={pseudocode}, caption={Pseudocode for the denominatorSizeScaleUnit module algorithm.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
-  at every negative edge of clock or positive edge of reset
-  if(rst)
-    scaleToShift = 0;
-    scaleToShiftInternal = 1;
-    started = 0;
-  end if
-  else if (start)
-  started = 1;
-  end else if
+%\begin{algorithm}
+%\caption{Pseudocode for the denominatorSizeScaleUnit module algorithm.}\label{alg:cap}
+%\begin{algorithmic}
+%\State at every negative edge of clock or positive edge of reset
+%    \If{rst}
+%        \State scaleToShift = 0;
+%        \State scaleToShiftInternal = 1;
+%        \State started = 0;
+%    \EndIf
+%\end{algorithmic}
+%\end{algorithm}
 
-  at every positive edge of clock
-  if (compare <= 32'b00000000000000001_000000000000000)
-  done = 1;
-  started = 0;
-  scaleToShift = scaleToShiftInternal;
-  end if
-  else
-  done = 0;
-  scaleToShiftInternal = scaleToShiftInternal + 1;
-  end else
+\begin{lstlisting}[language={pseudocode}, caption={Pseudocode for the denominatorSizeScaleUnit module algorithm.}, label= {lst:denominatorSizeScaleUnit-pseudocode}]
+at every negative edge of clock or positive edge of reset
+    if(rst)
+        scaleToShift = 0;
+        scaleToShiftInternal = 1;
+        started = 0;
+    end if
+    else if (start)
+        started = 1;
+    end else if
+
+at every positive edge of clock
+    if (compare <= 32'b00000000000000001_000000000000000)
+        done = 1;
+        started = 0;
+        scaleToShift = scaleToShiftInternal;
+    end if
+    else
+        done = 0;
+        scaleToShiftInternal = scaleToShiftInternal + 1;
+    end if
+
+at every positive edge of clock
+    if(start)
+    compare <= DInternal >> scaleToShiftInternal;
+    end if
 \end{lstlisting}
 
 \subsection{Simulation results}
 The simulation via Verilog testbench was made to determine the correctness of presented division module. The Icarus Verilog simulator was used to simulate the module and GTKWave was used to display the VCD simulation output file.\par
-As for the simulation output it can be stated, that the module works correctly for positive and negative numbers of fixed point format \textit{Q32.15}.\par
-The algorithm used in this module is able to calculate the propper result in much less clock cycles than the full division algorithm used in the division module in the package \cite{burke-fixed-point-math-library}.\par
-Thus the presented module may be used as a submodule in more complex modules.\par
-VCD simulation output waveforms are depicted on the following Figures. The simulations were conducted for arbitrary selected $N$ and $D$. The clock frequency was set 250 MHz. Pseudocode Verilog snippet for the test bench is present in the listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift} when the \textit{start} signal is set on low.
+The simulation output confirms that the module operates correctly for positive and negative numbers in the fixed-point format \textit{Q32.15}. The algorithm used in this module can compute the correct result in significantly fewer clock cycles compared to the full division algorithm utilized in the division module within the package \cite{burke-fixed-point-math-library}. As a result, the module can be freely used as a submodule in more complex modules.\par
+VCD simulation output waveforms are depicted on the following Figures. The simulations were conducted for arbitrarily selected values of $N$ and $D$, with clock frequency set to 250 MHz. Pseudocode Verilog snippet for the test bench is provided in the Listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift} when the \textit{start} signal is set on low.
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode snippet for the Verilog simulation test bench.}, label= {lst:division-testbench-verilog-pseudocode}]
     timescale 1ns/1ns 
@@ -647,7 +667,7 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-10-div-7.png}
-    \caption{Selected signals of simulation of division N/D = 10 / 7. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 10 / 7. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
   \label{fig:division-10-div-7}
 \end{figure}
 
@@ -655,14 +675,14 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-1-div-0-25.png}
-   \caption{Selected signals of simulation of division N/D = 1 / 0.25. The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+   \caption{Selected signals from simulation of division N/D = 1 / 0.25. The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-1-div-0-25}
 \end{figure}
 
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-1-div-minus-0-25.png}
-    \caption{Selected signals of simulation of division N/D = 1 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 1 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-1-div-minus-0-25}
 \end{figure}
 
@@ -670,14 +690,14 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-304-03215-div-min-0-25.png}
-    \caption{Selected signals of simulation of division N/D = 304.03215 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 304.03215 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-304-03215-div-min-0-25}
 \end{figure}
 
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-10-div-519.png}
-    \caption{Selected signals of simulation of division N/D = 10 / (519). The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 10 / (519). The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
   \label{fig:division-10-div-519}
 \end{figure}
 
