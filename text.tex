@@ -1438,6 +1438,72 @@ The adjugate matrix is calculated as follows
             For real time systems, the approach of \gls{abbreviation:she} may often be to precalculate the required switching angles offline and the utilize the \gls{abbreviation:lut} in a microprocessor to determine which set of angles use for the set reference voltage. Nowadays the \gls{abbreviation:fpga} may be more often utilized to calculate the solution. The caclulation may be highly paralelized and optimized to obtain the solution in near real time. In following sections the prototype implementation in Python and final implementaion in Verilog is presented.
 
     \subsection{Simplification for Verilog and High level implementation}
+        When implementing the solution in computational software, such as, Wolfram Mathematica, the optimization of the algorithm is very often not needed. However, when implementing the algorithm to a \gls{abbreviation:fpga} the higher level constructs are not easily available, so the simplification of the algorithm must be done. For clarity and prototyping purposes, the Python implementation optimization level is lower, than for the Verilog. In this section, the simplified algorithm of a \gls{abbreviation:nr} aglorithm is presented.\par
+
+        The equation for eliminating the 5th harmonics may be written as
+
+        \begin{equation}
+            \begin{gathered}
+               F_1^i = m \; \frac{\pi}{4} = \cos(\alpha_1) - \cos(\alpha_2),\\
+                F_2^i = 0 = \cos(5\alpha_1) - \cos(5\alpha_2).
+            \end{gathered}
+        \end{equation}
+        Thus the Jakobian matrix is
+
+        \begin{equation}
+            \begin{gathered}
+                J^i = 
+                \begin{pmatrix}
+                    - \sin(\alpha_1^i) & \sin(\alpha_2^i)\\
+                    - 5 \sin(5\alpha_1^i) & 5 \sin(5\alpha_2^i)
+                \end{pmatrix}.
+            \end{gathered}
+        \end{equation}
+        Where $i$ is the index of the iteration of the algorithm. Next the inverted Jakobian matrix is needed for further calculations.
+
+        \begin{equation}
+            \begin{gathered}
+                J_{\mathrm{inv}}^i = 
+                \begin{pmatrix}
+                \frac{5 \sin(5\alpha_2^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)} & - \frac{\sin(\alpha_2^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)}\\
+                    \frac{5\sin(\alpha_1^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)} & - \frac{\sin(\alpha_1^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)}
+                \end{pmatrix}.
+            \end{gathered}
+        \end{equation}
+
+        Next, the defect $\Delta F^i$ may be calculated
+
+        \begin{equation}
+            \begin{gathered}
+                \Delta F_1^i = F_1^0 - F_1^i,\\
+                \Delta F_2^i = F_2^0 - F_2^i.\\
+            \end{gathered}
+        \end{equation}
+        After the successfully calculated defect of a current iteration, the $\delta \alpha^i$ may be calculated.
+        \begin{equation}
+            \begin{gathered}
+                (\Delta \alpha^i) = (J_{\mathrm{inv}}^i) (\Delta F^i),
+            \end{gathered}
+        \end{equation}
+        thus rewritten in components notation suitable for the Verilog implementation
+
+        \begin{equation}
+            \begin{gathered}
+                \Delta \alpha_1^i = J_{00\mathrm{inv}}^i \Delta F_1^i + J_{01\mathrm{inv}}^i \Delta F_2^i,\\
+                \Delta \alpha_1^2 = J_{10\mathrm{inv}}^i \Delta F_1^i + J_{11\mathrm{inv}}^i \Delta F_2^i.
+            \end{gathered}
+        \end{equation}
+        Finally the next iteration values of $\alpha_1^i$ and $\alpha_2^i$ may be calculated
+
+        \begin{equation}
+            \begin{gathered}
+                \alpha_1^{i+1} = \alpha_1^i + \Delta \alpha_1^i,\\
+                \alpha_2^{i+1} = \alpha_2^i + \Delta \alpha_2^i.
+            \end{gathered}
+        \end{equation}
+
+        It is important to mention, that for the \gls{abbreviation:nr} algorithm to work correctly, the suitable initial values $F_1^0$ and $F_2^0$ must be well chosen before the algorithm starts.
+
     \subsection{High level implementation}
     The algorithm was for rapid prototyping purposes implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.\par
     The script may be run with command \textit{python3 she.py -mi <number>}, where \textit{<number>} is the requested modulation index.
