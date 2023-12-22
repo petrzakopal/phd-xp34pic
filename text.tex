@@ -493,7 +493,9 @@ literate={\{}{{\textcolor{ctured}{\{}}}{1}
 \fontspec{Times New Roman}
 
 \section{Introduction}
-This is the introduction.
+This paper presents the design of multiple \gls{abbreviation:fpga} units, which are designed to suit near real-time constraints of controlling the electric drives or for Hardware In Loop systems.\par
+The goal of this paper also was to investigate how to design the speed optimized units using open source toolchain. The final designed unit is capable of solving the Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. Many researches opt in for proprietary design software, which very often offers premade Intelectual Property (\gls{abbreviation:ip}) blocks, which can be used to design the specified circuit. However in this paper the design was created, tested and analyzed solely using the State of The Art Open Source software without any \gls{abbreviation:ip} catalogs. This platformless solution ensures, that the designed units may possibly be synthetized for various \gls{abbreviation:fpga} chips without any major barriers.\par
+The structure of the paper is as follows: Section \ref{sec:calculating-the-division-of-fixed-point-numbers} presents a unit for division of two arbitrary values by utilizing the Newton-Raphson (\gls{abbreviation:nr}) algorithm. Section \ref{sec:using-cordic-to-calculate-trigonometric-functions} presents design of the Coordinate Rotation Digital Computer (\gls{abbreviation:she}) optimized for speed, rather than lesser complexity. Section \ref{sec:simple-set-of-nonlinear-equations-solved-by-a-newton-raphson-algorithm-using-custom-circuit-implementation} introduces design which solves two non-linear equations with a Newton-Raphson (\gls{abbreviation:nr}) algorithm, presenting suitability of \gls{abbreviation:fpga} designs for iterative algorithms. Section \ref{sec:selective-harmonic-elimination} presents unit for solving the Selective Harmonic Elimination problem using previously developed modules.
 
 \flushbottom %vyčištění stránky
 \newpage
@@ -679,7 +681,7 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
   \label{fig:division-10-div-519}
 \end{figure}
 
-\section{Using CORDIC to calculate trigonometric functions}
+\section{Using CORDIC to calculate trigonometric functions}\label{sec:using-cordic-to-calculate-trigonometric-functions}
     There are numerous ways how to calculate the trigonometric functions. To gain more flexibility the Coordinate Rotation Digital Computer (\gls{abbreviation:cordic}) was chosen above the Look-Up Table (\gls{abbreviation:lut}) implementation.\par
     The \gls{abbreviation:lut} method may be fast, but the accuracy depends on the size of the table. When using the \gls{abbreviation:cordic} the precision depends on number of performed iterations of the algorithm. The modified algorithm may be used to calculate non-trivial functions, such as hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays} In this work only the calculation of $sinus$ and $cosinus$ functions is used.
     \subsection{Theory}\label{subsec:cordic-theory}
@@ -1156,7 +1158,7 @@ endmodule\end{lstlisting}
             \label{fig:cordic-verilog-whole-sim_minus_6_7195129}
         \end{figure}
 
-\section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using custom circuit implementation}
+\section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using custom circuit implementation}\label{sec:simple-set-of-nonlinear-equations-solved-by-a-newton-raphson-algorithm-using-custom-circuit-implementation}
     All the presented parts in previous sections may be utilized to solve the system of nonlinear equations. This work leads to solving the transcendetal equations for Selective Harmonic Elimination. But the best approach is to firstly solve an easier set of equations to determine, if the approach of \gls{abbreviation:nr} is viable.
     \subsection{Theory}
         The objective of the \gls{abbreviation:nr} algorithm is to solve the set of nonlienar equations
@@ -1339,7 +1341,7 @@ The adjugate matrix is calculated as follows
 
 
 
-\section{Selective Harmonic Elimination}
+\section{Selective Harmonic Elimination}\label{sec:selective-harmonic-elimination}
     \subsection{Theory}\label{subsec:theory}
     The original theory for Selective Harmonic Elimination was developen in \cite{patel-Generalized-Techniques-of-Harmonic-Elimination-and-Voltage-Control-in-Thyristor-Inverters:-Part-I--Harmonic-Elimination, patel-Generalized-Techniques-of-Harmonic-Elimination-and-Voltage-Control-in-Thyristor-Inverters:-Part-II-----Voltage-Control-Techniques} and later adopted by many researchers and adopted for multiple voltage invertor topologies. Nowdays the strategy is mainly used in traction applications after control and modulation strategies for start up state end and the reference voltage for the drive is high enough so the six step output voltage is utilized. However general six step output signal yields high order harmonics. When the motor is powered by these high order voltage harmonics, the current with high order harmonics (excluding triplen harmonics, because the symmetric 3 phase motor is considered) is then observed. This current harmonics cause undesirable current ripple, torque ripple and losses \cite{mullner-Modelling-and-precalculation-of-additional-losses-of-inverter-fed-asynchronous-induction-machines-for-traction-applications} which decrease the efficiency of the drive.\par
     To control the output voltage and reduce unwanted harmonics the Selective Harmonic Elimination (\gls{abbreviation:she}) technique may be employed. The elimination is based on generating the output voltage by switching the the components at certain angles, thus generating waveform with number of pulses to which corresponds the number of elliminated harmonics. The calculation is based on the calculation of fourier coefficients. The principle has been modified for different types of converters, such as multilevel, H-bridge converters or generic Voltage Source Inverters (\gls{abbreviation:vsi}). In this paper, the regular two level \gls{abbreviation:vsi} is considered.\par
@@ -1700,7 +1702,8 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
 \section*{Conclusion}
-And this is the conclusion of my report. \gls{symbol:Pn}.
+This paper presents \gls{abbreviation:fpga} module suitable for solving the \gls{abbreviation:she} algorithm in near real-time. The module consists of two other submodules which are also presented in this paper. These submodules are units for calculating the division of two arbitrary values and a \gls{abbreviation:cordic} unit, suitable for calculating $sinus$ and $cosinus$ functions.\par
+The goal of this paper was to make investigate and design speed optimized modules, which would be capable of near real-time calculations. Outcomes of this paper may be in the future used as a starting point for other researches of designing the modules for controlling the electric drives or for creating the Hardware In Loop Systems.
 
 \flushbottom %vyčištění stránky
 
