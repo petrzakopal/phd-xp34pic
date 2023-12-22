@@ -1262,8 +1262,8 @@ The adjugate matrix is calculated as follows
         \end{pmatrix}
         =
         \begin{pmatrix}
-            \textbf{J}_{00}^{-1i} \;\Delta \text{F}_1^i + \textbf{J}_{01}^{-1i} \;\Delta \text{F}_2^i\\ 
-            \textbf{J}_{10}^{-1i} \;\Delta \text{F}_1^i + \textbf{J}_{11}^{-1i} \;\Delta \text{F}_2^i
+            \textbf{J}_{00}^{-1,i} \;\Delta \text{F}_1^i + \textbf{J}_{01}^{-1,i} \;\Delta \text{F}_2^i\\ 
+            \textbf{J}_{10}^{-1,i} \;\Delta \text{F}_1^i + \textbf{J}_{11}^{-1,i} \;\Delta \text{F}_2^i
         \end{pmatrix}.
     \end{equation}
 
@@ -1437,22 +1437,23 @@ The adjugate matrix is calculated as follows
             The solution of the Equations \ref{eq:she-final-set-of-transcendental-equations} is not trivial as they are nonlinear. There may be various methods how to solve the problem, such as Genetic Algorithms \cite{taghizadeh-Harmonic-elimination-of-multilevel-inverters-using-particle-swarm-optimization, Ortiz-Espinoza-PWM-with-Selective-Harmonic-Elimination-Using-Optimization-Inspired-on-Earthquakes-for-AC-Electric-Drives, Abdelqawee_Naser-SELECTIVE-HARMONIC-ELIMINATION-PWM-VOLTAGE-SOURCE-INVERTER-BASED-ON-GENETIC-ALGORITHM} or algebraic methods \cite{wang-A-Comprehensive-Review-of-Solving-Selective-Harmonic-Elimination-Problem-with-Algebraic-Algorithms, Chiasson-A-Complete-Solution-to-the-Harmonic-Elimination-Problem}. One of the well known used algebraic methods is Newton-Raphson (\gls{abbreviation:nr}) algorithm \cite{Balow-A-Selective-Harmonic-Elimination-SHE-Technique-for-the-Multi-Leveled-Inverters}. On this paper, the solution is obtained solely by using \gls{abbreviation:nr} algorithm. The problem of this method is that it is required to set the initial conditions wellm otherwise the solution may not be found. On the other hand, the Genetic Algorithms need to set the initial values as well, but often random numbers from a predefined intervals are used.\par
             For real time systems, the approach of \gls{abbreviation:she} may often be to precalculate the required switching angles offline and the utilize the \gls{abbreviation:lut} in a microprocessor to determine which set of angles use for the set reference voltage. Nowadays the \gls{abbreviation:fpga} may be more often utilized to calculate the solution. The caclulation may be highly paralelized and optimized to obtain the solution in near real time. In following sections the prototype implementation in Python and final implementaion in Verilog is presented.
 
-    \subsection{Simplification for Verilog and High level implementation}
+    \subsection{Simplification for Verilog and High level implementation}\label{subsec:simplification-for-verilog-and-high-level-implementation}
         When implementing the solution in computational software, such as, Wolfram Mathematica, the optimization of the algorithm is very often not needed. However, when implementing the algorithm to a \gls{abbreviation:fpga} the higher level constructs are not easily available, so the simplification of the algorithm must be done. For clarity and prototyping purposes, the Python implementation optimization level is lower, than for the Verilog. In this section, the simplified algorithm of a \gls{abbreviation:nr} aglorithm is presented.\par
 
         The equation for eliminating the 5th harmonics may be written as
 
         \begin{equation}
             \begin{gathered}
-               F_1^i = m \; \frac{\pi}{4} = \cos(\alpha_1) - \cos(\alpha_2),\\
-                F_2^i = 0 = \cos(5\alpha_1) - \cos(5\alpha_2).
+                \mathrm{F}_1^i = \cos(\alpha_1) - \cos(\alpha_2),\\
+                \mathrm{F}_2^i = \cos(5\alpha_1) - \cos(5\alpha_2),\\
+                \mathrm{where} \; \mathrm{F}_1^0 = m \; \frac{\pi}{4},\; \mathrm{F}_2^0 = 0.\\
             \end{gathered}
         \end{equation}
         Thus the Jakobian matrix is
 
         \begin{equation}
             \begin{gathered}
-                J^i = 
+                \textbf{J}^i = 
                 \begin{pmatrix}
                     - \sin(\alpha_1^i) & \sin(\alpha_2^i)\\
                     - 5 \sin(5\alpha_1^i) & 5 \sin(5\alpha_2^i)
@@ -1463,7 +1464,7 @@ The adjugate matrix is calculated as follows
 
         \begin{equation}
             \begin{gathered}
-                J_{\mathrm{inv}}^i = 
+                \mathrm{J}^{-1,i} = 
                 \begin{pmatrix}
                 \frac{5 \sin(5\alpha_2^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)} & - \frac{\sin(\alpha_2^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)}\\
                     \frac{5\sin(\alpha_1^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)} & - \frac{\sin(\alpha_1^i)}{5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i)}
@@ -1471,26 +1472,35 @@ The adjugate matrix is calculated as follows
             \end{gathered}
         \end{equation}
 
-        Next, the defect $\Delta F^i$ may be calculated
+        From the inverted Jakobian matrix it can be seen, that it can be easily calculated by division of components by the determinant, which can be expressed as
 
         \begin{equation}
             \begin{gathered}
-                \Delta F_1^i = F_1^0 - F_1^i,\\
-                \Delta F_2^i = F_2^0 - F_2^i.\\
+                \mathrm{det}(\textbf{J}) = 5 \sin(5\alpha_1^i) \sin(\alpha_2^i) - 5 \sin(\alpha_1^i)\sin(\alpha_2^i).
             \end{gathered}
         \end{equation}
-        After the successfully calculated defect of a current iteration, the $\delta \alpha^i$ may be calculated.
+
+
+        Next, the defect $\Delta \mathrm{F}^i$ may be calculated
+
         \begin{equation}
             \begin{gathered}
-                (\Delta \alpha^i) = (J_{\mathrm{inv}}^i) (\Delta F^i),
+                \Delta \mathrm{F}_1^i = F_1^0 - F_1^i,\\
+                \Delta \mathrm{F}_2^i = F_2^0 - F_2^i.\\
+            \end{gathered}
+        \end{equation}
+        After the successfully calculated defect of a current iteration, the $\Delta \alpha^i$ may be calculated.
+        \begin{equation}
+            \begin{gathered}
+                \Delta \boldsymbol{\alpha}^i = \textbf{J}^{-1,i} \Delta \boldsymbol{F}^i,
             \end{gathered}
         \end{equation}
         thus rewritten in components notation suitable for the Verilog implementation
 
         \begin{equation}
             \begin{gathered}
-                \Delta \alpha_1^i = J_{00\mathrm{inv}}^i \Delta F_1^i + J_{01\mathrm{inv}}^i \Delta F_2^i,\\
-                \Delta \alpha_1^2 = J_{10\mathrm{inv}}^i \Delta F_1^i + J_{11\mathrm{inv}}^i \Delta F_2^i.
+                \Delta \alpha_1^i = \textbf{J}_{00}^{-1,i} \Delta F_1^i + \textbf{J}_{01}^{-1,i} \Delta F_2^i,\\
+                \Delta \alpha_1^2 = \textbf{J}_{10}^{-1,i} \Delta F_1^i + \textbf{J}^{-1,i} \Delta F_2^i.
             \end{gathered}
         \end{equation}
         Finally the next iteration values of $\alpha_1^i$ and $\alpha_2^i$ may be calculated
@@ -1501,8 +1511,10 @@ The adjugate matrix is calculated as follows
                 \alpha_2^{i+1} = \alpha_2^i + \Delta \alpha_2^i.
             \end{gathered}
         \end{equation}
-
-        It is important to mention, that for the \gls{abbreviation:nr} algorithm to work correctly, the suitable initial values $F_1^0$ and $F_2^0$ must be well chosen before the algorithm starts.
+        With the newly calculated values of $\alpha_1^i$, $\alpha_2^i$ the agorithm may continue with a new calculation iteration for calculating the $F_1^{i+1}$ and $F_2^{i+1}$ values.\par
+        It is important to mention, that for the \gls{abbreviation:nr} algorithm to work correctly, the suitable initial values $F_1^0$ and $F_2^0$ must be well chosen before the algorithm starts.\par
+        When elliminating the 5th harmonic in a settings, where $m = 1$, the initial values of $F_2^0 = 0.08726$~rad and $F_2^0 = 1.3439$~rad yield suitable results.\par
+        The presented mathematical algorithm then may be transformed to a \gls{abbreviation:fpga} designed Verilog algorithm, visually presented as a block diagram in the section \hyperref[subsubsec:algorithm-block-design]{\textit{Algorithm Block Design}}.
 
     \subsection{High level implementation}
     The algorithm was for rapid prototyping purposes implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.\par
@@ -1589,7 +1601,8 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
 \end{lstlisting}
     \subsection{IP Block Design}
 
-        \subsubsection{Algorithm Block Diagram}
+        \subsubsection{Algorithm Block Diagram}\label{subsubsec:algorithm-block-design}
+            The Figure \ref{fig:she-overview} presents the calculation algorithm for \gls{abbreviation:she}, mathematically expressed in the section \hyperref[subsec:simplification-for-verilog-and-high-level-implementation]{\textit{Simplification for Verilog and High level implementation}}.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-overview.pdf}
