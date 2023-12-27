@@ -905,6 +905,7 @@ end
 \begin{lstlisting}[language={python}, caption={Python code of \gls{abbreviation:cordic} implementation.}, label= {lst:python-cordic}]
 import math
 
+
 # Defining starting values and empty arrays
 totalNumberOfIterations = 12 # 12 - best tradeof between value and iterations
 atanValues = []
@@ -914,7 +915,8 @@ initialYValueCordic = 0
 # initialZValueCordic = 1.248  # angle for which to calculate cordic
 # initialZValueCordic = - 1.248  # angle for which to calculate cordic
 # initialZValueCordic = - 6.7194  # angle for which to calculate cordic
-initialZValueCordic = 10.7194824  # angle for which to calculate cordic
+# initialZValueCordic = 10.7194824  # angle for which to calculate cordic
+initialZValueCordic = 5  # angle for which to calculate cordic
 initialSigmaValueCordic = 1
 
 for x in range(totalNumberOfIterations):
@@ -948,18 +950,27 @@ if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
     zValue = initialZValueCordic - 3.141592
     sigmaValue = -1
     print("value in second q")
+    print("zValue:", zValue)
 elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
     zValue = initialZValueCordic - 3.141592
     sigmaValue = 1
     print("value in third q")
+    print("zValue:", zValue)
 elif (initialZValueCordic < 0):
     sigmaValue = -1
     zValue = initialZValueCordic
     print("value in fourth q")
+    print("zValue:", zValue)
+elif (initialZValueCordic > 4.7123) and (initialZValueCordic < 6.28318):
+    sigmaValue = -1
+    zValue = initialZValueCordic - 2*3.141592
+    print("value in fourth q")
+    print("zValue:", zValue)
 else:
     zValue = initialZValueCordic  # For angle
     sigmaValue = initialSigmaValueCordic  # For +- next angle
     print("value in first")
+    print("zValue:", zValue)
 
 # Passing starting values to the calculation values
 xValue = initialXValueCordic  # For cos
@@ -998,6 +1009,9 @@ if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
 elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
     resultCos = - resultCos
     resultSin = - resultSin
+elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
+    resultCos = - resultCos
+    resultSin = - resultSin
 
 # Calculating values based on the math library
 mathResultCos = math.cos(initialZValueCordic)
@@ -1007,20 +1021,29 @@ mathResultSin = math.sin(initialZValueCordic)
 errorCos = abs(resultCos) - abs(mathResultCos)
 errorSin = abs(resultSin) - abs(mathResultSin)
 
-# Results printing
+# Result printing
 print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
 print("CORDIC results:")
 print("cos: ", resultCos)
 print("sin: ", resultSin)
 print("scaleFactor: ", scalingValues[totalNumberOfIterations-1])
+
 print("\n")
+
 print("MATH results:")
 print("cos: ", mathResultCos)
 print("sin: ", mathResultSin)
+
+
 print("\n")
+
 print("error CORDIC-MATH:")
 print("cos: ", errorCos)
 print("sin: ", errorSin)
+
+print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
+print("atan values")
+print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
 \end{lstlisting}
 
 \par
