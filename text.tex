@@ -571,7 +571,7 @@ The whole algorithm comprises nine steps. The initial four steps are used for ca
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
-   \caption{Alloccation and timing diagram for the Data Path Unit part of the division module.}
+   \caption{Allocation and timing diagram for the Data Path part of the division module.}
   \label{fig:division-allocation-timing}
 \end{figure}
 
@@ -584,7 +584,7 @@ The Data Path Module unit also covers the possibility of using negative denomina
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
-    \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Data Path Unit part of the division module.}
+    \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of Division module Data Path part.}
   \label{fig:division-rtl}
 \end{figure}
 
@@ -697,7 +697,7 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/division-10-div-519.png}
-    \caption{Selected signals from simulation of division N/D = 10 / (519). The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 10 / 519. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
   \label{fig:division-10-div-519}
 \end{figure}
 
@@ -1068,7 +1068,7 @@ Once the Python implementation and debugging are completed, the Verilog implemen
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-allocation-timing.pdf}
-                \caption{Alloccation and timing diagram for the Data Path Unit part of the \gls{abbreviation:cordic} \gls{abbreviation:ip}.}
+                \caption{Allocation and timing diagram for the Data Path Unit part of the \gls{abbreviation:cordic} \gls{abbreviation:ip}.}
                 \label{fig:cordic-allocation-timing}
             \end{figure}
         \fbar
@@ -1078,7 +1078,7 @@ Once the Python implementation and debugging are completed, the Verilog implemen
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-rtl.pdf}
-                \caption{Register transfer level (\gls{abbreviation:rtl}) scheme of the \gls{abbreviation:cordic} \gls{abbreviation:ip} Data Path Unit \gls{abbreviation:ip}.}
+                \caption{Register transfer level (\gls{abbreviation:rtl}) scheme of the \gls{abbreviation:cordic} module Data Path.}
                 \label{fig:cordic-rtl}
             \end{figure}
             
@@ -1349,7 +1349,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-allocation-timing.pdf}
-                \caption{Allocation and timing diagram for the Data Path Unit part of the simple (\gls{abbreviation:nr}) module.}
+                \caption{Allocation and timing diagram for the Data Path of the simple (\gls{abbreviation:nr}) module.}
                 \label{fig:simple-nr-allocation-timing}
             \end{figure}
 
@@ -1360,7 +1360,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-rtl.pdf}
-                \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Data Path Unit part of the simple Newton-Raphson (\gls{abbreviation:nr}) calculation \gls{abbreviation:ip}.}
+                \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Data Path part of the simple Newton-Raphson (\gls{abbreviation:nr}) calculation \gls{abbreviation:ip}.}
                 \label{fig:simple-nr-rtl}
                 \end{figure}
 
@@ -1404,7 +1404,7 @@ The adjugate matrix is calculated as follows
                     \caption{Generic Six-Step Waveform harmonics analysis. The Voltage value is normalized to a DC link voltage.}
                     \label{fig:SixStepPlotHarmonics}
                 \end{subfigure}
-                \caption{}
+                \caption{Six-Step voltage waveform and harmonic analysis.}
             \end{figure}
             \FloatBarrier
             As previously mentioned, the \gls{abbreviation:she} method is based on a Fourier coefficient analysis. When the odd quarter-wave symmetry of the waveform is assumend, the $a_n$ Fourier coefficient is zero (as mentioned in the Equation \ref{eq:she-first-fourier-coefficient-zero}), whereas the $b_n$ coefficient may be written as Equation \ref{eq:she-second-fourier-coefficient}.
@@ -1683,7 +1683,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-allocation-timing.pdf}
-                           \caption{Allocation and Timing diagram for the Data Path Unit part of Selective Harmonic Elimination (\gls{abbreviation:she}) module.}
+                           \caption{Allocation and Timing diagram for the Data Path part of Selective Harmonic Elimination (\gls{abbreviation:she}) module.}
                 \label{fig:she-allocation-timing}
             \end{figure}
 
@@ -1693,7 +1693,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-rtl.pdf}
-                \caption{Register transfer level (\gls{abbreviation:rtl}) scheme of the Selective Harmonic Elimination Data Path Unit.}
+                \caption{Register transfer level (\gls{abbreviation:rtl}) scheme of the Selective Harmonic Elimination Data Path.}
                 \label{fig:she-rtl}
             \end{figure}
     
@@ -1720,7 +1720,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                     \caption{Waveform harmonics analysis of a output voltage of a two level Voltage Source Inverter utilising switching angles for the Selective Harmonic Elimination calculated in Verilog unit. The Voltage value is normalized to a DC link voltage.}
                     \label{fig:VerilogPlotHarmonics}
                 \end{subfigure}
-                \caption{}
+                \caption{Selective Harmonic Elimination voltage waveform and harmonic analysis.}
             \end{figure}
 
             \begin{figure}[htbp!]
@@ -1736,7 +1736,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                     \caption{Comparison of a Waveform harmonics analysis of a output voltage of a two level Voltage Source Inverter with and without the Selective Harmonic Elimination. The Voltage value is normalized to a DC link voltage.}
                     \label{fig:ComparataionPlotSixStepVerilogSheHarmonics}
                 \end{subfigure}
-                \caption{}
+                \caption{Comparison of a Six-Step and Selective Harmonic Elimination voltage waveforms and harmonic analyses.}
             \end{figure}
             \FloatBarrier
 
