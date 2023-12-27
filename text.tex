@@ -1364,7 +1364,7 @@ The adjugate matrix is calculated as follows
 
 
 \section{Selective Harmonic Elimination}\label{sec:selective-harmonic-elimination}
-    \subsection{Theory}\label{subsec:theory}
+    \subsection{Theory}\label{subsec:she-theory}
     The original theory for Selective Harmonic Elimination was initially developed in \cite{patel-Generalized-Techniques-of-Harmonic-Elimination-and-Voltage-Control-in-Thyristor-Inverters:-Part-I--Harmonic-Elimination, patel-Generalized-Techniques-of-Harmonic-Elimination-and-Voltage-Control-in-Thyristor-Inverters:-Part-II-----Voltage-Control-Techniques} and later adopted by numerous researchers for various voltage inverter topologies. Currently, the strategy is primarly employed in traction applications after start up state ends and the reference voltage for the drive is high enough so the six step output voltage is utilized. However, the general six step output signal produces high-order harmonics. When the motor is powered by these high-order voltage harmonics, the current with high-order harmonics (excluding triplen harmonics, considering the symmetric 3 phase motor) is observed. These current harmonics result in undesirable current ripple, torque ripple and losses \cite{mullner-Modelling-and-precalculation-of-additional-losses-of-inverter-fed-asynchronous-induction-machines-for-traction-applications}, thereby decreasing the efficiency of the drive.\par
     To control the output voltage and reduce unwanted harmonics, the Selective Harmonic Elimination (\gls{abbreviation:she}) technique can be employed. The elimination is based on generating the output voltage by switching components at certain phase angles, thereby generating waveform with a number of pulses, to corresponding the number of elliminated harmonics. The calculation which angles to use is based on the calculation of fourier coefficients. These equations, derived from the original principle, have been adapted for different types of converters, including multilevel, H-bridge converters or generic Voltage Source Inverters (\gls{abbreviation:vsi}). In this paper, the regular two level \gls{abbreviation:vsi} is considered.\par
     The considered inverter phase voltage six-step waveform is depicted in Figure \ref{fig:SixStepPlotWaveform}, while the harmonic analysis of the generic waveform is depicted in Figure \ref{fig:SixStepPlotHarmonics}.  It's worth noting that in a three-phase symmetrical system, the triplen harmonics are also eliminated.
@@ -1384,7 +1384,7 @@ The adjugate matrix is calculated as follows
                 \caption{}
             \end{figure}
             \FloatBarrier
-            As previously mentioned, the method is based on a Fourier coefficient analysis. When the odd quarter-wave symmetry of the waveform is assumend, the $a_n$ Fourier coefficient is zero (as mentioned in the Equation \ref{eq:she-first-fourier-coefficient-zero}), whereas the $b_n$ coefficient may be written as Equation \ref{eq:she-second-fourier-coefficient}.
+            As previously mentioned, the \gls{abbreviation:she} method is based on a Fourier coefficient analysis. When the odd quarter-wave symmetry of the waveform is assumend, the $a_n$ Fourier coefficient is zero (as mentioned in the Equation \ref{eq:she-first-fourier-coefficient-zero}), whereas the $b_n$ coefficient may be written as Equation \ref{eq:she-second-fourier-coefficient}.
 
             \begin{equation}
                 a_n = 0,
@@ -1392,10 +1392,10 @@ The adjugate matrix is calculated as follows
             \end{equation}
 
             \begin{equation}
-                b_n = \frac{1}{T} \int_{0}^{T} x(n\omega t)\sin(\omega t) \dd \omega t,
+                b_n = \frac{2}{T} \int_{0}^{T} x(n\omega t)\sin(\omega t) \dd \omega t,
                 \label{eq:she-second-fourier-coefficient}
             \end{equation}
-            where the $T$ is periode, $x(\omega t)$ description of the \gls{abbreviation:vsi} output waveform and $n$ is the order of the harmonics.
+            where the $T$ is signal periode, $x(\omega t)$ description of the \gls{abbreviation:vsi} output voltage waveform and $n$ is the order of the harmonics.
 
             When assuming quarter-wave symmetry the Equation \ref{eq:she-second-fourier-coefficient} may be rewritten as
 
@@ -1403,13 +1403,13 @@ The adjugate matrix is calculated as follows
                 b_n = \frac{8}{T} \int_{0}^{T/4} x(\omega t) \sin (n\omega t) \dd \omega t = \frac{8}{2 \pi} \int_{0}^{2 \pi/4} x(\omega t) \sin (n\omega t) \dd \omega t = \frac{4}{\pi} \int_{0}^{\frac{\pi}{2}} x(\omega t) \sin (n\omega t) \dd \omega t.
             \end{equation}
 
-            The function $x(\omega t)$ describes the output voltage pulse value normalized to a \gls{abbreviation:dc} link voltage. The Equation \ref{eq:she-second-fourier-coefficient} may then be rewritten using the substituion of $\omega t$ by the angles $\alpha$ which also describe the output waveform dependent on radians and that the function $x(\alpha)$ yields $1$ when the output voltage pulse is positive and $-1$ when negative. The rewritten equation \ref{eq:she-second-fourier-coefficient} when assuming quarter-wave symmetry
+            The function $x(\omega t)$ represents the normalized output voltage pulse in relation to a \gls{abbreviation:dc} link voltage. The Equation \ref{eq:she-second-fourier-coefficient} can be reformulated by substituting $\omega t$ with the angle $\alpha$, which also characterizes the output waveform in terms of radians. The function $x(\alpha)$ yields $1$ when the output voltage pulse is positive and $-1$ when negative. The reformulated Equation \ref{eq:she-second-fourier-coefficient}, assuming quarter-wave symmetry, is then as follows:
 
             \begin{equation}
                 b_n = \sum_{k=1}^{M} \frac{8}{T} \int_{\alpha_k}^{\alpha_{k+1}} x(\alpha) \sin(n\alpha) \dd \alpha.
             \end{equation}
 
-           Where $M$ is number of pulses in half periode of the otput signal. When assuming that the interal is calculated for states when the $x(\alpha_k)$ is $1$ or $-1$, the function may be raplaced by a constant, thus the integral calculation is quite simple.
+           Here $M$ represents number of pulses in half period of the output signal. Assuming that the integral is calculated for angles where $x(\alpha_k)$ is either $1$ or $-1$, the function may be replaced by a constant. As a result, the integral calculation becomes straightforward.
 
            \begin{equation}
                \begin{gathered}
@@ -1419,7 +1419,7 @@ The adjugate matrix is calculated as follows
                \label{eq:she-equation-integration}
            \end{equation}
 
-           The Equation \ref{eq:she-equation-integration} can be then further simplified by observing the results of the summation for $M = 2$.
+           The Equation \ref{eq:she-equation-integration} can be further simplified by observing the results of the summation for $M = 2$.
             
             \begin{equation}
                 \begin{gathered}
@@ -1438,9 +1438,9 @@ The adjugate matrix is calculated as follows
                 \label{eq:she-final-transcendetnal-equation}
             \end{equation}
 
-            Whereas it can be said, that the number of eliminated odd harmonics is $N = M-1$.\par
+            It can be said, that the number of eliminated odd harmonics is $N = M-1$.\par
 
-            To maintain clarity of this paper only the 5th harmonics is being eliminated by the designed unit. The set of equations to be solved to eliminated one harmonics is as follows.
+            To maintain clarity of this paper only the 5th harmonics is being eliminated by the designed unit. The set of equations required to eliminate this harmonic is as follows.
 
             \begin{equation}
                 \begin{gathered}
@@ -1449,7 +1449,7 @@ The adjugate matrix is calculated as follows
                 \end{gathered}
                 \label{eq:she-set-of-base-equations}
             \end{equation}
-            The $V_1 = b_1$, $V_5 = b_5$ are the amplitudes of 1st, respectively 5th harmonics. Where for the elimination of the 5th harmonics must be true that $b_5 = 0$. So the set of equations \ref{eq:she-set-of-base-equations} may be simplified as set of Equations \ref{eq:she-final-set-of-transcendental-equations}.
+            The amplitudes of the 1st and 5th harmonics are denoted as $V_1 = b_1$ and $V_5 = b_5$, respectively. For the elimination of the 5th harmonic, it is required that $b_5 = 0$. Consequentely, the set of Equations \ref{eq:she-set-of-base-equations} can be simplified as set of Equations \ref{eq:she-final-set-of-transcendental-equations}.
 
             \begin{equation}
                 \begin{gathered}
@@ -1458,13 +1458,13 @@ The adjugate matrix is calculated as follows
                 \end{gathered}
                 \label{eq:she-final-set-of-transcendental-equations}
             \end{equation}
-            The solution of the Equations \ref{eq:she-final-set-of-transcendental-equations} is not trivial as they are nonlinear. There may be various methods how to solve the problem, such as Genetic Algorithms \cite{taghizadeh-Harmonic-elimination-of-multilevel-inverters-using-particle-swarm-optimization, Ortiz-Espinoza-PWM-with-Selective-Harmonic-Elimination-Using-Optimization-Inspired-on-Earthquakes-for-AC-Electric-Drives, Abdelqawee_Naser-SELECTIVE-HARMONIC-ELIMINATION-PWM-VOLTAGE-SOURCE-INVERTER-BASED-ON-GENETIC-ALGORITHM} or algebraic methods \cite{wang-A-Comprehensive-Review-of-Solving-Selective-Harmonic-Elimination-Problem-with-Algebraic-Algorithms, Chiasson-A-Complete-Solution-to-the-Harmonic-Elimination-Problem}. One of the well known used algebraic methods is Newton-Raphson (\gls{abbreviation:nr}) algorithm \cite{Balow-A-Selective-Harmonic-Elimination-SHE-Technique-for-the-Multi-Leveled-Inverters}. On this paper, the solution is obtained solely by using \gls{abbreviation:nr} algorithm. The problem of this method is that it is required to set the initial conditions wellm otherwise the solution may not be found. On the other hand, the Genetic Algorithms need to set the initial values as well, but often random numbers from a predefined intervals are used.\par
-            For real time systems, the approach of \gls{abbreviation:she} may often be to precalculate the required switching angles offline and the utilize the \gls{abbreviation:lut} in a microprocessor to determine which set of angles use for the set reference voltage. Nowadays the \gls{abbreviation:fpga} may be more often utilized to calculate the solution. The caclulation may be highly paralelized and optimized to obtain the solution in near real time. In following sections the prototype implementation in Python and final implementaion in Verilog is presented.
+            Solving the nonlinear Equations \ref{eq:she-final-set-of-transcendental-equations} is not straightforward. Barious methods can be employed for solving the problem, such as Genetic Algorithms \cite{taghizadeh-Harmonic-elimination-of-multilevel-inverters-using-particle-swarm-optimization, Ortiz-Espinoza-PWM-with-Selective-Harmonic-Elimination-Using-Optimization-Inspired-on-Earthquakes-for-AC-Electric-Drives, Abdelqawee_Naser-SELECTIVE-HARMONIC-ELIMINATION-PWM-VOLTAGE-SOURCE-INVERTER-BASED-ON-GENETIC-ALGORITHM} or algebraic methods \cite{wang-A-Comprehensive-Review-of-Solving-Selective-Harmonic-Elimination-Problem-with-Algebraic-Algorithms, Chiasson-A-Complete-Solution-to-the-Harmonic-Elimination-Problem}. One commonly used algebraic method is Newton-Raphson (\gls{abbreviation:nr}) algorithm \cite{Balow-A-Selective-Harmonic-Elimination-SHE-Technique-for-the-Multi-Leveled-Inverters}. In this paper, the solution is obtained solely using \gls{abbreviation:nr} algorithm. However, it's worth noting that the success of this method depends on setting the initial conditions correctly; otherwise, a solution may not be found. In contrast, Genetic Algorithms also require setting initial values, but they often use random numbers from predefined intervals.\par
+            In real-time systems, the approach for solving the \gls{abbreviation:she} equations may often be to precalculate the required switching angles offline and the utilize the \gls{abbreviation:lut} in a microprocessor to determine which set of angles use for the set reference voltage. Nowadays the \gls{abbreviation:fpga}s are more frequently utilized to calculate the solution. The calculation can be highly paralelized and optimized, enabling the solution to be obtained in near real-time. In the following sections the prototype implementation in Python and final implementaion in Verilog are presented.
 
     \subsection{Simplification for Verilog and High level implementation}\label{subsec:simplification-for-verilog-and-high-level-implementation}
-        When implementing the solution in computational software, such as, Wolfram Mathematica, the optimization of the algorithm is very often not needed. However, when implementing the algorithm to a \gls{abbreviation:fpga} the higher level constructs are not easily available, so the simplification of the algorithm must be done. For clarity and prototyping purposes, the Python implementation optimization level is lower, than for the Verilog. In this section, the simplified algorithm of a \gls{abbreviation:nr} aglorithm is presented.\par
+        When implementing the solution in computational software like Wolfram Mathematica, optimizing the algorithm is unnecessary. However, when implementing the algorithm to an \gls{abbreviation:fpga}, higher-level constructs are not automatically available, so the simplification is necessary. Before creating the Verilog design, it is suitable, for clarity and prototyping purposes, to implement the algorithm in Python. In this section, the simplified algorithm of a \gls{abbreviation:nr} aglorithm is presented.\par
 
-        The equation for eliminating the 5th harmonics may be written as
+        The set of equations for eliminating the 5th harmonics may be formulated as
 
         \begin{equation}
             \begin{gathered}
@@ -1473,7 +1473,8 @@ The adjugate matrix is calculated as follows
                 \mathrm{where} \; \mathrm{F}_1^0 = m \; \frac{\pi}{4},\; \mathrm{F}_2^0 = 0.\\
             \end{gathered}
         \end{equation}
-        Thus the Jakobian matrix is
+        Where $m = V_1/V_{\mathrm{DC}}$ is modulation index.\par
+        Thus the Jacobian matrix is
 
         \begin{equation}
             \begin{gathered}
@@ -1484,9 +1485,9 @@ The adjugate matrix is calculated as follows
                 \end{pmatrix}.
             \end{gathered}
         \end{equation}
-        Where $i$ is the index of the iteration of the algorithm. Next the inverted Jakobian matrix is needed for further calculations.
+        Where $i$ is the index of the iteration of the algorithm. The inverted Jacobian matrix is needed for further calculations.
 
-        \begin{equation}
+        \begin{equation}\label{eq:she-inverted-jacobian-matrix}
             \begin{gathered}
                 \mathrm{J}^{-1,i} = 
                 \begin{pmatrix}
@@ -1496,7 +1497,7 @@ The adjugate matrix is calculated as follows
             \end{gathered}
         \end{equation}
 
-        From the inverted Jakobian matrix it can be seen, that it can be easily calculated by division of components by the determinant, which can be expressed as
+        From the inverted Jacobian matrix in Equation \ref{eq:she-inverted-jacobian-matrix}, it is evident that it can be easily calculated by dividing corresponding components of Jacobian matrix by the determinant, expressed as
 
         \begin{equation}
             \begin{gathered}
@@ -1505,7 +1506,7 @@ The adjugate matrix is calculated as follows
         \end{equation}
 
 
-        Next, the defect $\Delta \mathrm{F}^i$ may be calculated
+        Next, the defect $\Delta \mathrm{F}^i$ can be calculated
 
         \begin{equation}
             \begin{gathered}
@@ -1519,7 +1520,7 @@ The adjugate matrix is calculated as follows
                 \Delta \boldsymbol{\alpha}^i = \textbf{J}^{-1,i} \Delta \boldsymbol{F}^i,
             \end{gathered}
         \end{equation}
-        thus rewritten in components notation suitable for the Verilog implementation
+        thus rewritten in components notation which is more suitable for the Verilog implementation
 
         \begin{equation}
             \begin{gathered}
@@ -1535,14 +1536,14 @@ The adjugate matrix is calculated as follows
                 \alpha_2^{i+1} = \alpha_2^i + \Delta \alpha_2^i.
             \end{gathered}
         \end{equation}
-        With the newly calculated values of $\alpha_1^i$, $\alpha_2^i$ the agorithm may continue with a new calculation iteration for calculating the $F_1^{i+1}$ and $F_2^{i+1}$ values.\par
-        It is important to mention, that for the \gls{abbreviation:nr} algorithm to work correctly, the suitable initial values $F_1^0$ and $F_2^0$ must be well chosen before the algorithm starts.\par
-        When elliminating the 5th harmonic in a settings, where $m = 1$, the initial values of $F_2^0 = 0.08726$~rad and $F_2^0 = 1.3439$~rad yield suitable results.\par
-        The presented mathematical algorithm then may be transformed to a \gls{abbreviation:fpga} designed Verilog algorithm, visually presented as a block diagram in the section \hyperref[subsubsec:algorithm-block-design]{\textit{Algorithm Block Design}}.
+        With the newly calculated values of $\alpha_1^i$, $\alpha_2^i$ the algorithm may proceed with a new iteration ($i+1$) for calculating the $F_1^{i+1}$ and $F_2^{i+1}$ values.\par
+        It is important to note, that for the \gls{abbreviation:nr} algorithm to function correctly and yield viable results, suitable initial values $F_1^0$ and $F_2^0$ must be carefully chosen before the algorithm starts.\par
+        When elliminating the 5th harmonic with $m = 1$, the initial values of $F_2^0 = 0.08726$~rad and $F_2^0 = 1.3439$~rad yield satisfactory results.\par
+        The presented mathematical algorithm can then be transformed into an \gls{abbreviation:fpga} designed Verilog algorithm, visually represented as a block diagram in the section \hyperref[subsubsec:algorithm-block-design]{\textit{Algorithm Block Design}}.
 
     \subsection{High level implementation}
-    The algorithm was for rapid prototyping purposes implemented using Python. The script incorporates changing the modulation index at the start of the python simulation, thus enables generating values which then may be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware implemented algorithm.\par
-    The script may be run with command \textit{python3 she.py -mi <number>}, where \textit{<number>} is the requested modulation index.
+    The script allows changing the modulation index $m$ at the beginning of the Python simulation. This feature enables generation of values that can be compared with results obtained from Verilog/cocotb and Verilator simulation of the hardware-implemented algorithm.\par
+    The script may be run with command "\textit{python3 she.py -mi <number>}", where \textit{<number>} is the requested modulation index.
 \begin{lstlisting}[language={python}, caption={Python implementation of the Selective Harmonic Elimination Algorithm with adjustable modulation index.}, label= {lst:she-python}]
 import math
 import argparse  # for parsing command line arguments
@@ -1626,33 +1627,33 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
     \subsection{IP Block Design}
 
         \subsubsection{Algorithm Block Diagram}\label{subsubsec:algorithm-block-design}
-            The Figure \ref{fig:she-overview} presents the calculation algorithm for \gls{abbreviation:she}, mathematically expressed in the section \hyperref[subsec:simplification-for-verilog-and-high-level-implementation]{\textit{Simplification for Verilog and High level implementation}}.
+            The Figure \ref{fig:she-overview} presents the hardware-implementation for \gls{abbreviation:she} algorithm, mathematically expressed in the section \hyperref[subsec:simplification-for-verilog-and-high-level-implementation]{\textit{Simplification for Verilog and High level implementation}}.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-overview.pdf}
-                \caption{Block Diagram of the Selective Harmonic Elimination (\gls{abbreviation:she}) using Newton-Raphson algorithm.}
+                \caption{Block Diagram of the Selective Harmonic Elimination (\gls{abbreviation:she}) using Newton-Raphson algorithm. Design suitable for hardware implementation.}
                 \label{fig:she-overview}
             \end{figure}
 
     \FloatBarrier
         \subsubsection{Top module design}
-            The top module of this \gls{abbreviation:ip} is very similar to other developed modules for this paper. The design consists of a Control Unit which sends control signals to the Data Unit. The Data Unit, which consists of registers and computational units incorporates few external sub modules for additional calculations, such as \gls{abbreviation:cordic} and division.\par
-            As for every design presented, the units utilize the \textit{Q32.15} fixed point format for it's computational units and registers, the exception being multiplier computational units, which by the principle of multiplication use format \textit{Q64.30} for the results. When the multiplication results are passed to registers, the values are rounded back to globally used format.\par
-            The design is depicted on Figure \ref{fig:she-top-module}.
+            The top module of this \gls{abbreviation:ip} closely resembles other developed modules in this paper. The design consists of a Control Unit which sends control signals to the Data Unit. The Data Unit, which includes registers and computational units, incorporates few external sub-modules for additional calculations, such as \gls{abbreviation:cordic} and division.\par
+            Consistent with every design presented, the units utilize the \textit{Q32.15} fixed point format for the computational units and registers. The exception is the multiplier computational units, which, by the principle of multiplication, use the \textit{Q64.30} format for results. When the multiplication results are transfered to registers, the values are rounded back to the globally used format.\par
+            The design is depicted in Figure \ref{fig:she-top-module}.
 
 
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-top-module.pdf}
-                           \caption{Top module design for the Selective Harmonic Elimination unit (\gls{abbreviation:she}).}
+                           \caption{Top module design for the Selective Harmonic Elimination (\gls{abbreviation:she}).}
                 \label{fig:she-top-module}
             \end{figure}
 
     \FloatBarrier
-        \subsubsection{Allocation and Timing}\label{sh:allocation-and-timing}
-            The Allocation and Timing diagram, depicted on Figure \ref{fig:she-allocation-timing} describes the algorithm presented in the \hyperref[subsec:she-theory]{\textit{Theory}} section. As can be seen from previous sections, this algorithm has been thoroughly tested before Verilog implementation.\par
-            The Verilog implementation consists of totally 13 states \textit{S0}-\textit{S12}. Through states \textit{S1}-\textit{S11} the \gls{abbreviation:nr} algorithm iterates to calculate the ending results. The state \textit{S0} is a starting state after resetting the unit and state \textit{S12} is ending state, which is reached after the successfull calculation of the last algorithm iteration.\par
-            As previously stated, the \gls{abbreviation:she} calculation module consists of various submodules, which may use other iterative algorithms. Iterations of these sobmodule algorithms are not concern of this part and are implicitly accepted as a part of the \gls{abbreviation:she} module algorithm.
+        \subsubsection{Allocation and Timing}\label{subsubsec:she-allocation-and-timing}
+            The Allocation and Timing diagram, depicted in Figure \ref{fig:she-allocation-timing} outlines the algorithm presented in the \hyperref[subsec:she-theory]{\textit{Theory}} section. As evident from previous sections, this algorithm has been thoroughly tested before Verilog implementation.\par
+            The Verilog implementation comprises a total of 13 states, labeled \textit{S0}-\textit{S12}. Through states \textit{S1}-\textit{S11}, the \gls{abbreviation:nr} algorithm iterates to calculate the final results. The state \textit{S0} is a starting state after resetting the unit, and state \textit{S12} is the ending state reached after the successful calculation of the last algorithm iteration.\par
+            As previously stated, the \gls{abbreviation:she} calculation module consists of various submodules, which may use other iterative algorithms. Iterations of these submodule algorithms are not in focues of this section and are implicitly accepted as a part of the \gls{abbreviation:she} module algorithm.
 
 
 
