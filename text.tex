@@ -895,12 +895,12 @@ end
             \end{equation}
 
             \par
-             The values $x_2$ and $y_2$ in the Equation \ref{eq:example-cordic-calculation} represent the values of $\cos (57,535\;˚)$ and $\sin (57,535\;˚)$ respectively.
+             The values $x_2$ and $y_2$ in the Equation \ref{eq:example-cordic-calculation} correspond to $\cos (57,535\;˚)$ and $\sin (57,535\;˚)$ respectively.
 
     \subsection{Python Implementation}\label{subsec:cordic-python-implementation}
-        The \gls{abbreviation:cordic} algorithm was for simplicity prototyped in python. This turned out very beneficial as the debugging of the code is much faster. The less complex and abstract python code may help with understanding and creating the designed algorithms more than Mathematica which uses some higher abstraction layers to make calculations optimized and easier for more complex problems. But when designing the low level mathematical algorithms, the lower and easier language the more easy is then to implement the design in Verilog or any other hardware description language.\par
-        The python code was as well used to precalculate the \gls{abbreviation:lut} for scaling factor and arcus tangens values for $z_i$ calculations.\par
-        For the clarity, the python implementation is presented in the code \ref{lst:python-cordic}. The code also calculates the error of the \gls{abbreviation:cordic} calculated value from the python math library functions.
+        For simplicity, the \gls{abbreviation:cordic} algorithm was prototyped in Python. This proved highly beneficial, as the debugging of the Python code is much more straightforward compared to debugging Verilog design without prepared and debugged algoritm in a higher level language.\par
+        The Python code was used to precalculate the \gls{abbreviation:lut} for scaling factor and arcus tangens values for $z_i$ calculations.\par
+        For clarity, the Python implementation is provided in Code \ref{lst:python-cordic}. The presented Code also calculates the error between the \gls{abbreviation:cordic}-calculated value and the Python math library functions.
 
 \begin{lstlisting}[language={python}, caption={Python code of \gls{abbreviation:cordic} implementation.}, label= {lst:python-cordic}]
 import math
@@ -1024,14 +1024,14 @@ print("sin: ", errorSin)
 \end{lstlisting}
 
 \par
-After the python implementation and debugging has been finalized, the circuit Verilog implementation of the algorithm could be initiated. Same as for the Division Unit IP, presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module was designed. This approach based on the application specific circuit design should be by its nature faster and more safe than creating the custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa}.
+Once the Python implementation and debugging are completed, the Verilog implementation of the algorithm can initiated. Similar to the Division Unit module, as presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module were designed. This application-specific circuit design approach should be faster and safer than creating a custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa}.
 
     \fbar
     \subsection{IP Block Design}
     \fbar
         \subsubsection{Top module design}
-            The top module design of the \gls{abbreviation:cordic} \gls{abbreviation:ip} is shown in the picture \ref{fig:cordic-top-module}. As can be seen, the structure is very much similar to the Division Unit top module. When using the approach to create a customized circuit for algorithm the flow of creating the top modules is likely to be similar with minor differences in signals, inputs and variables.\par
-            The Data Path Moule in the top design incorporates the precalculated \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues}. The \gls{abbreviation:lut} memory module's structure is very simple and therefore the Verilog interpretation is depicted only for \textit{atanValues} variable. The value of \textit{totalNumberOfIterations} is set to be 12 in this implementation, thus the \gls{abbreviation:lut} is 12x32 bits in size. Obivously the already presented custom fixed point \textit{Q32.15} format is required.
+            The top module design of the \gls{abbreviation:cordic} \gls{abbreviation:ip} is illustrated in Figure \ref{fig:cordic-top-module}. As evident, the structure closely resembles that of the Division Unit top module. When using an approach to create a customized circuit for an algorithm, the process of developing the top modules is likely to be similar, with minor differences in signals, inputs and variables.\par
+            The Data Path module incorporates precalculated values in \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues}. In this implementation, the value of \textit{totalNumberOfIterations} is set to 12 , making the \gls{abbreviation:lut} 12x32 bits in size. It is worth noting that the previously introduced custom fixed-point format \textit{Q32.15} is utilized.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-top-module.pdf}
@@ -1040,7 +1040,8 @@ After the python implementation and debugging has been finalized, the circuit Ve
             \end{figure}
         \fbar
         \subsubsection{Allocation and Timing}
-            In the picture \ref{fig:cordic-allocation-timing} the allocation and timing diagram is depicted. As can be seen, the if statements which are implemented in the control unit are documented here as well. The explanation why the if statements are needed is stated in the \gls{abbreviation:cordic} \hyperref[subsec:cordic-theory]{\textit{Theory}} section. As stated in the section for \gls{abbreviation:cordic} \hyperref[subsubsec:cordic-control-unit]{\textit{Control Unit}} there are two approaches of iteration cycles. The designer may choose jump from \textit{S4} to \textit{S2} for faster algorithm or from \textit{S6} to \textit{S2} for demonstrative aproach. The jumps in the allocation and timing diagram are not shown.
+            In Figure \ref{fig:cordic-allocation-timing}, the allocation and timing diagram is depicted. Notably, the if statements, implemented in the control unit, are documented within the diagram. The explanation, why the if statements are needed, is presented in the \gls{abbreviation:cordic} \hyperref[subsec:cordic-theory]{\textit{Theory}} section.\par
+            As mentioned in the \gls{abbreviation:cordic} \hyperref[subsubsec:cordic-control-unit]{\textit{Control Unit}} sections, there are two primary approaches to iteration cycles. The one is to proceed from \textit{S4} to \textit{S2} for a faster algorithm, while the other involves progressing from \textit{S6} to \textit{S2}. The latter approach is employed for demonstrative purposes, as it ensures that the final numerical values are always calculated.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-allocation-timing.pdf}
@@ -1049,12 +1050,12 @@ After the python implementation and debugging has been finalized, the circuit Ve
             \end{figure}
         \fbar
         \subsubsection{Data Path Module}
-            The picture \ref{fig:cordic-rtl} visualize the Data Path part of the Top Module design including calculation and storing units. The memory \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues} are not depicted as a separate registers but as inputs to the calculation units. The results of $sinus$ and $cosinus$ functions, in python implementation named as \textit{resultSin} and \textit{resultCos} are saved to registers R9 and R10. The \textbf{NEG} blocks aren't in fact implemented as a standalone blocks for making negative numbers. The negation is activated in a corresponding target register when the appropriate \textbf{SelR$_x$} is activated. (where $x$ is here the number of a corresponding register R9 or R10)\par
-            As was stated before, the implementation of the \gls{abbreviation:lut} memory module for $atanValues$ is depicted in Code \ref{lst:atanValuesCordicLUT}, memory module for $scalingValues$ is depicted in Code \ref{lst:scalingValuesCordicLUT}.
+            The Figure \ref{fig:cordic-rtl} presents the Data Path module of the design, calculation and storing units included. The memory \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues} are presented not as separate registers but as inputs to the calculation unit. The results of $sine$ and $cosine$ functions, referred to as \textit{resultSin} and \textit{resultCos} in the Python implementation, are stored to registers R9 and R10, respectively. It is important to note that the \textbf{NEG} blocks are not implemented as calculation unit blocks for generating the negative numbers. Instead negation is activated in the corresponding target register when the appropriate \textbf{SelR$_x$} is activated. (where $x$ represents the number of a corresponding register, either R9 or R10)\par
+            The implementation of the \gls{abbreviation:lut} memory module for $atanValues$ is depicted in Code \ref{lst:atanValuesCordicLUT}, memory module for $scalingValues$ is depicted in Code \ref{lst:scalingValuesCordicLUT}.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-rtl.pdf}
-                \caption{Register transfer level \gls{abbreviation:rtl} scheme of the \gls{abbreviation:cordic} \gls{abbreviation:ip} Data Path Unit \gls{abbreviation:ip}.}
+                \caption{Register transfer level (\gls{abbreviation:rtl}) scheme of the \gls{abbreviation:cordic} \gls{abbreviation:ip} Data Path Unit \gls{abbreviation:ip}.}
                 \label{fig:cordic-rtl}
             \end{figure}
             
@@ -1113,12 +1114,12 @@ end
 endmodule\end{lstlisting}
         \fbar
         \subsubsection{Control Unit}\label{subsubsec:cordic-control-unit}
-        Same way as in a Division Module Control unit, presented in \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}} section, the control signal encoding table \ref{tab:control-signal-cordic-unit} for Data Path \gls{abbreviation:cordic} unit is created.\par
-        The branches of if statements used in the design has been colorcoded in the table for improved clarity. The iteation jumps are not depicted in the control signal table. The jumps may be performed from the step \textit{S4}, when the speed of the calculation is the main concern, or from \textit{S6}, when the alogrithm function is presented. The steps \textit{S5} and \textit{S6} are mainly focused on multiplying the result of iteration by the appropriate scaling value and on transforming the results based on the quadrant of the original wanted angle value.
+        Similarly to the Division \hyperref[subsubsec:division-control-unit]{\textit{Control Unit}} section, the encoding of the control signal is presented in Table \ref{tab:control-signal-cordic-unit}.\par
+        The branches of if statements used in the design have been color-coded to enhance clarity. Steps \textit{S5} and \textit{S6} are mainly focused on multiplying the result of iteration by the appropriate scaling value and on multiplying the calculated values based on the quadrant of the original reference angle value.
         \subfile{src/tex/cordic-control-unit-table.tex}
     \subsection{Simulation results}
-    The testbench for testing the design is created with cocotb and simulated with Verilator.\par
-    As can be seen when implementing the algorithm where the actual iteration value for \textit{sinus} and \textit{cosinus} is calculated, the number of cycles needed for the final calculation can be calculated
+    The testbench for testing the design was developed using Cocotb \cite{cocotb} with the Verilator \cite{verilator} as a simulator.\par
+    It becomes evident during the algorithm implementation, where the actual iteration values for $sine$ and $cosine$ are calculated, that the number of cycles required for the final calculation can be determined as
 
     \begin{equation}
                 NoCyc_\text{result every iteration} = 
@@ -1131,7 +1132,7 @@ endmodule\end{lstlisting}
          + \;5 NoIt,
     \end{equation}
 
-    where $NoCyc$ (-) is the number of cycles and $NoIt$ is the number of iterations for the \gls{abbreviation:cordic} algorithm. The $4$ value is for \textit{S0}-\textit{S4} and the multiplication by 5 is because of states \textit{S4}–\textit{S8}. When the result of the \gls{abbreviation:cordic} algorithm is calculated only once at the end of the algorithm, the number of iteration can be determined by
+    where $NoCyc$ (-) is the number of cycles and $NoIt$ is the number of iterations for the \gls{abbreviation:cordic} algorithm. The $4$ value is caused by states \textit{S0}-\textit{S4} and the multiplication by 5 is caused by states \textit{S4}–\textit{S8}. When the result of the \gls{abbreviation:cordic} algorithm is calculated only once at the end of the algorithm, the number of iterations can be determined by
 
     \begin{equation}
         NoCyc_\text{result at the end} = 
@@ -1145,40 +1146,40 @@ endmodule\end{lstlisting}
     \end{equation}
     where the multiplication by value 3 is caused by states \textit{S4}–\textit{S6}, the addition of $4$ is caused by states \textit{S0}-\textit{S4} and the addition of the $2$ is casued by states \textit{S7}–\textit{S8}.\par
     \par
-    In the simulation the $numberOfCycles$ displayed is more of an index of the cycle, so for angle $\theta$ is the number of iterations depicted on Figure \ref{fig:cordic-verilog-end-of-the-simulation} in fact $63$ not displayed $62$.
+    In the simulation the $numberOfCycles$ displayed is an index of the cycle, so for angle $\theta = -1.247985$~rad is the number of iterations depicted on Figure \ref{fig:cordic-verilog-end-of-the-simulation} is $63$.
 
-    The frequency of the clock signal in this design is currently set as 50 MHz.
+    The frequency of the clock signal in the simulation is currently set to 50 MHz.
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1.2479$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The value of sine and cosine based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-end-of-the-simulation.png}
-            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = -1.2479$ rad. The result is passed to the registers R9 and R10.}
+            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-end-of-the-simulation}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim-10_719.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = 10.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = 10.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim-10_719}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim_minus_6_7195129.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sinus and cosinus values of angle $\theta = - 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = - 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim_minus_6_7195129}
         \end{figure}
 
 \section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using custom circuit implementation}\label{sec:simple-set-of-nonlinear-equations-solved-by-a-newton-raphson-algorithm-using-custom-circuit-implementation}
-    All the presented parts in previous sections may be utilized to solve the system of nonlinear equations. This work leads to solving the transcendetal equations for Selective Harmonic Elimination. But the best approach is to firstly solve an easier set of equations to determine, if the approach of \gls{abbreviation:nr} is viable.
+    Most of the modules presented in the preceding sections can be utilized as submodules to solve the system of nonlinear equations. Because this work aims to solve the transcendetal equations for Selective Harmonic Elimination (\gls{abbreviation:she}), the most effective approach is to initially solve a simpler set of equations to determine, the difficulty and viability of the \gls{abbreviation:nr}.
     \subsection{Theory}
         The objective of the \gls{abbreviation:nr} algorithm is to solve the set of nonlienar equations
 
@@ -1201,10 +1202,11 @@ endmodule\end{lstlisting}
         \end{equation}
 
         \par
-        The algorithm could be implemented in a custom \gls{abbreviation:cpu} with reduced instruction set but for the obvious reasons, eg. speed and complexity of developing own RISC-V, the approach of creating the application specific circuit design was used.\par
-        To be able to implement the algorithm to the custom design, the general \gls{abbreviation:nr} algorithm approach had to be simplified to the most low level implementation. Every single part that could be precalculated was set as a static value at the design step.\par
-        To check if the implementation and algorithm was well designed, the solution by \textit{Solve} function and a customized \gls{abbreviation:nr} was made in Wolfram Mathematica. Before the start of the algorithm the starting values of $x_1^0$ and $x_2^0$ were set as an input to the module. Based on that input the function values at selected starting points were calculated.\par
-        As a next step, the so called defect could be calculated using the newly found values of $\text{F}_1 (x_1^0)$ and $\text{F}_2 (x_1^0, x_2^0)$
+        The algorithm could have been implemented in a custom \gls{abbreviation:cpu} with reduced instruction set. However, due to apparent reasons such as speed and complexity associated with developing own processor, chosen approach involved creating an application specific circuit design.\par
+        In order to integrate the algorithm into the custom design, the general \gls{abbreviation:nr} algorithm approach had to be simplified to the its most fundamental implementation. Every component that could be precalculated was set as a static value during the design phase.\par
+        To check if the implementation and algorithm was well designed, the solution by \textit{Solve} function and a customized \gls{abbreviation:nr} was made in Wolfram Mathematica.\par
+        Before initiating the algorithm, the starting values of $x_1^0$ and $x_2^0$ were set as inputs to the module. Based on that input the function values at selected starting points were calculated.\par
+        As a next step, the so called defect could be calculated using the newly found values of $\text{F}_1 (x_1^0, x_2^0)$ and $\text{F}_2 (x_1^0, x_2^0)$
 
         \begin{equation}
             \Delta \textbf{F}^i =
@@ -1219,7 +1221,7 @@ endmodule\end{lstlisting}
             \end{pmatrix},
         \end{equation}
         where the superscript $i$ is the number of iteration for which the defect is calculated. When the algorithm starts, the $i = 0$. So for example the input value for $\text{F}_1^0$ is $x_1^0$ and $x_2^0$.\par
-        Next the Jacobian matrix \textbf{J} from vector of functions $\textbf(F)(x_1, x_2) = (\text{F}_1, \text{F}_2)$ is calculated as follows.
+        Next, the Jacobian matrix \textbf{J} from vector of functions $\textbf(F)(x_1, x_2) = (\text{F}_1, \text{F}_2)$ is calculated as follows.
 
     \begin{equation}
         \textbf{J}^i = 
@@ -1234,14 +1236,14 @@ endmodule\end{lstlisting}
         \end{pmatrix}.
     \end{equation}
 
-    As for the general \gls{abbreviation:nr} algorithm, the inverted value of Jacobian matrix needs to be calculated. The problem is that when using general mathematical software, such as Wolfram Mathematica, the calculation of the inverted value is as easy as using function of inversion. When designing the circuit, the approach of manual calculation of inversion must be used. In this paper, the calculation is made possible by calculating the determinant of the Jacobian Matrix, its reciprocal value, its adjugate matrix and multiplication of the adjugate matrix elements by the calculated determinant reciprocal value.\par
+    As for the general \gls{abbreviation:nr} algorithm, the inverted value Jacobian matrix needs to be calculated. The problem is, that when using general mathematical software, such as Wolfram Mathematica, the calculation of the inversion is as easy as using function of inversion. When designing the circuit, the approach of manual calculation of inversion must be used. In this paper, the calculation is made possible by calculating the determinant of the Jacobian Matrix, its reciprocal value, its adjugate matrix and multiplication of the adjugate matrix elements by the calculated determinant reciprocal value.\par
     Because the size of the Jacobian matrix is 2x2 the determinant may be easily calculated using the Sarrus Rule. When the matrix is more complicated, the expansion method may be utilized.
 
     \begin{equation}
         \text{det}(\textbf{J}) = 3 (x_1^i)^2 (-2) - (-1) = 3 (x_1^i)^2 (-2) + 1.
     \end{equation}
 
-    The reciprocal value of the determinant is then calculaetd by the Division Unit, created for calculating division of arbitrary numbers real numbers. This Division Unit is presented in the section \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}}.\par
+    The reciprocal value of the determinant is then calculated by the Division Unit, created for calculating division of arbitrary real numbers. This Division Unit is presented in the section \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}}.\par
 The adjugate matrix is calculated as follows
 
     \begin{equation}
@@ -1257,7 +1259,7 @@ The adjugate matrix is calculated as follows
         \end{pmatrix}.
     \end{equation}
 \par
-    After the calculation of the reciprocal value of the determinant of the Jakobi matrix and the adjugate matrix, the inverted Jakobi matrix bay be finally calculated
+    After the calculation of the reciprocal value of the determinant of the Jacobi matrix and the adjugate matrix, the inverted Jacobi matrix may be finally calculated
 
     \begin{equation}
         \textbf{J}^{-1i} =
@@ -1274,7 +1276,7 @@ The adjugate matrix is calculated as follows
         \end{pmatrix}.
     \end{equation}
 \par
-    Next the $(\Delta x_1^i, \Delta x_2^i)$ is to be calculated by using the inverted Jacobi matrix and the defect.
+    Next the $(\Delta x_1^i, \Delta x_2^i)$ can be calculated using the inverted Jacobi matrix and the defect.
 
     \begin{equation}
         \begin{pmatrix}
@@ -1303,24 +1305,24 @@ The adjugate matrix is calculated as follows
         \end{pmatrix}.
     \end{equation}
 \par
-    With those new iteration values $x_1^{i+1}$ $x_2^{i+1}$ the loop for calculation starts again at the calculation of the new value $\text{F}_1^{i+1}$ $\text{F}_2^{i+1}$ which is presented at the start of this section.
+    With these new iteration values $x_1^{i+1}$ $x_2^{i+1}$ the loop for calculation starts again at the calculation of the new value $\text{F}_1^{i+1}$ $\text{F}_2^{i+1}$ which is presented at the start of this section.
 
     \subsection{IP Block Design}
         
         \fbar
         \subsubsection{Top module design}
-            The picture \ref{fig:simple-nr-top-module} depicts the top module design of the circuit. The Control Unit sends control signals to the Data Path unit to make the desired calculations. As in all designs in this paper, the numbers are formatted in the \textit{Q32.15} fixed point format.
+            Figure \ref{fig:simple-nr-top-module} depicts the top module design of the circuit. The Control Unit sends control signals to the Data Path unit to make the calculations. As in all designs in this paper, the numbers are formatted in the \textit{Q32.15} fixed point format.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-top-module.pdf}
-                \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation unit module block design.}
+                \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation module block design.}
                 \label{fig:simple-nr-top-module}
             \end{figure}
 
         \fbar
         \subsubsection{Allocation and Timing}
             
-            The algorithm structure for the Verilog implementation is depicted in the data flow diagram in the picture \ref{fig:simple-nr-allocation-timing}. The algorithm iteration jumps (explained in the section \hyperref[subsubsec:simple-nr-control-unit]{\textit{Control unit}} of the simple \gls{abbreviation:nr} algorithm ) are not displayed in this diagram.
+            The algorithm structure for the Verilog implementation is depicted in the data flow diagram in the picture \ref{fig:simple-nr-allocation-timing}.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-allocation-timing.pdf}
@@ -1331,7 +1333,7 @@ The adjugate matrix is calculated as follows
         \fbar
         \subsubsection{Data Path Unit}
 
-            The Data path unit for this simple \gls{abbreviation:nr} algorithm consists of four multipliers, two adders, two subtractors and one divider. The divider is implemented using the Division Unit, presented in the section \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}}. When the algorithm has finished the results for $x_1$ and $x_2$ are saved in the R1 and R2, the state \textit{S11} is set and \textit{done} signal is set to 1. The results then can be driven to another module or unit for further usage. In fact the \textit{done} signal is driven in the Control Unit and can be used in controlling the possible module, where the \gls{abbreviation:nr} module is only part of the design.
+            The Data path unit for this simple \gls{abbreviation:nr} algorithm consists of four multipliers, two adders, two subtractors and one divider. The divider is implemented using the Division Unit, presented in the section \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}}. Upon completion of the algorithm the results for $x_1$ and $x_2$ are saved in the R1 and R2, the state transitions to \textit{S11} and signal \textit{done} is set to 1. The results then can be driven to another module or unit for further usage.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-rtl.pdf}
@@ -1342,15 +1344,16 @@ The adjugate matrix is calculated as follows
         \fbar
         \subsubsection{Control Unit}\label{subsubsec:simple-nr-control-unit}
 
-            The encoding table \ref{tab:control-signal-simple-nr} shows the steps of the algorithm with a corresponding control signal for the Data Path Unit of the simple \gls{abbreviation:nr} algorithm Verilog implementation.\par
-            The \gls{abbreviation:nr} algorithm iteration jumps are carried out from the state \textit{S10} to state \textit{S1}, when the numebr of iteration is lower than the set total number of iterations, which is hardcoded to the Control Unit. At this implementation, the total number of iterations is se to be 5. In fact, the end of the \gls{abbreviation:nr} algorithm should be determined based on the defect value. In this simple example, the value check of the defect is not implemented. The implementationwould be simple though. The value of register holding the defect values R3 and R4 would be wired to the control unit in the corresponding steps \textit{S4} and \textit{S5} respectively and the comparation with the desired defect value would be performed. If the defect value was smaller than the desired value, the next state of the algorithm would be \textit{S11} and therefore the calculation would end. If the defect was larger than the desired value, the next state would be \textit{S6} and the iteratioun would complete normally and loop from the state \textit{S10} to \textit{S1}.
+            The Table \ref{tab:control-signal-simple-nr} shows encoding of a control signal for the Data Path unit.\par
+            The \gls{abbreviation:nr} algorithm iteration transitions from the state \textit{S10} to state \textit{S1} when the iteration count is lower than the predetermined total number of iterations, value which is set in the Control Unit during the design phase. In this particular implementation, the total number of iterations is set to 5. It is worth noting that sometimes the termination of the \gls{abbreviation:nr} algorithm is determined by the value of a defect. However, in this implementation the defect-check is not implemented.\par
+            Implementation of a defect-controlled algorithm would be straightforward. The values from registers holding the defect values, R3 and R4, would be connected to the control unit in the steps \textit{S4} and \textit{S5} respectively, and a comparison with the reference defect value would be executed. If the defect value was smaller than the reference value, the algorithm would transition to the state \textit{S11} and therefore the calculation would end. Conversely, ff the defect was larger than the reference value, the next state would be \textit{S6} and the iteratioun would proceeed normally, transitioning from state \textit{S10} to \textit{S1}.
 
             \subfile{src/tex/simple-nr-control-unit-table.tex}
 
     \fbar
     \subsection{Simulation results}
-        The test bench for simulation was made using Cocotb \cite{cocotb} with the Verilator \cite{verilator} as a simulator. The result of the calculation may be seen in the registers R1 and R2. The results are $x_1 = - 0.707489$ and $x_2 = - 1.353759$\par
-        The clock signal frequency for this design is currently 20 MHz.
+        The test bench for simulation was made using Cocotb \cite{cocotb} with the Verilator \cite{verilator} as a simulator. The results of the calculation may be seen in the registers R1 and R2. The results are $x_1 = - 0.707489$ and $x_2 = - 1.353759$.\par
+        The clock signal frequency in simulation was set to 20 MHz.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/png/simple-nr-sim.png}
