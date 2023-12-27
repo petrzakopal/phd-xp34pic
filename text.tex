@@ -1357,7 +1357,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/png/simple-nr-sim.png}
-                \caption{The whole Verilog simulation of a simple Newton-Raphson (\gls{abbreviation:nr}) algorithm. The result is may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
+                \caption{The whole Verilog simulation of a simple Newton-Raphson (\gls{abbreviation:nr}) algorithm. The result may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
                 \label{fig:simple-nr-sim}
             \end{figure}
 
@@ -1666,7 +1666,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
 
     \FloatBarrier
         \subsubsection{Data Path Unit}\label{sh:data-path-unit}
-            As can be observed from the Figure \ref{fig:she-rtl} the Data Path unit for solving the transcendetal equations is more complex than previously presented units. Obviously the design could be further simplified, i.e., reduce the number of registers and calculation units. This simplification would resoult in a trade of speed for less complexity. The less complex the design, the less \gls{abbreviation:fpga} resources, i.e., \gls{abbreviation:lut}s, is needed for the realization of the design. This paper mainly focuses on speed and clarity, so the design consists of thirteen data registers, four \gls{abbreviation:cordic} units, four multiplication units, two adders, two subtractors, one division unit and one invertor unit, which is implemeted directly in the registers logic.
+            As can be observed from the Figure \ref{fig:she-rtl} the Data Path unit for solving the transcendetal equations is more complex than previously presented units. Obviously the design could be further simplified, i.e., reduce the number of registers and calculation units. This simplification would result in a trade of speed for less complexity. The less complex the design, the less \gls{abbreviation:fpga} resources, i.e., \gls{abbreviation:lut}s, is needed for the realization of the design. This paper mainly focuses on speed and clarity, so the design consists of thirteen data registers, four \gls{abbreviation:cordic} units, four multiplication units, two adders, two subtractors, one division unit and one invertor unit, which is implemeted directly in the registers logic.
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-rtl.pdf}
@@ -1676,13 +1676,13 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
     
     \FloatBarrier
         \subsubsection{Control Unit}\label{subsubsec:sh-elimination-control-unit}
-            Control unit signal specification can be observed in the Table \ref{tab:control-signal-she-unit}. If the unit design was less complex, i.e., with smaller amount of registers, the control signal length would be smaller, but the number of states would be hightened.
+            Control unit signal specification can be observed in the Table \ref{tab:control-signal-she-unit}. If the unit design was less complex, i.e., with smaller amount of registers, the control signal length would be smaller, but the number of states would be higher.
 
         \subfile{src/tex/sh-elimination-control-unit-table.tex}
     \FloatBarrier
 
     \subsubsection{Inverter output voltage analysis for Verilog implementation}
-        The simulated \gls{abbreviation:vsi} output phase voltage when the \gls{abbreviation:she} algorithm is employed for the modulation index $m = 1$ in Verilog is depicted in the Figure \ref{fig:VerilogPlotWaveform}. The harmonic analysis for the presented waveform may be observed in the Figure \ref{fig:VerilogPlotHarmonics}. As previously stated, please note that in the 3 phase symmetrical system, the triplen harmonics would be eliminated as well. As can be seen, the undesired 5th harmonics has been eliminated. The calculated angles after ten iterations of the \gls{abbreviation:nr} algorithm are $\alpha_1 = 0.06341$ rad and $\alpha_2 = 1.320098$ rad. Obviously in the design the numbers are formatted using \textit{Q32.15} fixed point format.
+        The simulated \gls{abbreviation:vsi} output phase voltage, when the \gls{abbreviation:she} algorithm is employed for the modulation index $m = 1$ in Verilog, is depicted in the Figure \ref{fig:VerilogPlotWaveform}. The harmonic analysis for the presented waveform can be observed in the Figure \ref{fig:VerilogPlotHarmonics}. As mentioned in previous sections, please note that in the 3-phase symmetrical system, the triplen harmonics would be eliminated as well. It is evident that the unwanted 5th harmonics has been successfully eliminated. The calculated angles after ten iterations of the \gls{abbreviation:nr} algorithm are $\alpha_1 = 0.06341$ rad and $\alpha_2 = 1.320098$ rad.
 
             \begin{figure}[htbp!]
                 \centering
@@ -1700,33 +1700,45 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
                 \caption{}
             \end{figure}
 
-
-
-
-
             \begin{figure}[htbp!]
                 \centering
                 \begin{subfigure}[t]{0.45\textwidth}
-                    \includegraphics[width=1\textwidth]{src/png/ComparataionPlotSixStepVerilogSheHarmonics.png}
-                    \caption{Comparation of a Waveform output of a two level Voltage Source Inverter when the Selective Harmonic Elimination method is or is not applied with Verilog calculated angles. The Voltage value is normalized to a \gls{abbreviation:dc} link voltage.}
-                    \label{fig:ComparataionPlotSixStepVerilogSheHarmonics}
+                    \includegraphics[width=1\textwidth]{src/png/ComparataionPlotSixStepVerilogSheWaveform.png}
+                    \caption{Comparison of a Waveform output of a two level Voltage Source Inverter when the Selective Harmonic Elimination method is or is not applied with Verilog calculated angles. The Voltage value is normalized to a \gls{abbreviation:dc} link voltage.}
+                    \label{fig:ComparataionPlotSixStepVerilogSheWaveform}
                 \end{subfigure}
                 \hspace{0.05\textwidth}
                 \begin{subfigure}[t]{0.45\textwidth}
-                    \includegraphics[width=1\textwidth]{src/png/ComparataionPlotSixStepVerilogSheWaveform.png}
-                    \caption{Compartion of a Waveform harmonics analysis of a output voltage of a two level Voltage Source Inverter with and without the Selective Harmonic Elimination. The Voltage value is normalized to a DC link voltage.}
-                    \label{fig:ComparataionPlotSixStepVerilogSheWaveform}
+                    \includegraphics[width=1\textwidth]{src/png/ComparataionPlotSixStepVerilogSheHarmonics.png}
+                    \caption{Comparison of a Waveform harmonics analysis of a output voltage of a two level Voltage Source Inverter with and without the Selective Harmonic Elimination. The Voltage value is normalized to a DC link voltage.}
+                    \label{fig:ComparataionPlotSixStepVerilogSheHarmonics}
                 \end{subfigure}
                 \caption{}
             \end{figure}
             \FloatBarrier
 
+    \subsection{Simulation results}
+        The end of simulation with result of \gls{abbreviation:she} alogrithm after the 10th \gls{abbreviation:nr} algorithm can be seen in Figure \ref{fig:she-sim-end}. The whole simulation run is depicted in the Figure \ref{fig:she-sim-all}.\par
+        The clock signal frequency in simulation was set to 25 MHz to emulate low cost \gls{abbreviation:fpga} capabilities.
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/png/she-sim-end.png}
+                \caption{The ending part of a Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
+                \label{fig:she-sim-end}
+            \end{figure}
+
+            \begin{figure}[htbp!]
+                \centering
+                \includegraphics[width=1\textwidth]{src/png/she-sim-all.png}
+                \caption{The whole Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
+                \label{fig:she-sim-all}
+            \end{figure}
 %závěr
 \newpage
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
 \section*{Conclusion}
-This paper presents \gls{abbreviation:fpga} module suitable for solving the \gls{abbreviation:she} algorithm in near real-time. The module consists of two other submodules which are also presented in this paper. These submodules are units for calculating the division of two arbitrary values and a \gls{abbreviation:cordic} unit, suitable for calculating $sinus$ and $cosinus$ functions.\par
-The goal of this paper was to make investigate and design speed optimized modules, which would be capable of near real-time calculations. Outcomes of this paper may be in the future used as a starting point for other researches of designing the modules for controlling the electric drives or for creating the Hardware In Loop Systems.
+This paper introduces \gls{abbreviation:fpga} module designed for solving the \gls{abbreviation:she} algorithm in near real-time. The module comprises two additional submodules, both discussed in this paper. These submodules include units for calculating the division of two arbitrary values and a \gls{abbreviation:cordic} unit suitable for calculating $sine$ and $cosine$ functions.\par
+The primary objective of this paper was to design speed-optimized modules capable of near real-time calculations. The outcomes of this paper could serve as a starting point for future research in designing modules for controlling electric drives or creating Hardware-in-Loop Systems.
 
 \flushbottom %vyčištění stránky
 
