@@ -666,7 +666,7 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=1\textwidth]{src/png/division-10-div-7.png}
+  \includegraphics[width=1\textwidth]{src/png/inverted/division-10-div-7.png}
     \caption{Selected signals from simulation of division N/D = 10 / 7. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
   \label{fig:division-10-div-7}
 \end{figure}
@@ -674,14 +674,14 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=1\textwidth]{src/png/division-1-div-0-25.png}
+  \includegraphics[width=1\textwidth]{src/png/inverted/division-1-div-0-25.png}
    \caption{Selected signals from simulation of division N/D = 1 / 0.25. The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-1-div-0-25}
 \end{figure}
 
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=1\textwidth]{src/png/division-1-div-minus-0-25.png}
+  \includegraphics[width=1\textwidth]{src/png/inverted/division-1-div-minus-0-25.png}
     \caption{Selected signals from simulation of division N/D = 1 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-1-div-minus-0-25}
 \end{figure}
@@ -689,14 +689,14 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=1\textwidth]{src/png/division-304-03215-div-min-0-25.png}
+  \includegraphics[width=1\textwidth]{src/png/inverted/division-304-03215-div-min-0-25.png}
     \caption{Selected signals from simulation of division N/D = 304.03215 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
   \label{fig:division-304-03215-div-min-0-25}
 \end{figure}
 
 \begin{figure}[htbp!]
   \centering
-  \includegraphics[width=1\textwidth]{src/png/division-10-div-519.png}
+  \includegraphics[width=1\textwidth]{src/png/inverted/division-10-div-519.png}
     \caption{Selected signals from simulation of division N/D = 10 / 519. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
   \label{fig:division-10-div-519}
 \end{figure}
@@ -1175,28 +1175,28 @@ endmodule\end{lstlisting}
 
         \begin{figure}[htbp!]
             \centering
-            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim.png}
+            \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim.png}
             \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The value of sine and cosine based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
-            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-end-of-the-simulation.png}
+            \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-end-of-the-simulation.png}
             \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-end-of-the-simulation}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
-            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim-10_719.png}
+            \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim-10_719.png}
             \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = 10.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim-10_719}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
-            \includegraphics[width=1\textwidth]{src/png/cordic-verilog-whole-sim_minus_6_7195129.png}
+            \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim_minus_6_7195129.png}
             \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = - 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim_minus_6_7195129}
         \end{figure}
@@ -1379,7 +1379,7 @@ The adjugate matrix is calculated as follows
         The clock signal frequency in simulation was set to 20 MHz.
             \begin{figure}[htbp!]
                 \centering
-                \includegraphics[width=1\textwidth]{src/png/simple-nr-sim.png}
+                \includegraphics[width=1\textwidth]{src/png/inverted/simple-nr-sim.png}
                 \caption{The whole Verilog simulation of a simple Newton-Raphson (\gls{abbreviation:nr}) algorithm. The result may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
                 \label{fig:simple-nr-sim}
             \end{figure}
@@ -1745,14 +1745,14 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
         The clock signal frequency in simulation was set to 25 MHz to emulate low cost \gls{abbreviation:fpga} capabilities.
             \begin{figure}[htbp!]
                 \centering
-                \includegraphics[width=1\textwidth]{src/png/she-sim-end.png}
+                \includegraphics[width=1\textwidth]{src/png/inverted/she-sim-end.png}
                 \caption{The ending part of a Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
                 \label{fig:she-sim-end}
             \end{figure}
 
             \begin{figure}[htbp!]
                 \centering
-                \includegraphics[width=1\textwidth]{src/png/she-sim-all.png}
+                \includegraphics[width=1\textwidth]{src/png/inverted/she-sim-all.png}
                 \caption{The whole Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
                 \label{fig:she-sim-all}
             \end{figure}
