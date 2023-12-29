@@ -505,8 +505,8 @@ The structure of the paper is as follows: Section \ref{sec:calculating-the-divis
 %konec úvodu
 
 \section{Notes on all of the circuit designs in Verilog}
-    All of the designs presented in this paper are created using pure Verilog code and tested through Free and Open-Source Software (\gls{abbreviation:foss}). The decision to opt for \gls{abbreviation:foss}  was deliberate, aiming to prevent any vendor-locking to specific hardware or predefined \gls{abbreviation:ip}s. Predefined \gls{abbreviation:ip}s  are often optimized by a specific hardware vendor and intended for use with that vendor's hardware. However, the hardware may not always be available or suitable for a specific application. Academics and numerous companies opt for open-source and open-hardware approaches to prevent vendor lock-in. Once the design and algorithm are thoroughly understood, they can be initially implemented without any specific platform in mind. Later, when selecting the device vendor, the design can be modified to suit the specific hardware requirements.\par
-    That is why Verilog, with Cocotb \cite{cocotb} (Test Bench creation tool) and Verilator \cite{verilator} (simulator) have been used for designing the circuits presented in this paper.\par
+    All of the designs presented in this paper are created using pure Verilog code and tested through Free and Open-Source Software (\gls{abbreviation:foss}). The decision to opt for \gls{abbreviation:foss}  was deliberate, aiming to prevent any vendor-locking to specific hardware or predefined \gls{abbreviation:ip}s. Predefined \gls{abbreviation:ip}s  are often optimized by a specific hardware vendor and intended for use with that vendor's hardware. However, the hardware may not always be available or suitable for the application. Academics and numerous companies opt for open-source and open-hardware approaches to prevent vendor lock-in. Once the design and algorithm are thoroughly understood, they can be implemented without any specific platform in mind. Later, when selecting the device vendor, the design can be modified to suit the specific hardware requirements.\par
+    That is why Verilog, with Cocotb \cite{cocotb} (Test Bench creation tool) and Verilator \cite{verilator} (simulator) were used for designing the circuits presented in this paper.\par
 
 \section{Calculating the division of fixed point numbers}\label{sec:calculating-the-division-of-fixed-point-numbers}
 Typically, when employing numerical methods to solve transcendental equations, the calculation of the division of two input numbers becomes necessary. This requirement persists even when applying the Newton-Raphson (\gls{abbreviation:nr}) method to solve a set of two equations, because computing the reciprocal value of the Jacobian determinant.\par
@@ -667,7 +667,7 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/inverted/division-10-div-7.png}
-    \caption{Selected signals from simulation of division N/D = 10 / 7. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 10 / 7. The correct result in R0 is obtained after two iterations (register numberOfIterations).}
   \label{fig:division-10-div-7}
 \end{figure}
 
@@ -675,14 +675,14 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/inverted/division-1-div-0-25.png}
-   \caption{Selected signals from simulation of division N/D = 1 / 0.25. The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+   \caption{Selected signals from simulation of division N/D = 1 / 0.25. The correct result in R0 is obtained after five iterations (register numberOfIterations).}
   \label{fig:division-1-div-0-25}
 \end{figure}
 
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/inverted/division-1-div-minus-0-25.png}
-    \caption{Selected signals from simulation of division N/D = 1 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 1 / (-0.25). The correct result in R0 is obtained after five iterations (register numberOfIterations).}
   \label{fig:division-1-div-minus-0-25}
 \end{figure}
 
@@ -690,14 +690,14 @@ VCD simulation output waveforms are depicted on the following Figures. The simul
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/inverted/division-304-03215-div-min-0-25.png}
-    \caption{Selected signals from simulation of division N/D = 304.03215 / (-0.25). The correct result in \textit{R0} is obtained after five iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 304.03215 / (-0.25). The correct result in R0 is obtained after five iterations (register numberOfIterations).}
   \label{fig:division-304-03215-div-min-0-25}
 \end{figure}
 
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/png/inverted/division-10-div-519.png}
-    \caption{Selected signals from simulation of division N/D = 10 / 519. The correct result in \textit{R0} is obtained after two iterations (reg numberOfIterations).}
+    \caption{Selected signals from simulation of division N/D = 10 / 519. The correct result in R0 is obtained after two iterations (register numberOfIterations).}
   \label{fig:division-10-div-519}
 \end{figure}
 
@@ -1058,7 +1058,7 @@ Once the Python implementation and debugging are completed, the Verilog implemen
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-top-module.pdf}
-                \caption{Top module design for the \gls{abbreviation:cordic} module block design.}
+                \caption{Top module design for the \gls{abbreviation:cordic} module block.}
                 \label{fig:cordic-top-module}
             \end{figure}
         \fbar
@@ -1068,7 +1068,7 @@ Once the Python implementation and debugging are completed, the Verilog implemen
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-allocation-timing.pdf}
-                \caption{Allocation and timing diagram for the Data Path Unit part of the \gls{abbreviation:cordic} \gls{abbreviation:ip}.}
+                \caption{Allocation and timing diagram for the Data Path Unit part of the \gls{abbreviation:cordic} module.}
                 \label{fig:cordic-allocation-timing}
             \end{figure}
         \fbar
@@ -1176,32 +1176,32 @@ endmodule\end{lstlisting}
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The value of sine and cosine based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The value of sine and cosine based on the current iteration is also calculated in this algorithm approach. The result is passed to registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-end-of-the-simulation.png}
-            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The result is passed to the registers R9 and R10.}
+            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The result is passed to registers R9 and R10.}
             \label{fig:cordic-verilog-end-of-the-simulation}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim-10_719.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = 10.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = 10.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim-10_719}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim_minus_6_7195129.png}
-            \caption{The whole Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = - 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to the registers R9 and R10.}
+            \caption{The Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = - 6.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim_minus_6_7195129}
         \end{figure}
 
-\section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using custom circuit implementation}\label{sec:simple-set-of-nonlinear-equations-solved-by-a-newton-raphson-algorithm-using-custom-circuit-implementation}
+\section{Simple set of nonlinear equations solved by a Newton-Raphson algorithm using a custom circuit implementation}\label{sec:simple-set-of-nonlinear-equations-solved-by-a-newton-raphson-algorithm-using-custom-circuit-implementation}
     Most of the modules presented in the preceding sections can be utilized as submodules to solve the system of nonlinear equations. Because this work aims to solve the transcendetal equations for Selective Harmonic Elimination (\gls{abbreviation:she}), the most effective approach is to initially solve a simpler set of equations to determine, the difficulty and viability of the \gls{abbreviation:nr}.
     \subsection{Theory}
         The objective of the \gls{abbreviation:nr} algorithm is to solve the set of nonlienar equations
@@ -1338,7 +1338,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-top-module.pdf}
-                \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation module block design.}
+                \caption{Top module design for the simple Newton-Raphson (\gls{abbreviation:nr}) calculation module block.}
                 \label{fig:simple-nr-top-module}
             \end{figure}
 
@@ -1741,18 +1741,18 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
             \FloatBarrier
 
     \subsection{Simulation results}
-        The end of simulation with result of \gls{abbreviation:she} alogrithm after the 10th \gls{abbreviation:nr} algorithm can be seen in Figure \ref{fig:she-sim-end}. The whole simulation run is depicted in the Figure \ref{fig:she-sim-all}.\par
+        The detail of the ending part of simulation with result of \gls{abbreviation:she} alogrithm after the 10th \gls{abbreviation:nr} iteration can be seen in Figure~\ref{fig:she-sim-end}. The whole simulation run is depicted in the Figure \ref{fig:she-sim-all}.\par
         The clock signal frequency in simulation was set to 25 MHz to emulate low cost \gls{abbreviation:fpga} capabilities.
             \begin{figure}[htbp!]
                 \centering
-                \includegraphics[width=1\textwidth]{src/png/inverted/she-sim-end.png}
+                \includegraphics[width=0.93\textwidth]{src/png/inverted/she-sim-end.png}
                 \caption{The ending part of a Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
                 \label{fig:she-sim-end}
             \end{figure}
 
             \begin{figure}[htbp!]
                 \centering
-                \includegraphics[width=1\textwidth]{src/png/inverted/she-sim-all.png}
+                \includegraphics[width=0.93\textwidth]{src/png/inverted/she-sim-all.png}
                 \caption{The whole Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
                 \label{fig:she-sim-all}
             \end{figure}
@@ -1761,7 +1761,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
 \addcontentsline{toc}{section}{\numberline{}Conclusion} 
 \section*{Conclusion}
 This paper introduces \gls{abbreviation:fpga} module designed for solving the \gls{abbreviation:she} algorithm in near real-time. The module comprises two additional submodules, both discussed in this paper. These submodules include units for calculating the division of two arbitrary values and a \gls{abbreviation:cordic} unit suitable for calculating $sine$ and $cosine$ functions.\par
-The primary objective of this paper was to design speed-optimized modules capable of near real-time calculations. The outcomes of this paper could serve as a starting point for future research in designing modules for controlling electric drives or creating Hardware-in-Loop Systems.
+The primary objective of this paper was to design speed-optimized modules capable of near real-time calculations. The outcomes of this paper can serve as a starting point for future research in designing \gls{abbreviation:fpga} modules for controlling electric drives or in creating the Hardware-in-Loop Systems.
 
 \flushbottom %vyčištění stránky
 
