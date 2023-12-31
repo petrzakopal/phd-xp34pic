@@ -504,15 +504,15 @@ The structure of the paper is as follows: Section \ref{sec:calculating-the-divis
 \newpage
 %konec úvodu
 
-\section{Notes on all of the circuit designs in Verilog}
-    All of the designs presented in this paper are created using pure Verilog code and tested through Free and Open-Source Software (\gls{abbreviation:foss}). The decision to opt for \gls{abbreviation:foss}  was deliberate, aiming to prevent any vendor-locking to specific hardware or predefined \gls{abbreviation:ip}s. Predefined \gls{abbreviation:ip}s  are often optimized by a specific hardware vendor and intended for use with that vendor's hardware. However, the hardware may not always be available or suitable for the application. Academics and numerous companies opt for open-source and open-hardware approaches to prevent vendor lock-in. Once the design and algorithm are thoroughly understood, they can be implemented without any specific platform in mind. Later, when selecting the device vendor, the design can be modified to suit the specific hardware requirements.\par
-    That is why Verilog, with Cocotb \cite{cocotb} (Test Bench creation tool) and Verilator \cite{verilator} (simulator) were used for designing the circuits presented in this paper.\par
+\section{Note on the circuit Verilog designs}
+    All of the designs presented in this paper are created using pure Verilog code and tested through Free and Open-Source Software (\gls{abbreviation:foss}). The decision to opt for \gls{abbreviation:foss}  was deliberate, aiming to prevent any vendor-locking to a specific hardware or predefined \gls{abbreviation:ip}s. Predefined \gls{abbreviation:ip}s  are often optimized by a specific hardware vendor and intended for use with that vendor's hardware. However, the hardware may not always be available or suitable for the application.\par
+    Once the design and algorithm are thoroughly understood, they can be implemented without any specific platform in mind. Later, when selecting the device vendor, the design can be modified to suit the specific hardware requirements. That is why Verilog, with Cocotb \cite{cocotb} (Test Bench creation tool) and Verilator \cite{verilator} (simulator) were used for designing the circuits presented in this paper.\par
 
 \section{Calculating the division of fixed point numbers}\label{sec:calculating-the-division-of-fixed-point-numbers}
-Typically, when employing numerical methods to solve transcendental equations, the calculation of the division of two input numbers becomes necessary. This requirement persists even when applying the Newton-Raphson (\gls{abbreviation:nr}) method to solve a set of two equations, because computing the reciprocal value of the Jacobian determinant.\par
-There are some \gls{abbreviation:ip} blocks available, which are capable of calculating the division of two numbers, but the blocks are usually either vendor specific intellectual property \gls{abbreviation:ip} \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
+Typically, when employing numerical methods to solve transcendental equations, the calculation of the division of two input numbers becomes necessary. This requirement persists even when applying the Newton-Raphson (\gls{abbreviation:nr}) method to solve a set of two equations, because computing the reciprocal value of the Jacobian determinant is necessary.\par
+There are some \gls{abbreviation:ip} blocks available, which are capable of calculating the division of two numbers, but the blocks are usually either vendor specific intellectual property (\gls{abbreviation:ip}) \cite{amd-xilinx-vivado-divider-ip-block} or feature low performance \cite{burke-fixed-point-math-library}.\par
 The drawback of vendor-specific \gls{abbreviation:ip}s lies in their limited compatibility, often preventing their use with \gls{abbreviation:fpga} chips from different vendors. On the other hand the vendor specific \gls{abbreviation:ip}s are usually optimized and able to use the specific type of resources available at the vendor's chip which resolve in better performance.\par
-To preserve the compatibility of the design with chips from multiple vendors, the custom solution for division design based on the very known Newton Raphson (\gls{abbreviation:nr}) algorithm was developed. \cite{burke-fixed-point-math-library}
+To preserve the compatibility of the design with chips from multiple vendors, the custom solution for division design based on the very well known Newton Raphson (\gls{abbreviation:nr}) algorithm was developed. \cite{burke-fixed-point-math-library}
 
 \subsection{Newton Rapshon algorithm for calculating the division}\label{subsection:newton-raphson-algorithm-for-calculating-the-division}
 General Newton Raphson (\gls{abbreviation:nr}) algorithm is a well known approach to numerically solve equations. It is the reason why it is utilized in many algorithms. However, the negative aspect of \gls{abbreviation:nr} is that it's convergency strongly depends on initial values of variables. When the initial values are chosen poorly, the performed number of iterations before the convergency is reached can be high.\par
@@ -522,7 +522,7 @@ The Equation \ref{eq:initial-nr-value-formula} for calculating the initial value
 \begin{equation}\label{eq:initial-nr-value-formula}
 x_0 = \frac{48}{17} - \frac{32}{17} D,
 \end{equation}
-where the $x_0$ is the initial value for \gls{abbreviation:nr} algorithm, $D$ is the denominator value for calculating the expression $N/D$.\par
+where the $x_0$ is the initial value for the \gls{abbreviation:nr} algorithm, $D$ is the denominator value for calculating the expression $N/D$, where $N$ is the numerator.\pa
 Because in the module design implemented via Verilog the fixed point number format \textit{Q32.15} is used, the fractional numbers from Equation \ref{eq:initial-nr-value-formula} are rounded to\newline2.8229 (32'sb00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'sb00000000000000001\_111000011100101 in binary) respectively.\par
 After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea of using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication which can be synthetized in the \gls{abbreviation:fpga} fabric. When employing the \gls{abbreviation:nr} algorithm for finding the values of $N/D$ the function with root is $1/D$ is essential. After the root of the function is found, it is then multiplied by the numerator value, and te solution $N/D$ is obtained. There may be many functions, which root is the searched value $1/D$ but the most trivial is Equation \ref{eq:equation-with-appropriate-root}.\par
 
@@ -536,18 +536,18 @@ After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm
   \frac{\dd F(x_i)}{\dd x} = F'(x_i) = \frac{F (x_{i+1}) - F (x_i)}{x_{i+1}-x_i}.
 \end{equation}
 
-\noindent Because finding root of the equation \ref{eq:equation-with-appropriate-root}, the value of $F (x_{i+1})$ is set to be zero. After separating the $x_{i+1}$ value of the eq. \ref{eq:nr-division-derivative-at-the-point} and derivating the function $F (x_i)$ the obtained algorithm for a value $x_{i+1}$ is obtained from eq. \ref{eq:derivative-nr-new-value-algorithm}.\par
+\noindent Because finding root of the Equation \ref{eq:equation-with-appropriate-root}, the value of $F (x_{i+1})$ is set to be zero. After separating the $x_{i+1}$ value of the Equation \ref{eq:nr-division-derivative-at-the-point} and derivating the function $F (x_i)$ the obtained algorithm for a value $x_{i+1}$ is obtained from eq. \ref{eq:derivative-nr-new-value-algorithm}.\par
 
 \begin{equation}\label{eq:derivative-nr-new-value-algorithm}
   x_{i+1} = -\frac{F (x_i)}{F' (x_i)} + x_i = - \frac{F (x_i)}{-\frac{1}{x_i^2}} + x_i = (\frac{1}{x_i} - D) x_i^2 + x_i = x_i - D x_i^2 + x_i = 2 x_i - D x_i^2.
 \end{equation}
 
-Usually, the iterative algorithm is stopped, when the value $F(x_{i+1}) - F(x_i)$ (called defect) reaches certain value set by the stop condition. However, in this algorithm, the stop condition is not yet implemented. Based on the observation carried on the N-R algorithm the obtained result is sufficient after 5 iterations.
+Usually, the iterative algorithm is stopped, when the value $F(x_{i+1}) - F(x_i)$ (called the defect) reaches certain value set by the stop condition. However, in this algorithm, the stop condition is not yet implemented. Based on the observation carried on the \gls{abbreviation:nr} algorithm the obtained result is sufficient after 5~iterations.
 
-The mathematically expressed algorithm is then transformed into programmable algorithm suitable for \gls{abbreviation:fpga} implementation. The top module design for this algorithm is presented in the section \hyperref[subsubsec:division-top-module-design]{\textit{Top module design}}, the control and data unit for calculating the value $x_{i+1}$ is presented in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}}
+The mathematically expressed algorithm is then transformed into programmable algorithm suitable for \gls{abbreviation:fpga} implementation. The top module design for this algorithm are presented in the section \hyperref[subsubsec:division-top-module-design]{\textit{Top module design}}, the control and data unit for calculating the value $x_{i+1}$ is presented in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}}
 
 \subsection{IP Block Design}\label{subsec:division-ip-block-design}
-The design of this unit is consists of 4 main modules:
+The design of this unit consists of 4 main modules:
 \begin{itemize}
   \item the \textbf{data unit module}, used for manipulating data and making calculation operations,
   \item the \textbf{control unit module}, used for controlling the \textbf{data unit module} and \textbf{scaling unit module},
@@ -558,7 +558,7 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/top-module.pdf}
-   \caption{Top module design for the division unit module block design.}
+   \caption{Top module design for the division unit module block}
   \label{fig:division-top-module}
 \end{figure}
 
@@ -567,7 +567,7 @@ The top module wraps all of the presented modules (\textbf{data unit module}, \t
 \fbar
 \subsubsection{Allocation and Timing}\label{subsubsec:division-allocation-and-timing}
 The diagram of the data flow and timing of the algorithm is displayed in the Figure \ref{fig:division-allocation-timing}.\par
-The whole algorithm comprises nine steps. The initial four steps are used for calculating the initial value of $x_0$ as presented in the Equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, thus the root of the Equation \ref{eq:equation-with-appropriate-root} which in fact is the searched value of $1/D$. The following iteration begins at the step labeled as \textit{S5}. The iterative process continues until a predefined stop condition is satisfied, such as reaching a specified number of iterations.
+The complete algorithm comprises nine steps. The initial four steps are used for calculating the initial value of $x_0$ as presented in the Equation \ref{eq:initial-nr-value-formula}. The steps \textit{S4} to \textit{S8} are for calculating the next search value of $x_{i+1}$, thus the root of the Equation \ref{eq:equation-with-appropriate-root} which in fact is the searched value of $1/D$. The following iteration begins at the step labeled as \textit{S5}. The iterative process continues until a predefined stop condition is satisfied, such as reaching a specified number of iterations.
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/allocation-timing.pdf}
@@ -584,14 +584,14 @@ The Data Path Module unit also covers the possibility of using negative denomina
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=1\textwidth]{src/pdf/rtl.pdf}
-    \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of Division module Data Path part.}
+    \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Division module Data Path.}
   \label{fig:division-rtl}
 \end{figure}
 
 
 \fbar
 \subsubsection{Control Unit}\label{subsubsec:division-control-unit}
-Signals from Control Unit to Data Path Module are encoded in the CS signal. Table \ref{tab:control-signal-division-unit} displays the CS signal along with the corresponding instructions for steps $S0$–$S8$ of the \gls{abbreviation:fsm}. To enhance code clarity the signal is passed to the Control Unit in the hexadecimal format.\par
+Signals from Control Unit to Data Path Module are encoded in the CS signal. Table \ref{tab:control-signal-division-unit} displays the CS signal along with the corresponding instructions for steps $S0$–$S8$ of the \gls{abbreviation:fsm}. To enhance code clarity the signal is defined in the Control Unit in the hexadecimal format.\par
 The number of the iteration of the Finite State Machine (\gls{abbreviation:fsm}) is also set in the Control Unit. This iteration number is subsequently used in the module to check for the stop condition of the calculation loop.\par
 As stated in the \hyperref[subsubsec:division-allocation-and-timing]{\textit{Allocation and Timing}} section, after the step \textit{S8}, the \gls{abbreviation:fsm} restarts at the state \textit{S4} with new $x_i$ values as inputs. This state change is not depicted in the Table \ref{tab:control-signal-division-unit} for CS signal.
 
@@ -647,7 +647,7 @@ at every positive edge of clock
 \subsection{Simulation results}
 The simulation via Verilog testbench was made to determine the correctness of presented division module. The Icarus Verilog simulator was used to simulate the module and GTKWave was used to display the VCD simulation output file.\par
 The simulation output confirms that the module operates correctly for positive and negative numbers in the fixed-point format \textit{Q32.15}. The algorithm used in this module can compute the correct result in significantly fewer clock cycles compared to the full division algorithm utilized in the division module within the package \cite{burke-fixed-point-math-library}. As a result, the module can be freely used as a submodule in more complex modules.\par
-VCD simulation output waveforms are depicted on the following Figures. The simulations were conducted for arbitrarily selected values of $N$ and $D$, with clock frequency set to 250 MHz. Pseudocode Verilog snippet for the test bench is provided in the Listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift} when the \textit{start} signal is set on low.
+The rendered \gls{abbreviation:vcd} simulation output waveforms are depicted on the following Figures. The simulations were conducted for arbitrarily selected values of numerator $N$ and denominator $D$, with clock frequency set to 250 MHz. Pseudocode Verilog snippet for the test bench is provided in the Listing \ref{lst:division-testbench-verilog-pseudocode}. In the test bench, one unit of time corresponds to 1 ns. (based on the set timescale settings) The division unit algorithm starts at the next positive edge of clock signal after successful determination of the value \textit{bitsToShift}.
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode snippet for the Verilog simulation test bench.}, label= {lst:division-testbench-verilog-pseudocode}]
     timescale 1ns/1ns 
@@ -1058,7 +1058,7 @@ Once the Python implementation and debugging are completed, the Verilog implemen
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/cordic-top-module.pdf}
-                \caption{Top module design for the \gls{abbreviation:cordic} module block.}
+                \caption{Top module design for the \gls{abbreviation:cordic} module.}
                 \label{fig:cordic-top-module}
             \end{figure}
         \fbar
@@ -1176,21 +1176,21 @@ endmodule\end{lstlisting}
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim.png}
-            \caption{The Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The value of sine and cosine based on the current iteration is also calculated in this algorithm approach. The result is passed to registers R9 and R10.}
+            \caption{The Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The actual scaled value of sine and cosine is calculated every iteration with this algorithm approach. The result is passed to registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-end-of-the-simulation.png}
-            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad. The result is passed to registers R9 and R10.}
+            \caption{The detail of the last iteration of the Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = -1.2479$ rad.The actual scaled value of sine and cosine is calculated every iteration with this algorithm approach. The result is passed to registers R9 and R10.}
             \label{fig:cordic-verilog-end-of-the-simulation}
         \end{figure}
 
         \begin{figure}[htbp!]
             \centering
             \includegraphics[width=1\textwidth]{src/png/inverted/cordic-verilog-whole-sim-10_719.png}
-            \caption{The Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = 10.7195129$ rad. The value of sinus and cosinus based on the current iteration is also calculated in this algorithm approach. The result is passed to registers R9 and R10.}
+            \caption{The Verilog simulation of \gls{abbreviation:cordic} algorithm for determining the sine and cosine values of angle $\theta = 10.7195129$ rad. The actual scaled value of sine and cosine is calculated every iteration with this algorithm approach. The result is passed to registers R9 and R10.}
             \label{fig:cordic-verilog-whole-sim-10_719}
         \end{figure}
 
@@ -1349,7 +1349,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-allocation-timing.pdf}
-                \caption{Allocation and timing diagram for the Data Path of the simple (\gls{abbreviation:nr}) module.}
+                \caption{Allocation and timing diagram for the Data Path of the simple Newton-Raphson (\gls{abbreviation:nr}) module.}
                 \label{fig:simple-nr-allocation-timing}
             \end{figure}
 
@@ -1360,7 +1360,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/simple-nr-rtl.pdf}
-                \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Data Path part of the simple Newton-Raphson (\gls{abbreviation:nr}) calculation \gls{abbreviation:ip}.}
+                \caption{Register Transfer Level (\gls{abbreviation:rtl}) scheme of the Data Path part of the simple Newton-Raphson (\gls{abbreviation:nr}) calculation module.}
                 \label{fig:simple-nr-rtl}
                 \end{figure}
 
@@ -1380,7 +1380,7 @@ The adjugate matrix is calculated as follows
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/png/inverted/simple-nr-sim.png}
-                \caption{The whole Verilog simulation of a simple Newton-Raphson (\gls{abbreviation:nr}) algorithm. The result may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
+                \caption{The complete Verilog simulation of a simple Newton-Raphson (\gls{abbreviation:nr}) algorithm. The result may be seen in registers R1 and R2 after the fifth iteration of the algorithm.}
                 \label{fig:simple-nr-sim}
             \end{figure}
 
@@ -1654,7 +1654,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-overview.pdf}
-                \caption{Block Diagram of the Selective Harmonic Elimination (\gls{abbreviation:she}) using Newton-Raphson algorithm. Design suitable for hardware implementation.}
+                \caption{Block Diagram of the Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm using Newton-Raphson algorithm (\gls{abbreviation:nr}). Design suitable for hardware implementation.}
                 \label{fig:she-overview}
             \end{figure}
 
@@ -1668,7 +1668,7 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=1\textwidth]{src/pdf/she-top-module.pdf}
-                           \caption{Top module design for the Selective Harmonic Elimination (\gls{abbreviation:she}).}
+                           \caption{Top module design for the Selective Harmonic Elimination (\gls{abbreviation:she}) module.}
                 \label{fig:she-top-module}
             \end{figure}
 
@@ -1746,14 +1746,14 @@ print(Fore.GREEN + "x2: " + str(x2) + style.END)
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=0.93\textwidth]{src/png/inverted/she-sim-end.png}
-                \caption{The ending part of a Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
+                \caption{The ending part of the Verilog simulation the Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
                 \label{fig:she-sim-end}
             \end{figure}
 
             \begin{figure}[htbp!]
                 \centering
                 \includegraphics[width=0.93\textwidth]{src/png/inverted/she-sim-all.png}
-                \caption{The whole Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
+                \caption{The complete Verilog simulation of Selective Harmonic Elimination (\gls{abbreviation:she}) algorithm. The result are in registers R0 and R1.}
                 \label{fig:she-sim-all}
             \end{figure}
 %závěr
