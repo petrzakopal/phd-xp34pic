@@ -300,7 +300,7 @@ literate=
 } %json%
 
 \lstdefinelanguage{pseudocode}
-{morekeywords={if, else, positive, negative, edge, end},
+{morekeywords={if, else, positive, negative, edge, end, elif, and, or},
 alsoletter={-},
 stringstyle=\color{ctuorange},
 moredelim=[s][\color{ctuorange}]{"}{"},
@@ -522,7 +522,7 @@ The Equation \ref{eq:initial-nr-value-formula} for calculating the initial value
 \begin{equation}\label{eq:initial-nr-value-formula}
 x_0 = \frac{48}{17} - \frac{32}{17} D,
 \end{equation}
-where the $x_0$ is the initial value for the \gls{abbreviation:nr} algorithm, $D$ is the denominator value for calculating the expression $N/D$, where $N$ is the numerator.\pa
+where the $x_0$ is the initial value for the \gls{abbreviation:nr} algorithm, $D$ is the denominator value for calculating the expression $N/D$, where $N$ is the numerator.\par
 Because in the module design implemented via Verilog the fixed point number format \textit{Q32.15} is used, the fractional numbers from Equation \ref{eq:initial-nr-value-formula} are rounded to\newline2.8229 (32'sb00000000000000010\_110100101011000 in binary)\newline and 1.8819 (32'sb00000000000000001\_111000011100101 in binary) respectively.\par
 After the initial value $x_0$ is calculated, the \gls{abbreviation:nr} algorithm is performed. The idea of using \gls{abbreviation:nr} algorithm to calculate the division of $N/D$ is to trade the division for a multiplication which can be synthetized in the \gls{abbreviation:fpga} fabric. When employing the \gls{abbreviation:nr} algorithm for finding the values of $N/D$ the function with root is $1/D$ is essential. After the root of the function is found, it is then multiplied by the numerator value, and te solution $N/D$ is obtained. There may be many functions, which root is the searched value $1/D$ but the most trivial is Equation \ref{eq:equation-with-appropriate-root}.\par
 
@@ -702,8 +702,10 @@ The rendered \gls{abbreviation:vcd} simulation output waveforms are depicted on 
 \end{figure}
 
 \section{Using CORDIC to calculate trigonometric functions}\label{sec:using-cordic-to-calculate-trigonometric-functions}
-    There are numerous methods calculating trigonometric functions. To enhance flexibility, the Coordinate Rotation Digital Computer (\gls{abbreviation:cordic}) was selected over the Look-Up Table (\gls{abbreviation:lut}) implementation.\par
-    While the \gls{abbreviation:lut} method may be fast, its accuracy depends on the size of the table. In contrast, when using the \gls{abbreviation:cordic} the precision depends on number of performed iterations of the algorithm. The modified algorithm is versatile and may be used to calculate non-trivial functions, including hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays} In this work only the calculation of $sinus$ and $cosinus$ functions is used.
+    There are numerous methods calculating trigonometric functions. To enhance flexibility of the design, the Coordinate Rotation Digital Computer (\gls{abbreviation:cordic}) was selected over the Look-Up Table (\gls{abbreviation:lut}) implementation.\par
+    While the \gls{abbreviation:lut} method may be fast, its accuracy depends on the size of the table. In contrast, when using the \gls{abbreviation:cordic} the precision depends on number of performed iterations of the algorithm. The modified algorithm is versatile and may be used to calculate non-trivial functions, including hyperbolic functions, square roots, multiplications, divisions, exponentials and logarithms. \cite{base-digital-signal-processing-with-field-programmable-gate-arrays}\par
+    In this work only the calculation of $sine$ and $cosine$ functions is performed.
+
     \subsection{Theory}\label{subsec:cordic-theory}
         The theory of the first \gls{abbreviation:cordic} was introduced by Volder in \cite{volder-cordic-trigonomtric-computing-technique}. This algorithm computes a coordinate conversion between rectangular ($x$, $y$) and polar ($R$, $\theta$) coordinates. The algorithm was then extended by Walther in \cite{walther-a-unified-algorithm-for-elementary-functions} to include circular, linear and hyperbolic transforms.  In this paper, only circular transforms are employed to calculate  $sine$ and $cosine$ functions. The presentation will focus on the fundamental aspects of the algorithm.\par
         The rotation of a vector in the rectangular coordinate system ($x$, $y$) may be described by matrix-vector multiplication depicted in the Equation \ref{eq:rotation}.
@@ -724,7 +726,7 @@ The rendered \gls{abbreviation:vcd} simulation output waveforms are depicted on 
              \end{pmatrix},
         \end{equation}
 
-        where $x_\text{R}$ and $y_\text{R}$ are coordinates of a rotated vector, $\theta$ is the angle for which the vector with coordinates $x_\text{in}$ and $y_\text{in}$ was rotated.\par
+        where $x_\text{R}$ and $y_\text{R}$ are coordinates of a rotated vector, $\theta$ is the angle for which the vector with coordinates $x_\text{in}$ and $y_\text{in}$ is rotated.\par
         Then when simplifying the Equation \ref{eq:rotation}
 
 
@@ -744,23 +746,25 @@ The rendered \gls{abbreviation:vcd} simulation output waveforms are depicted on 
              \end{pmatrix}
         \end{equation}
 
-        \noindent it can be seen, that only multiplication by scaling factor of precalculated values of $\cos (\theta)$, multiplication by $\tan (\theta)$, subtraction and addiction operations are needed to perform the rotation. However, the multiplication by $\tan (\theta)$ can be replaced. The replacement may be done for angles $\theta$ for which the equation \ref{eq:tan-theta-2} is true. When implementing the algorithm to the \gls{abbreviation:fpga} the multiplication may be swapped for signed right bit shift, which is faster operation than multiplication.
+        \noindent it can be seen, that only multiplication by scaling factor of precalculated values of $\cos (\theta)$, multiplication by $\tan (\theta)$, subtraction and addiction operations are needed to perform the rotation. However, the multiplication by $\tan (\theta)$ can be replaced. The replacement may be done for angles $\theta$ for which the Equation \ref{eq:tan-theta-2} is true. When implementing the algorithm to the \gls{abbreviation:fpga} the multiplication may be swapped for signed right bit shift, which is faster operation than multiplication.
 
         \begin{equation}\label{eq:tan-theta-2}
             \tan (\theta) = 2^{-1}.
         \end{equation}
         \par
-        When the values $x_\text{in} = 1$ and $y_\text{in} = 0$ are used, the result for $sine$ and $cosine$ may be easily obtained from $x_\text{R}$ and $y_\text{R}$ as expressed in the Equation \ref{eq:xr-yr-when-initial-values-1-0}.
+        When the initial values $x_\text{in} = 1$ and $y_\text{in} = 0$ are used, the result for $sine$ and $cosine$ may be easily obtained from $x_\text{R}$ and $y_\text{R}$ as expressed in the Equation \ref{eq:xr-yr-when-initial-values-1-0}.
 
         \begin{equation}\label{eq:xr-yr-when-initial-values-1-0}
             \begin{gathered}
-            x_\text{R} = x_\text{in} \cos (\theta) - y_\text{in} \sin (\theta) = | \theta = 0 | = \cos (\theta),\\
-            y_\text{R} = x_\text{in} \sin (\theta) + y_\text{in} \cos (\theta) = | \theta = 0 | = \sin (\theta).
+%            x_\text{R} = x_\text{in} \cos (\theta) - y_\text{in} \sin (\theta) = | \theta = 0 | = \cos (\theta),\\
+%            y_\text{R} = x_\text{in} \sin (\theta) + y_\text{in} \cos (\theta) = | \theta = 0 | = \sin (\theta).
+             x_\text{R} = x_\text{in} \cos (\theta) - y_\text{in} \sin (\theta) = \cos (\theta),\\
+             y_\text{R} = x_\text{in} \sin (\theta) + y_\text{in} \cos (\theta) = \sin (\theta).
             \end{gathered}
         \end{equation}
 
-            The algorithm can be further simplified by assuming that it is designed to undergo more than 6 iterations and thus the scaling constant, represented by multipliying $cosine$ of different $\theta$ values, converges to $0,60725$. If this condition is true, there is no necessity to precalculate all the scaling values and only the convergenent value may be used for the multiplication. In this paper the precalculated values are passed from the custom \gls{abbreviation:lut} module to the main algorithm.\par
-            As evident from the \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algorithm theory itself, it is essential to estabilish whether the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). To address this, the set of the equations is expanded, and new variable $z_i$ is introduced. The complete set of equations utilized in the implementation is as follows.
+            The algorithm can be further simplified by assuming that it is designed to undergo more than 6 iterations and thus the scaling constant, represented by multipliying $cosine$ of different $\theta$ values, converges to the value $0.60725$. If this condition is true, there is no necessity to precalculate all the scaling values and only the convergenent value may be used for the multiplication. In this paper the precalculated scaling values are passed from the custom \gls{abbreviation:lut} module to the main algorithm.\par
+            As evident from the \hyperref[subsubsec:example-of-calculation]{\textit{Example of calculation}} section or the algorithm theory itself, it is essential to estabilish whether the angle for which the vector is rotated in the next iteration should be in a positive direction (counter-clockwise) or negative direction (clockwise). To address this, the set of the equations is expanded, and new variable $z_i$ is introduced. The complete set of equations utilized in the implementation is as follows:
 
             \begin{equation}
                 \begin{gathered}
@@ -782,36 +786,77 @@ The rendered \gls{abbreviation:vcd} simulation output waveforms are depicted on 
                 \right\}
             \end{equation}
             \par
-            The algorithm, as presented, accurately computes values for $sine$ and $cosine$ functions only in the first and fourth quadrants ($3\pi/2$ to $\pi/2$ counter-clockwise). To expand its applicability across the entire $2\pi$ range, specific actions must be taken before the actual looped aglorithm.\par
-            The algorithm must determine the quadrant, where the desired angle $\theta$ for which the $sine$ and $cosine$ functions are to be calculated is. This determination is made through \texttt{if} statements during the initialization of the algorithm values and at the final value calculation. If the reference angle $\theta$ falls outside the first or fourth quadrant, then the angle is rotated from its original quadrant to either the first or fourth quadrant. Depending on the quadrant, to which the angle is rotated, the $\sigma_i$ value is set accordingly. The corresponding if statements during the algorithm initialization are provided in Pseudocode \ref{lst:cordic-initial-if-statements}. Similar statements used at the final values calculation are presented in Pseudocode \ref{lst:cordic-ending-if-statements}.\par
-            The pseudocodes use \texttt{initialZValue} as a reference angle $\theta$, for which to calculate the $sine$ and $cosine$ function values, \texttt{zValue} as a temporary value for calculating the iterations for $z_{i}$ variables, \texttt{sigmaValue} for temporary value holding the current iteration value of $\sigma_i$, the \texttt{resultCos} and \texttt{resultSin} variables are used for storing the temporary and final values of the $\cos (\theta)$ and $\sin (\theta)$ values respectively.
+            The algorithm, as presented, accurately computes values for $sine$ and $cosine$ functions only in the first and fourth quadrants ($-\pi/2$ to $\pi/2$ counter-clockwise). To expand its applicability across the entire $2\pi$ range, specific actions must be taken before the actual looped aglorithm.\par
+            The algorithm must determine the quadrant, where the desired angle $\theta$ for which the $sine$ and $cosine$ functions are to be calculated is. This determination is made through \texttt{if} statements during the initialization of the algorithm values and at the final value calculation. If the reference angle $\theta$ falls outside the first or fourth quadrant, then the angle is rotated from its original quadrant to either the first or fourth quadrant. Depending on the quadrant, to which the angle is rotated, the $\sigma_i$ value is set accordingly. The corresponding \texttt{if} statements during the algorithm initialization are provided in Pseudocode \ref{lst:cordic-initial-if-statements}. Similar statements used at the final values calculation are presented in Pseudocode \ref{lst:cordic-ending-if-statements}.\par
+            The pseudocodes use \textit{initialZValue} as a reference angle $\theta$, for which to calculate the $sine$ and $cosine$ function values, \textit{zValue} as a temporary value for calculating the iterations for $z_{i}$ variables, \textit{sigmaValue} for temporary value, which holds the current iteration value of $\sigma_i$, the \textit{resultCos} and \textit{resultSin} variables are used for storing the temporary and final values of the $\cos (\theta)$ and $\sin (\theta)$ values respectively.
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode for if statements used at the value initialization of the \gls{abbreviation:cordic} algorithm.}, label= {lst:cordic-initial-if-statements}]
-if((initialZValue > 1.5707)&(initialZValue < 3.141592))
+if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
+    zValue = initialZValueCordic - 3.141592
     sigmaValue = -1
-    zValue = initialZValue - 3.141592
-else if((initialZValue > 3.141592)&(initialZValue < 4.7123))
+    print("value in second q")
+    print("zValue:", zValue)
+elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
+    zValue = initialZValueCordic - 3.141592
     sigmaValue = 1
-    zValue = initialZValue - 3.141592
-else
-    zValue = initialZValue
+    print("value in third q")
+    print("zValue:", zValue)
+elif (initialZValueCordic < 0) and (initialZValueCordic > - 1.5707):
+    sigmaValue = -1
+    zValue = initialZValueCordic
+    print("value in fourth q")
+    print("zValue:", zValue)
+elif (initialZValueCordic < -1.5707) and (initialZValueCordic > - 3.141592):
     sigmaValue = 1
-end
+    zValue = initialZValueCordic + 3.141592
+    print("value in third q")
+    print("zValue:", zValue)
+elif (initialZValueCordic < - 3.141592) and (initialZValueCordic > - 4.7129):
+    sigmaValue = - 1
+    zValue = initialZValueCordic + 3.141592
+    print("value in second q")
+    print("zValue:", zValue)
+elif (initialZValueCordic < - 4.7129) and (initialZValueCordic > - 6.28318):
+    sigmaValue = initialSigmaValueCordic
+    zValue = initialZValueCordic + 2*3.141592
+    print("value in first q")
+    print("zValue:", zValue)
+elif (initialZValueCordic > 4.7123) and (initialZValueCordic < 6.28318):
+    sigmaValue = -1
+    zValue = initialZValueCordic - 2*3.141592
+    print("value in fourth q")
+    print("zValue:", zValue)
+else:
+    zValue = initialZValueCordic  # For angle
+    sigmaValue = initialSigmaValueCordic  # For +- next angle
+    print("value in first")
+    print("zValue:", zValue)
 \end{lstlisting}
 
 
 \begin{lstlisting}[language={pseudocode}, caption={Pseudocode for if statements used at the final $sinus$ and $cosinus$ value calculation.}, label= {lst:cordic-ending-if-statements}]
-if((initialZValue > 1.5707)&(initialZValue < 3.141592))
-    resultCos = - resultCos
-    resultSin = resultSin
-else if((initialZValue > 3.141592)&(initialZValue < 4.7123))
+if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
     resultCos = - resultCos
     resultSin = - resultSin
-end
+elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
+    resultCos = - resultCos
+    resultSin = - resultSin
+elif (initialZValueCordic < 0) and (initialZValueCordic > - 1.5707):
+    resultCos = resultCos
+    resultSin = resultSin
+elif (initialZValueCordic < -1.5707) and (initialZValueCordic > - 3.141592):
+    resultCos = -resultCos
+    resultSin = -resultSin
+elif (initialZValueCordic < - 3.141592) and (initialZValueCordic > - 4.7129):
+    resultCos = - resultCos
+    resultSin = - resultSin
+elif (initialZValueCordic < - 4.7129) and (initialZValueCordic > - 2*3.141592):
+    resultCos = resultCos
+    resultSin = resultSin
 \end{lstlisting}
 
         \subsubsection{Example of calculation}\label{subsubsec:example-of-calculation}
-            The \gls{abbreviation:cordic} algorithm's general approach can be illustrated by calculating the $sine$ and $cosine$ values for the reference angle $\theta = 57,535\;˚$. Initially, the angle is deconstructed into its base angles, satisfying the Equation \ref{eq:tan-theta-2}. In this example the deconstruction is $57,535 = 45 + 25,565 -14,03$.\par
+            The \gls{abbreviation:cordic} algorithm's general approach can be illustrated by calculating the $sine$ and $cosine$ values for the reference angle $\theta = 57,535\;˚$ ($1.0041$ rad). Initially, the angle is decompositioned into its base angles, satisfying the Equation \ref{eq:tan-theta-2}. In this example the decomposition is $57,535 = 45 + 25,565 -14,03$.\par
             The index $i$ of the variables $x_i$ and $y_i$ in the following equations means the number of iteration of the algorithm.
 
             \begin{equation}
@@ -898,8 +943,8 @@ end
              The values $x_2$ and $y_2$ in the Equation \ref{eq:example-cordic-calculation} correspond to $\cos (57,535\;˚)$ and $\sin (57,535\;˚)$ respectively.
 
     \subsection{Python Implementation}\label{subsec:cordic-python-implementation}
-        For simplicity, the \gls{abbreviation:cordic} algorithm was prototyped in Python. This proved highly beneficial, as the debugging of the Python code is much more straightforward compared to debugging Verilog design without prepared and debugged algoritm in a higher level language.\par
-        The Python code was used to precalculate the \gls{abbreviation:lut} for scaling factor and arcus tangens values for $z_i$ calculations.\par
+        For simplicity, the \gls{abbreviation:cordic} algorithm was prototyped in Python. This proved highly beneficial, as the debugging of the Python code is much more straightforward compared to debugging the Verilog design without prepared and debugged algoritm in a higher level language.\par
+        The Python code was used to precalculate the \gls{abbreviation:lut} for scaling factor and \textit{arcus tangens} values for $z_i$ calculations.\par
         For clarity, the Python implementation is provided in Code \ref{lst:python-cordic}. The presented Code also calculates the error between the \gls{abbreviation:cordic}-calculated value and the Python math library functions.
 
 \begin{lstlisting}[language={python}, caption={Python code of \gls{abbreviation:cordic} implementation.}, label= {lst:python-cordic}]
@@ -915,8 +960,19 @@ initialYValueCordic = 0
 # initialZValueCordic = 1.248  # angle for which to calculate cordic
 # initialZValueCordic = - 1.248  # angle for which to calculate cordic
 # initialZValueCordic = - 6.7194  # angle for which to calculate cordic
+# initialZValueCordic = 6.7194  # angle for which to calculate cordic
+# initialZValueCordic = 5.8  # angle for which to calculate cordic
 # initialZValueCordic = 10.7194824  # angle for which to calculate cordic
-initialZValueCordic = 5  # angle for which to calculate cordic
+# initialZValueCordic = - 10.7194824  # angle for which to calculate cordic
+# initialZValueCordic = 5.8  # angle for which to calculate cordic
+# initialZValueCordic = - 5  # angle for which to calculate cordic
+# initialZValueCordic = - 5  # angle for which to calculate cordic
+# initialZValueCordic = - 20.3948  # angle for which to calculate cordic
+# initialZValueCordic = - 1.8  # angle for which to calculate cordic
+# initialZValueCordic = 1.6  # angle for which to calculate cordic
+# initialZValueCordic = 1.8  # angle for which to calculate cordic
+# initialZValueCordic = 3.5  # angle for which to calculate cordic
+initialZValueCordic = - 3.5  # angle for which to calculate cordic
 initialSigmaValueCordic = 1
 
 for x in range(totalNumberOfIterations):
@@ -956,10 +1012,25 @@ elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
     sigmaValue = 1
     print("value in third q")
     print("zValue:", zValue)
-elif (initialZValueCordic < 0):
+elif (initialZValueCordic < 0) and (initialZValueCordic > - 1.5707):
     sigmaValue = -1
     zValue = initialZValueCordic
     print("value in fourth q")
+    print("zValue:", zValue)
+elif (initialZValueCordic < -1.5707) and (initialZValueCordic > - 3.141592):
+    sigmaValue = 1
+    zValue = initialZValueCordic + 3.141592
+    print("value in third q")
+    print("zValue:", zValue)
+elif (initialZValueCordic < - 3.141592) and (initialZValueCordic > - 4.7129):
+    sigmaValue = - 1
+    zValue = initialZValueCordic + 3.141592
+    print("value in second q")
+    print("zValue:", zValue)
+elif (initialZValueCordic < - 4.7129) and (initialZValueCordic > - 6.28318):
+    sigmaValue = initialSigmaValueCordic
+    zValue = initialZValueCordic + 2*3.141592
+    print("value in first q")
     print("zValue:", zValue)
 elif (initialZValueCordic > 4.7123) and (initialZValueCordic < 6.28318):
     sigmaValue = -1
@@ -1006,12 +1077,22 @@ resultSin = scalingValues[x-1] * yValue
 # Changing results sign based on the rotation of the initialZValueCordic
 if (initialZValueCordic > 1.5707) and (initialZValueCordic < 3.141592):
     resultCos = - resultCos
-elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
-    resultCos = - resultCos
     resultSin = - resultSin
 elif (initialZValueCordic > 3.141592) and (initialZValueCordic < 4.7123):
     resultCos = - resultCos
     resultSin = - resultSin
+elif (initialZValueCordic < 0) and (initialZValueCordic > - 1.5707):
+    resultCos = resultCos
+    resultSin = resultSin
+elif (initialZValueCordic < -1.5707) and (initialZValueCordic > - 3.141592):
+    resultCos = -resultCos
+    resultSin = -resultSin
+elif (initialZValueCordic < - 3.141592) and (initialZValueCordic > - 4.7129):
+    resultCos = - resultCos
+    resultSin = - resultSin
+elif (initialZValueCordic < - 4.7129) and (initialZValueCordic > - 2*3.141592):
+    resultCos = resultCos
+    resultSin = resultSin
 
 # Calculating values based on the math library
 mathResultCos = math.cos(initialZValueCordic)
@@ -1034,26 +1115,16 @@ print("MATH results:")
 print("cos: ", mathResultCos)
 print("sin: ", mathResultSin)
 
-
-print("\n")
-
-print("error CORDIC-MATH:")
-print("cos: ", errorCos)
-print("sin: ", errorSin)
-
-print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
-print("atan values")
-print("*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-*")
 \end{lstlisting}
 
 \par
-Once the Python implementation and debugging are completed, the Verilog implementation of the algorithm can initiated. Similar to the Division Unit module, as presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module were designed. This application-specific circuit design approach should be faster and safer than creating a custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa}.
+Once the Python implementation and debugging are completed, the Verilog implementation of the algorithm can safely created. Similar to the Division Unit module, as presented in \hyperref[sec:calculating-the-division-of-fixed-point-numbers]{\textit{Calculating the division of fixed point numbers}} section, the Data Path, Control Unit and Top Module were designed. This application-specific circuit design approach should be faster and safer than creating a custom \gls{abbreviation:cpu} with reduced and customized \gls{abbreviation:isa} for performing the \gls{abbreviation:cordic} algorithm.
 
     \fbar
     \subsection{IP Block Design}
     \fbar
         \subsubsection{Top module design}
-            The top module design of the \gls{abbreviation:cordic} \gls{abbreviation:ip} is illustrated in Figure \ref{fig:cordic-top-module}. As evident, the structure closely resembles that of the Division Unit top module. When using an approach to create a customized circuit for an algorithm, the process of developing the top modules is likely to be similar, with minor differences in signals, inputs and variables.\par
+            The top module design of the \gls{abbreviation:cordic} \gls{abbreviation:ip} is illustrated in Figure \ref{fig:cordic-top-module}. As evident, the structure closely resembles that of the Division Unit top module. When using an approach to create a customized circuit for an algorithm, the process of developing the top modules is likely to be similar, only with minor differences in used control signal, inputs and variables.\par
             The Data Path module incorporates precalculated values in \gls{abbreviation:lut}s for \textit{atanValues} and \textit{scalingValues}. In this implementation, the value of \textit{totalNumberOfIterations} is set to 12 , making the \gls{abbreviation:lut} 12x32 bits in size. It is worth noting that the previously introduced custom fixed-point format \textit{Q32.15} is utilized.
             \begin{figure}[htbp!]
                 \centering
@@ -1063,7 +1134,7 @@ Once the Python implementation and debugging are completed, the Verilog implemen
             \end{figure}
         \fbar
         \subsubsection{Allocation and Timing}
-            In Figure \ref{fig:cordic-allocation-timing}, the allocation and timing diagram is depicted. Notably, the if statements, implemented in the control unit, are documented within the diagram. The explanation, why the if statements are needed, is presented in the \gls{abbreviation:cordic} \hyperref[subsec:cordic-theory]{\textit{Theory}} section.\par
+            In the Figure \ref{fig:cordic-allocation-timing}, the allocation and timing diagram is depicted. Notably, the \texttt{if} statements, implemented in the control unit, are documented within the diagram. The explanation, why the \texttt{if} statements are needed, is presented in the \gls{abbreviation:cordic} \hyperref[subsec:cordic-theory]{\textit{Theory}} section.\par
             As mentioned in the \gls{abbreviation:cordic} \hyperref[subsubsec:cordic-control-unit]{\textit{Control Unit}} sections, there are two primary approaches to iteration cycles. The one is to proceed from \textit{S4} to \textit{S2} for a faster algorithm, while the other involves progressing from \textit{S6} to \textit{S2}. The latter approach is employed for demonstrative purposes, as it ensures that the final numerical values are always calculated.
             \begin{figure}[htbp!]
                 \centering
